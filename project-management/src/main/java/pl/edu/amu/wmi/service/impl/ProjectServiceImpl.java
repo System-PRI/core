@@ -82,16 +82,23 @@ public class ProjectServiceImpl implements ProjectService {
         return projectDetailsDTO;
     }
 
-    // TODO: 5/31/2023 Reimplement this method using Criteria Queries; use user roles
     @Override
     public List<ProjectDTO> findAll(String studyYear, String userIndexNumber) {
         List<Project> projectEntityList = projectDAO.findAllByStudyYear_StudyYear(studyYear);
-        Student studentByIndexNumber = studentDAO.findByUserData_IndexNumber(userIndexNumber);
+        Student student = studentDAO.findByUserData_IndexNumber(userIndexNumber);
+        Supervisor supervisor = supervisorDAO.findByUserData_IndexNumber(userIndexNumber);
 
-        projectEntityList.sort(Comparator
-                .comparing((Project p) -> p.getAssignedStudents().stream().noneMatch(studentProject -> studentProject.getStudent().equals(studentByIndexNumber)))
-                .thenComparing(p -> !p.getSupervisor().getUserData().getIndexNumber().equals(userIndexNumber))
-                .thenComparing(Project::getId, Comparator.naturalOrder()));
+        if (student != null) {
+            List<Long> studentProjectsIds = student.getAssignedProjects().stream()
+                    .map(sp -> sp.getProject().getId()).toList();
+            projectEntityList.sort(Comparator
+                    .comparing((Project p) -> !studentProjectsIds.contains(p.getId()))
+                    .thenComparing((Project p) -> !student.getConfirmedProject().getId().equals(p.getId())));
+        } else {
+            projectEntityList.sort(Comparator
+                    .comparing((Project p) -> !p.getSupervisor().getId().equals(supervisor.getId()))
+                    .thenComparing((Project p) -> !p.getAcceptanceStatus().equals(ACCEPTED)));
+        }
 
         return projectMapper.mapToDtoList(projectEntityList);
     }
