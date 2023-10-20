@@ -83,21 +83,25 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> findAll(String studyYear, String userIndexNumber) {
+    public List<ProjectDTO> findAllWithSorting(String studyYear, String userIndexNumber) {
         List<Project> projectEntityList = projectDAO.findAllByStudyYear_StudyYear(studyYear);
+        // TODO: 10/20/2023: Extend following entities search by year of study -
+        //  fix after implementing DB schema improvements
         Student student = studentDAO.findByUserData_IndexNumber(userIndexNumber);
         Supervisor supervisor = supervisorDAO.findByUserData_IndexNumber(userIndexNumber);
 
         if (student != null) {
             List<Long> studentProjectsIds = student.getAssignedProjects().stream()
                     .map(sp -> sp.getProject().getId()).toList();
-            projectEntityList.sort(Comparator
+            Comparator<Project> byStudentAssignedAndConfirmedProjects = Comparator
                     .comparing((Project p) -> !studentProjectsIds.contains(p.getId()))
-                    .thenComparing((Project p) -> !student.getConfirmedProject().getId().equals(p.getId())));
+                    .thenComparing((Project p) -> !student.getConfirmedProject().getId().equals(p.getId()));
+            projectEntityList.sort(byStudentAssignedAndConfirmedProjects);
         } else {
-            projectEntityList.sort(Comparator
+            Comparator<Project> bySupervisorAssignedAndAcceptedProjects = Comparator
                     .comparing((Project p) -> !p.getSupervisor().getId().equals(supervisor.getId()))
-                    .thenComparing((Project p) -> !p.getAcceptanceStatus().equals(ACCEPTED)));
+                    .thenComparing((Project p) -> !p.getAcceptanceStatus().equals(ACCEPTED));
+            projectEntityList.sort(bySupervisorAssignedAndAcceptedProjects);
         }
 
         return projectMapper.mapToDtoList(projectEntityList);
