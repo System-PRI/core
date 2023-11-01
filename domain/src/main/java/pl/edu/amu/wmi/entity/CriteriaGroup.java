@@ -1,9 +1,7 @@
 package pl.edu.amu.wmi.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pl.edu.amu.wmi.enumerations.Semester;
@@ -17,6 +15,7 @@ import java.util.List;
 @Table(name = "CRITERIA_GROUP")
 public class CriteriaGroup extends AbstractEntity {
 
+    @NotNull
     private String name;
 
     @OneToMany
@@ -25,6 +24,8 @@ public class CriteriaGroup extends AbstractEntity {
 
     private Double criteriaGroupGradeWeight;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private Semester semester;
 
 }
