@@ -40,9 +40,9 @@ build:
     - echo "POSTGRES_DB=${POSTGRES_DB}" >> config.env
     - echo "JWT_TOKEN=${JWT_TOKEN}" >> config.env
     - cat config.env
-    - docker compose down
-    - docker compose build
-    - docker compose -f docker-compose-prod.yml --env-file config.env up
+    - docker compose -f docker-compose-prod.yml down
+    - docker compose -f docker-compose-prod.yml build
+    - docker compose -f docker-compose-prod.yml up
 
 code-analysis:
   extends:
