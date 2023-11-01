@@ -37,9 +37,10 @@ build:
     - echo "POSTGRES_USER=${POSTGRES_USER}" >> secrets.env
     - echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> secrets.env
     - echo "JWT_TOKEN=${JWT_TOKEN}" >> secrets.env
-    - docker compose down
-    - docker compose build
-    - docker compose up
+    - cat secrets.env
+    - docker-compose down
+    - docker-compose build
+    - docker-compose up
 
 code-analysis:
   extends:
