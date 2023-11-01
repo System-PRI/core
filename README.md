@@ -43,10 +43,13 @@ Run application with the profile `local`
 
 To run the application use an IDE build in option (e.g. in IntelliJ) or execute in command line:
 
-````
+```
 mvn clean package
-java -jar pri-application/target/pri-application-1.0-SNAPSHOT.jar // before execution check the name of the jar file
-````
+java -jar -Dspring.profiles.active=local -DPOSTGRES_URL=${POSTGRES_URL} -DPOSTGRES_DB=${POSTGRES_DB} -DPOSTGRES_USER=${POSTGRES_USER} -DPOSTGRES_PASSWORD=${POSTGRES_PASSWORD} -DJWT_TOKEN=${JWT_TOKEN} pri-application/target/pri-application-1.0-SNAPSHOT.jar 
+// before execution check the name of the jar file
+```
+
+If running form an IDE build in option, make sure above values are provided as e.g. ENV variables.
 
 ## How to run application using Docker:
 
@@ -62,13 +65,23 @@ See `secrets.env.example` file.
 
 #### Profile
 
-Run the application with SPRING_PROFILES_ACTIVE in docker-compose.yml set to `local` or `prod`
-which will allow you to distinguish desired environments.
+Two profiles are available: `docker-prod` and `docker-dev`. 
+For development purpose use `docker-dev` profile.
+`docker-prod` profile is dedicated for CI/CD process.
 
 ### Starting the application
 
-To run the application and rebuild Docker images use command `docker compose --env-file ${path} up --build` \
-To restart the application without Docker images rebuild use command `docker compose --env-file ${path} up`
+To run the application and rebuild Docker images use command:
+```
+docker compose -f docker-compose-${env}.yml --env-file ${path} up --build
+```
+
+To restart the application without Docker images rebuild use command:
+```
+docker compose -f docker-compose-${env}.yml --env-file ${path} up`
+```
+
+`${env}` possible values: `dev`,`prod`.
 
 ## Useful links:
 
