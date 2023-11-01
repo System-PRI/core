@@ -42,7 +42,7 @@ build:
     - cat config.env
     - docker compose down
     - docker compose build
-    - docker compose -f docker-compose-prod.yml up
+    - docker compose -f docker-compose-prod.yml --env-file config.env up
 
 code-analysis:
   extends:
