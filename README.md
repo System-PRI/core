@@ -29,7 +29,8 @@
 
 #### Secrets
 
-It is necessary to define secret values in the file secrets.properties
+Secrets must be defined as `java` command arguments (see **Starting the application**) 
+or provided to the IDE as e.g. ENV variables - depending on the run method.
 
 #### Liquibase
 
@@ -49,15 +50,13 @@ java -jar -Dspring.profiles.active=local -DPOSTGRES_URL=${POSTGRES_URL} -DPOSTGR
 // before execution check the name of the jar file
 ```
 
-If running form an IDE build in option, make sure above values are provided as e.g. ENV variables.
-
 ## How to run application using Docker:
 
 ### Prerequisites
 
 #### Secrets
 
-See `secrets.env.example` file.
+See `config.env.example` file.
 
 #### Liquibase
 
@@ -81,7 +80,8 @@ To restart the application without Docker images rebuild use command:
 docker compose -f docker-compose-${env}.yml --env-file ${path} up`
 ```
 
-`${env}` possible values: `dev`,`prod`.
+`${env}` possible values: `dev`,`prod`. \
+`${path}` path to the config.env file (e.g. `--env-file config.env`)
 
 ## Useful links:
 
