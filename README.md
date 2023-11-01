@@ -54,15 +54,7 @@ java -jar pri-application/target/pri-application-1.0-SNAPSHOT.jar // before exec
 
 #### Secrets
 
-It is necessary to define the environment variables needed to configure the database. 
-For a local deployment, place these values in a terminal session.
-If deployed via CI/CD on a server, they are delivered from the pipeline.
-````
-export POSTGRES_USER=${POSTGRES_USER}
-export POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-export POSTGRES_DB=pri-system
-export JWT_TOKEN=${JWT_TOKEN}
-````
+See `secrets.env.example` file.
 
 #### Liquibase
 
@@ -75,7 +67,8 @@ which will allow you to distinguish desired environments.
 
 ### Starting the application
 
-To run the application use command `docker compose up --build`
+To run the application and rebuild Docker images use command `docker compose --env-file ${path} up --build` \
+To restart the application without Docker images rebuild use command `docker compose --env-file ${path} up`
 
 ## Useful links:
 

@@ -34,3 +34,4 @@ build/
 .vscode/
 
 secrets.properties
+secrets.env
