@@ -83,7 +83,7 @@ pages:
 
 deploy:
   extends:
-    - .after-merge-rule
+    - .common-rule
   image: docker:latest
   services:
     - docker:dind
