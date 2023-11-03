@@ -18,7 +18,7 @@ public class CriteriaGroup extends AbstractEntity {
     @NotNull
     private String name;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "CRITERIA_GROUP_ID")
     private List<Criterion> criteria = new ArrayList<>();
 
