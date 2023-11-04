@@ -63,7 +63,7 @@ pages:
     paths:
       - ./node_modules
   script:
-    - sudo docker run -d -p 80:8080 -e BASE_URL=/swagger -e SWAGGER_JSON=https://petstore.swagger.io/v2/swagger.json -v ${CI_PROJECT_DIR}/pri-application/pri-api.yml:/pri-api.yml swaggerapi/swagger-ui
+    - sudo docker run -d -p 80:8080 -e BASE_URL=/swagger -e SWAGGER_JSON={CI_PROJECT_DIR}/pri-application/pri-api.yml -v ${CI_PROJECT_DIR}/pri-application/pri-api.yml:/pri-api.yml swaggerapi/swagger-ui
 
     # - mkdir public
     # - cp -rp node_modules/swagger-ui-dist/* public
