@@ -10,7 +10,6 @@ stages:
 clean:
   extends:
     - .common-rule
-  image: $IMAGE_OPENJDK_MVN
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -23,7 +22,6 @@ clean:
 build:
   extends:
     - .common-rule
-  image: $IMAGE_OPENJDK_MVN
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -40,7 +38,6 @@ build:
 code-analysis:
   extends:
     - .common-rule
-  image: $IMAGE_OPENJDK_MVN
   stage: test
   script:
     - echo "Running SonarQube..."
@@ -49,7 +46,6 @@ code-analysis:
 unit-test:
   extends:
     - .common-rule
-  image: $IMAGE_OPENJDK_MVN
   stage: test
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -61,8 +57,7 @@ unit-test:
 
 pages:
   extends:
-    - .after-merge-rule
-  image: $IMAGE_NODE_LATEST
+    - .common-rule
   stage: deploy
   cache:
     paths:
