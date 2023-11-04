@@ -86,8 +86,8 @@ deploy:
     - .common-rule
   stage: deploy
   before_script:
-    - docker version
-    - docker compose version
+    - sudo docker version
+    - sudo docker compose version
   script:
     - echo "Deployment..."
     # TODO: Necessary for final deployment stage, when server is available
@@ -97,6 +97,6 @@ deploy:
     - echo "POSTGRES_DB=${POSTGRES_DB}" >> config.env
     - echo "JWT_TOKEN=${JWT_TOKEN}" >> config.env
     - cat config.env
-    - docker compose -f docker-compose-prod.yml down
-    - docker compose -f docker-compose-prod.yml build
-    - docker compose -f docker-compose-prod.yml up
+    - sudo docker compose -f docker-compose-prod.yml down
+    - sudo docker compose -f docker-compose-prod.yml build
+    - sudo docker compose -f docker-compose-prod.yml up
