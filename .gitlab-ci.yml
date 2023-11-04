@@ -99,4 +99,4 @@ deploy:
     - sudo cat ${CI_PROJECT_DIR}/config.env
     - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env down
     - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env build
-    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env up
+    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env up -d
