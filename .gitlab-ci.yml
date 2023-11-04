@@ -86,7 +86,8 @@ deploy:
     - .common-rule
   image: docker:latest
   services:
-    - docker:dind
+    - name: docker:dind
+      entrypoint: ["dockerd-entrypoint.sh", "--tls=false"]
   stage: deploy
   before_script:
     - docker version
