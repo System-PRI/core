@@ -63,7 +63,7 @@ pages:
     paths:
       - ./node_modules
   script:
-    - docker run --rm -p 9002:8080 -v ${CI_PROJECT_DIR}/pri-application/pri-api.yml:/pri-api.yml -e SWAGGER_JSON=/pri-api.yml swaggerapi/swagger-ui
+    - sudo docker run --rm -p 9002:8080 -v ${CI_PROJECT_DIR}/pri-application/pri-api.yml:/pri-api.yml -e SWAGGER_JSON=/pri-api.yml swaggerapi/swagger-ui
 
     # - mkdir public
     # - cp -rp node_modules/swagger-ui-dist/* public
