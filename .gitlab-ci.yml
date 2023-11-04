@@ -12,7 +12,7 @@ stages:
 
 clean:
   extends:
-    - .after-merge-rule
+    - .common-rule
   image: $IMAGE_OPENJDK_MVN
   stage: clean
   cache:
@@ -25,7 +25,7 @@ clean:
 
 build:
   extends:
-    - .after-merge-rule
+    - .common-rule
   image: $IMAGE_OPENJDK_MVN
   stage: build
   cache:
@@ -42,7 +42,7 @@ build:
 
 code-analysis:
   extends:
-    - .after-merge-rule
+    - .common-rule
   image: $IMAGE_OPENJDK_MVN
   stage: test
   script:
@@ -51,7 +51,7 @@ code-analysis:
 
 unit-test:
   extends:
-    - .after-merge-rule
+    - .common-rule
   image: $IMAGE_OPENJDK_MVN
   stage: test
   cache:
@@ -83,14 +83,13 @@ pages:
 
 deploy:
   extends:
-    - .common-rule
+    - .after-merge-rule
   stage: deploy
   before_script:
     - sudo docker version
     - sudo docker compose version
   script:
     - sudo echo "Deployment..."
-    # TODO: Necessary for final deployment stage, when server is available
     - sudo echo "POSTGRES_URL=${POSTGRES_URL}" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "POSTGRES_USER=${POSTGRES_USER}" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> ${CI_PROJECT_DIR}/config.env
