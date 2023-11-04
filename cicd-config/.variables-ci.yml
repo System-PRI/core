@@ -16,5 +16,5 @@ variables:
     -DdeployAtEnd=true
   DOCS_FOLDER: "pri-application"
   SPEC_TO_DISPLAY: "pri-api.yaml"
-  DOCKER_HOST: tcp://localhost:2375/
-  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://127.0.0.1:2375/
+  DOCKER_DRIVER: overlay
