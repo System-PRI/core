@@ -9,7 +9,7 @@ stages:
 
 clean:
   extends:
-    - .common-rule
+    - .after-merge-rule
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -21,7 +21,7 @@ clean:
 
 build:
   extends:
-    - .common-rule
+    - .after-merge-rule
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -37,7 +37,7 @@ build:
 
 code-analysis:
   extends:
-    - .common-rule
+    - .after-merge-rule
   stage: test
   script:
     - echo "Running SonarQube..."
@@ -45,7 +45,7 @@ code-analysis:
 
 unit-test:
   extends:
-    - .common-rule
+    - .after-merge-rule
   stage: test
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -62,13 +62,13 @@ pages:
   cache:
     paths:
       - ./node_modules
-  before_script:
-    - npm install swagger-ui-dist@3.22.1
   script:
-    - mkdir public
-    - cp -rp node_modules/swagger-ui-dist/* public
-    - cp -rp $DOCS_FOLDER/* public
-    - sed -i "s#https://petstore\.swagger\.io/v2/swagger\.json#$SPEC_TO_DISPLAY#g" public/index.html
+    - docker run --rm -p 9002:8080 -v ${CI_PROJECT_DIR}/pri-application/pri-api.yml:/pri-api.yml -e SWAGGER_JSON=/pri-api.yml swaggerapi/swagger-ui
+
+    # - mkdir public
+    # - cp -rp node_modules/swagger-ui-dist/* public
+    # - cp -rp $DOCS_FOLDER/* public
+    # - sed -i "s#https://petstore\.swagger\.io/v2/swagger\.json#$SPEC_TO_DISPLAY#g" public/index.html
   artifacts:
     paths:
       - public
