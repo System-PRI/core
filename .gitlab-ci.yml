@@ -84,11 +84,6 @@ pages:
 deploy:
   extends:
     - .common-rule
-  image: docker:latest
-  services:
-    - name: docker:20-dind
-      alias: docker
-      command: ["--tls=false"]
   stage: deploy
   before_script:
     - docker version
