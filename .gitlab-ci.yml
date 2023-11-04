@@ -97,6 +97,6 @@ deploy:
     - sudo echo "POSTGRES_DB=${POSTGRES_DB}" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "JWT_TOKEN=${JWT_TOKEN}" >> ${CI_PROJECT_DIR}/config.env
     - sudo cat ${CI_PROJECT_DIR}/config.env
-    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml down
-    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml build
-    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml up
+    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env down
+    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env build
+    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env up
