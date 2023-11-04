@@ -91,12 +91,12 @@ deploy:
   script:
     - sudo echo "Deployment..."
     # TODO: Necessary for final deployment stage, when server is available
-    - sudo echo "POSTGRES_URL=${POSTGRES_URL}" >> config.env
-    - sudo echo "POSTGRES_USER=${POSTGRES_USER}" >> config.env
-    - sudo echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> config.env
-    - sudo echo "POSTGRES_DB=${POSTGRES_DB}" >> config.env
-    - sudo echo "JWT_TOKEN=${JWT_TOKEN}" >> config.env
-    - sudo cat config.env
-    - sudo docker compose -f docker-compose-prod.yml down
-    - sudo docker compose -f docker-compose-prod.yml build
-    - sudo docker compose -f docker-compose-prod.yml up
+    - sudo echo "POSTGRES_URL=${POSTGRES_URL}" >> ${CI_PROJECT_DIR}/config.env
+    - sudo echo "POSTGRES_USER=${POSTGRES_USER}" >> ${CI_PROJECT_DIR}/config.env
+    - sudo echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}" >> ${CI_PROJECT_DIR}/config.env
+    - sudo echo "POSTGRES_DB=${POSTGRES_DB}" >> ${CI_PROJECT_DIR}/config.env
+    - sudo echo "JWT_TOKEN=${JWT_TOKEN}" >> ${CI_PROJECT_DIR}/config.env
+    - sudo cat ${CI_PROJECT_DIR}/config.env
+    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml down
+    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml build
+    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml up
