@@ -3,18 +3,15 @@ include:
   - "cicd-config/.variables-ci.yml"
 
 stages:
-  - clean
   - build
   - test
-  - build-image
-  - publish-image
   - deploy
 
 clean:
   extends:
     - .common-rule
   image: $IMAGE_OPENJDK_MVN
-  stage: clean
+  stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
     paths:
