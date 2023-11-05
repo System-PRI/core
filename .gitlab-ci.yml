@@ -57,7 +57,7 @@ unit-test:
 
 pages:
   extends:
-    - .common-rule
+    - .after-merge-rule
   stage: deploy
   script:
     - sudo docker stop swagger
