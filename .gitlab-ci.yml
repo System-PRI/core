@@ -9,7 +9,7 @@ stages:
 
 clean:
   extends:
-    - .after-merge-rule
+    - .common-rule
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -21,7 +21,7 @@ clean:
 
 build:
   extends:
-    - .after-merge-rule
+    - .common-rule
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -37,7 +37,7 @@ build:
 
 code-analysis:
   extends:
-    - .after-merge-rule
+    - .common-rule
   stage: test
   script:
     - echo "Running SonarQube..."
@@ -45,7 +45,7 @@ code-analysis:
 
 unit-test:
   extends:
-    - .after-merge-rule
+    - .common-rule
   stage: test
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -55,9 +55,9 @@ unit-test:
     - echo "Running unit tests..."
     - mvn $MAVEN_CLI_OPTS test
 
-pages:
+swagger:
   extends:
-    - .common-rule
+    - .after-merge-rule
   stage: deploy
   script:
     - sudo docker stop swagger
