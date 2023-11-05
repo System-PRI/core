@@ -60,10 +60,11 @@ pages:
     - .common-rule
   stage: deploy
   script:
-    - mkdir public
-    - cp -rp /usr/local/lib/node_modules/swagger-ui-dist/* public
-    - cp -rp ${CI_PROJECT_DIR}/$DOCS_FOLDER/pri-api.yaml public
-    - sed -i "s#https://petstore\.swagger\.io/v2/swagger\.json#$SPEC_TO_DISPLAY#g" public/index.html
+    - sudo docker run --name swagger -e BASE_URL=/swagger -p 80:8080 -e SWAGGER_JSON=/swagger-api/pri-api.yaml -v /${CI_PROJECT_DIR}/pri-application/:/swagger-api swaggerapi/swagger-ui
+    # - mkdir public
+    # - cp -rp /usr/local/lib/node_modules/swagger-ui-dist/* public
+    # - cp -rp ${CI_PROJECT_DIR}/$DOCS_FOLDER/pri-api.yaml public
+    # - sed -i "s#https://petstore\.swagger\.io/v2/swagger\.json#$SPEC_TO_DISPLAY#g" public/index.html
   artifacts:
     paths:
       - public
