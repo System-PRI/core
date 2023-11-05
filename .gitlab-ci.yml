@@ -61,7 +61,7 @@ pages:
   stage: deploy
   cache:
     paths:
-      - ./node_modules
+      - /usr/local/lib/node_modules
   script:
     - mkdir public
     - cp -rp node_modules/swagger-ui-dist/* public
