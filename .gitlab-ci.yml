@@ -59,13 +59,10 @@ pages:
   extends:
     - .common-rule
   stage: deploy
-  cache:
-    paths:
-      - /usr/local/lib/node_modules
   script:
     - mkdir public
-    - cp -rp node_modules/swagger-ui-dist/* public
-    - cp -rp $DOCS_FOLDER/* public
+    - cp -rp /usr/local/lib/node_modules/swagger-ui-dist/* public
+    - cp -rp ${CI_PROJECT_DIR}/$DOCS_FOLDER/pri-api.yml public
     - sed -i "s#https://petstore\.swagger\.io/v2/swagger\.json#$SPEC_TO_DISPLAY#g" public/index.html
   artifacts:
     paths:
