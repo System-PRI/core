@@ -3,8 +3,8 @@ package pl.edu.amu.wmi.service.criteria.impl;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.edu.amu.wmi.dao.CriteriaDAO;
 import pl.edu.amu.wmi.dao.CriteriaSectionDAO;
+import pl.edu.amu.wmi.dao.CriterionDAO;
 import pl.edu.amu.wmi.entity.CriteriaGroup;
 import pl.edu.amu.wmi.entity.CriteriaSection;
 import pl.edu.amu.wmi.entity.Criterion;
@@ -32,18 +32,18 @@ public class CriteriaSaveServiceImpl implements CriteriaSaveService {
     private final CriteriaGroupMapper criteriaGroupMapper;
     private final CriterionMapper criterionMapper;
     private final CriteriaSectionDAO criteriaSectionDAO;
-    private final CriteriaDAO criteriaDAO;
+    private final CriterionDAO criterionDAO;
 
     public CriteriaSaveServiceImpl(CriteriaSectionMapper criteriaSectionMapper,
                                    CriteriaGroupMapper criteriaGroupMapper,
                                    CriterionMapper criterionMapper,
                                    CriteriaSectionDAO criteriaSectionDAO,
-                                   CriteriaDAO criteriaDAO) {
+                                   CriterionDAO criterionDAO) {
         this.criteriaSectionMapper = criteriaSectionMapper;
         this.criteriaGroupMapper = criteriaGroupMapper;
         this.criterionMapper = criterionMapper;
         this.criteriaSectionDAO = criteriaSectionDAO;
-        this.criteriaDAO = criteriaDAO;
+        this.criterionDAO = criterionDAO;
     }
 
     @Override
@@ -91,6 +91,6 @@ public class CriteriaSaveServiceImpl implements CriteriaSaveService {
 
     private Set<Criterion> saveCriteria(List<CriterionDTO> criterionDTOS, boolean isNewEvaluation) {
         List<Criterion> criteria = criterionMapper.mapToEntitiesList(criterionDTOS, isNewEvaluation);
-        return new HashSet<>(criteriaDAO.saveAll(criteria));
+        return new HashSet<>(criterionDAO.saveAll(criteria));
     }
 }

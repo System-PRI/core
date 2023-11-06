@@ -11,6 +11,7 @@ import pl.edu.amu.wmi.model.EvaluationCriteriaDTO;
 import pl.edu.amu.wmi.model.enumeration.DataFeedType;
 import pl.edu.amu.wmi.service.DataFeedImportService;
 import pl.edu.amu.wmi.service.criteria.CriteriaSaveService;
+import pl.edu.amu.wmi.service.criteria.CriteriaUpdateService;
 import pl.edu.amu.wmi.service.criteria.EvaluationCardTemplateService;
 
 import java.util.List;
@@ -21,10 +22,12 @@ import java.util.Objects;
 public class DataFeedCriteriaImportServiceImpl implements DataFeedImportService {
 
     private final CriteriaSaveService criteriaSaveService;
+    private final CriteriaUpdateService criteriaUpdateService;
     private final EvaluationCardTemplateService evaluationCardTemplateService;
 
-    public DataFeedCriteriaImportServiceImpl(CriteriaSaveService criteriaSaveService, EvaluationCardTemplateService evaluationCardTemplateService) {
+    public DataFeedCriteriaImportServiceImpl(CriteriaSaveService criteriaSaveService, CriteriaUpdateService criteriaUpdateService, EvaluationCardTemplateService evaluationCardTemplateService) {
         this.criteriaSaveService = criteriaSaveService;
+        this.criteriaUpdateService = criteriaUpdateService;
         this.evaluationCardTemplateService = evaluationCardTemplateService;
     }
 
@@ -51,7 +54,7 @@ public class DataFeedCriteriaImportServiceImpl implements DataFeedImportService 
                 criteriaSections.forEach(criteriaSection -> criteriaSaveService.saveCriteriaSection(criteriaSection, evaluationCardTemplate, true));
             } else {
                 EvaluationCardTemplate updatedEvaluationCardTemplate = evaluationCardTemplateService.updateEvaluationCardTemplate(studyYear, evaluationCriteriaDTO);
-                // TODO: 11/6/2023 implement update logic
+                criteriaSections.forEach(criteriaSection -> criteriaUpdateService.updateCriteriaSection(criteriaSection, updatedEvaluationCardTemplate));
             }
         } catch (Exception exception) {
             log.error("Exception during parsing the criteria");
