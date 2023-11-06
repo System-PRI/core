@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +19,18 @@ public class EvaluationCard {
 
     @Id
     private Long id;
+
+    @CreationTimestamp
+    @Column(nullable = false)
+    private LocalDateTime creationDate;
+
+    @UpdateTimestamp
+    @Column(nullable = false)
+    private LocalDateTime modificationDate;
+
+    @Version
+    @Column(nullable = false)
+    private Long version;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
