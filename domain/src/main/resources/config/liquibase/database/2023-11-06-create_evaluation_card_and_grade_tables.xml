@@ -52,15 +52,18 @@
         </createTable>
     </changeSet>
     <changeSet author="dawid.gorkiewicz" id="2023-11-06-create_evaluation_card_and_grade_tables-3">
-        <addForeignKeyConstraint baseColumnNames="evaluation_card_id" baseTableName="grade" constraintName="FK2kkn8l09o5dmpaka1svllc6kp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="evaluation_card" validate="true"/>
+        <addUniqueConstraint columnNames="project_id" constraintName="UC_EVALUATION_CARDPROJECT_ID_COL" tableName="evaluation_card"/>
     </changeSet>
     <changeSet author="dawid.gorkiewicz" id="2023-11-06-create_evaluation_card_and_grade_tables-4">
-        <addForeignKeyConstraint baseColumnNames="evaluation_card_template_id" baseTableName="evaluation_card" constraintName="FK4v4n0j5nr79qb9b6y6rnlahw4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="evaluation_card_template" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="evaluation_card_id" baseTableName="grade" constraintName="FK2kkn8l09o5dmpaka1svllc6kp" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="evaluation_card" validate="true"/>
     </changeSet>
     <changeSet author="dawid.gorkiewicz" id="2023-11-06-create_evaluation_card_and_grade_tables-5">
-        <addForeignKeyConstraint baseColumnNames="criteria_group_id" baseTableName="grade" constraintName="FKfim4vfgvg3g87xtjcbrwfxg9l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="criteria_group" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="evaluation_card_template_id" baseTableName="evaluation_card" constraintName="FK4v4n0j5nr79qb9b6y6rnlahw4" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="evaluation_card_template" validate="true"/>
     </changeSet>
     <changeSet author="dawid.gorkiewicz" id="2023-11-06-create_evaluation_card_and_grade_tables-6">
+        <addForeignKeyConstraint baseColumnNames="criteria_group_id" baseTableName="grade" constraintName="FKfim4vfgvg3g87xtjcbrwfxg9l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="criteria_group" validate="true"/>
+    </changeSet>
+    <changeSet author="dawid.gorkiewicz" id="2023-11-06-create_evaluation_card_and_grade_tables-7">
         <addForeignKeyConstraint baseColumnNames="project_id" baseTableName="evaluation_card" constraintName="FKhfdacj2wiy0aqcgb072uobl6l" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="project" validate="true"/>
     </changeSet>
 </databaseChangeLog>

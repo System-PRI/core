@@ -11,10 +11,6 @@ import lombok.Setter;
 public class Grade extends AbstractEntity {
 
     @ManyToOne
-    @JoinColumn(name = "EVALUATION_CARD_ID")
-    private EvaluationCard evaluationCard;
-
-    @ManyToOne
     @JoinColumn(name = "CRITERIA_GROUP_ID")
     private CriteriaGroup criteriaGroup;
 
