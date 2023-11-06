@@ -50,7 +50,8 @@ public class Project extends AbstractEntity {
     @OneToOne(
             mappedBy = "project",
             cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            optional = false
     )
     private EvaluationCard evaluationCard;
 

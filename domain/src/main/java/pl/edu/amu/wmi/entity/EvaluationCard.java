@@ -1,6 +1,7 @@
 package pl.edu.amu.wmi.entity;
 
 import jakarta.persistence.*;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +12,10 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "EVALUATION_CARD")
-public class EvaluationCard extends AbstractEntity {
+public class EvaluationCard {
 
+    @Id
+    private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId("projectId")
