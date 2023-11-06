@@ -47,7 +47,11 @@ public class Project extends AbstractEntity {
     )
     private StudyYear studyYear;
 
-    @OneToOne(mappedBy = "project")
+    @OneToOne(
+            mappedBy = "project",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY
+    )
     private EvaluationCard evaluationCard;
 
     @OneToMany(

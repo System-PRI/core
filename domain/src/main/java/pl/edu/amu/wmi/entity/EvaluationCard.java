@@ -14,9 +14,9 @@ import java.util.List;
 public class EvaluationCard extends AbstractEntity {
 
 
-    @OneToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "PROJECT_ID", unique = true)
-    private Project project;;
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId("projectId")
+    private Project project;
 
     @Column(name = "TOTAL_POINTS_SEMESTER_I")
     private Double totalPointsFirstSemester;
@@ -32,9 +32,7 @@ public class EvaluationCard extends AbstractEntity {
     @JoinColumn(name = "EVALUATION_CARD_TEMPLATE_ID")
     private EvaluationCardTemplate evaluationCardTemplate;
 
-    @OneToMany(
-            cascade = CascadeType.REMOVE
-    )
+    @OneToMany(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "EVALUATION_CARD_ID")
     private List<Grade> grades = new ArrayList<>();
 
