@@ -16,9 +16,9 @@ public interface CriterionMapper {
     @Mapping(target = "id", expression = "java(isSaveMode ? null : dto.id())")
     Criterion mapToEntity(CriterionDTO dto, boolean isSaveMode);
 
-    default List<Criterion> mapToEntitiesList(List<CriterionDTO> criterionDTOS, boolean isNew) {
+    default List<Criterion> mapToEntitiesList(List<CriterionDTO> criterionDTOS, boolean isSaveMode) {
         return criterionDTOS.stream()
-                .map(criterion -> mapToEntity(criterion, isNew))
+                .map(criterion -> mapToEntity(criterion, isSaveMode))
                 .toList();
     }
 

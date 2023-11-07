@@ -26,6 +26,8 @@ import java.util.*;
 @Slf4j
 public class CriteriaUpdateServiceImpl implements CriteriaUpdateService {
 
+    private static final Boolean IS_SAVE_MODE = Boolean.FALSE;
+
     private final CriteriaSectionMapper criteriaSectionMapper;
     private final CriteriaGroupMapper criteriaGroupMapper;
     private final CriterionMapper criterionMapper;
@@ -78,8 +80,8 @@ public class CriteriaUpdateServiceImpl implements CriteriaUpdateService {
 
     private CriteriaGroup updateCriteriaGroup(CriteriaGroupDTO criteriaGroupDTO, Set<Criterion> updatedCriteria, Semester semester) {
         CriteriaGroup criteriaGroup = switch (semester) {
-            case SEMESTER_I -> criteriaGroupMapper.mapToEntityForFirstSemester(criteriaGroupDTO, false);
-            case SEMESTER_II -> criteriaGroupMapper.mapToEntityForSecondSemester(criteriaGroupDTO, false);
+            case SEMESTER_I -> criteriaGroupMapper.mapToEntityForFirstSemester(criteriaGroupDTO, IS_SAVE_MODE);
+            case SEMESTER_II -> criteriaGroupMapper.mapToEntityForSecondSemester(criteriaGroupDTO, IS_SAVE_MODE);
         };
         CriteriaGroup persistedCriteriaGroup = criteriaGroupDAO.findById(criteriaGroup.getId()).orElseGet(CriteriaGroup::new);
         if (!isGradeWeightRelevant(criteriaGroup)) {
@@ -101,7 +103,7 @@ public class CriteriaUpdateServiceImpl implements CriteriaUpdateService {
     }
 
     private Set<Criterion> updateCriteria(List<CriterionDTO> criteriaDTOs) {
-        List<Criterion> criteria = criterionMapper.mapToEntitiesList(criteriaDTOs, false);
+        List<Criterion> criteria = criterionMapper.mapToEntitiesList(criteriaDTOs, IS_SAVE_MODE);
         List<Criterion> persistedCriteria = new ArrayList<>();
         criteria.forEach(criterion -> {
             Criterion persistedEntity = criterionDAO.findById(criterion.getId()).orElseGet(Criterion::new);

@@ -51,7 +51,7 @@ public class DataFeedCriteriaImportServiceImpl implements DataFeedImportService 
             boolean isEvaluationCardTemplatePresentForStudyYear = evaluationCardTemplateService.existsByStudyYear(studyYear);
             if (!isEvaluationCardTemplatePresentForStudyYear) {
                 EvaluationCardTemplate evaluationCardTemplate = evaluationCardTemplateService.saveEvaluationCardTemplate(studyYear, evaluationCriteriaDTO);
-                criteriaSections.forEach(criteriaSection -> criteriaSaveService.saveCriteriaSection(criteriaSection, evaluationCardTemplate, true));
+                criteriaSections.forEach(criteriaSection -> criteriaSaveService.saveCriteriaSection(criteriaSection, evaluationCardTemplate));
             } else {
                 EvaluationCardTemplate updatedEvaluationCardTemplate = evaluationCardTemplateService.updateEvaluationCardTemplate(studyYear, evaluationCriteriaDTO);
                 criteriaSections.forEach(criteriaSection -> criteriaUpdateService.updateCriteriaSection(criteriaSection, updatedEvaluationCardTemplate));

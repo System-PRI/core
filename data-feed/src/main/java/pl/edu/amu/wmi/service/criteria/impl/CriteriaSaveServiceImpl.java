@@ -28,6 +28,8 @@ import java.util.Set;
 @Slf4j
 public class CriteriaSaveServiceImpl implements CriteriaSaveService {
 
+    private static final Boolean IS_SAVE_MODE = Boolean.TRUE;
+
     private final CriteriaSectionMapper criteriaSectionMapper;
     private final CriteriaGroupMapper criteriaGroupMapper;
     private final CriterionMapper criterionMapper;
@@ -47,19 +49,19 @@ public class CriteriaSaveServiceImpl implements CriteriaSaveService {
     }
 
     @Override
-    public void saveCriteriaSection(CriteriaSectionDTO criteriaSectionDTO, EvaluationCardTemplate savedEvaluationCardTemplate, boolean isNewEvaluation) {
-        CriteriaSection firstSemesterCriteriaSection = criteriaSectionMapper.mapToEntityForFirstSemester(criteriaSectionDTO, isNewEvaluation);
-        CriteriaSection secondSemesterCriteriaSection = criteriaSectionMapper.mapToEntityForSecondSemester(criteriaSectionDTO, isNewEvaluation);
+    public void saveCriteriaSection(CriteriaSectionDTO criteriaSectionDTO, EvaluationCardTemplate savedEvaluationCardTemplate) {
+        CriteriaSection firstSemesterCriteriaSection = criteriaSectionMapper.mapToEntityForFirstSemester(criteriaSectionDTO, IS_SAVE_MODE);
+        CriteriaSection secondSemesterCriteriaSection = criteriaSectionMapper.mapToEntityForSecondSemester(criteriaSectionDTO, IS_SAVE_MODE);
 
         for (CriteriaGroupDTO criteriaGroupDTO : criteriaSectionDTO.criteriaGroups()) {
-            Set<Criterion> savedCriteria = saveCriteria(criteriaGroupDTO.criteria(), isNewEvaluation);
+            Set<Criterion> savedCriteria = saveCriteria(criteriaGroupDTO.criteria());
 
-            CriteriaGroup criteriaGroupForFirstSemester = createCriteriaGroup(criteriaGroupDTO, savedCriteria, Semester.SEMESTER_I, isNewEvaluation);
+            CriteriaGroup criteriaGroupForFirstSemester = createCriteriaGroup(criteriaGroupDTO, savedCriteria, Semester.SEMESTER_I);
             if (Objects.nonNull(criteriaGroupForFirstSemester)) {
                 firstSemesterCriteriaSection.getCriteriaGroups().add(criteriaGroupForFirstSemester);
             }
 
-            CriteriaGroup criteriaGroupForSecondSemester = createCriteriaGroup(criteriaGroupDTO, savedCriteria, Semester.SEMESTER_II, isNewEvaluation);
+            CriteriaGroup criteriaGroupForSecondSemester = createCriteriaGroup(criteriaGroupDTO, savedCriteria, Semester.SEMESTER_II);
             if (Objects.nonNull(criteriaGroupForSecondSemester)) {
                 secondSemesterCriteriaSection.getCriteriaGroups().add(criteriaGroupForSecondSemester);
             }
@@ -72,10 +74,10 @@ public class CriteriaSaveServiceImpl implements CriteriaSaveService {
         criteriaSectionDAO.save(secondSemesterCriteriaSection);
     }
 
-    private CriteriaGroup createCriteriaGroup(CriteriaGroupDTO criteriaGroupDTO, Set<Criterion> savedCriteria, Semester semester, boolean isNewEvaluation) {
+    private CriteriaGroup createCriteriaGroup(CriteriaGroupDTO criteriaGroupDTO, Set<Criterion> savedCriteria, Semester semester) {
         CriteriaGroup criteriaGroup = switch (semester) {
-            case SEMESTER_I -> criteriaGroupMapper.mapToEntityForFirstSemester(criteriaGroupDTO, isNewEvaluation);
-            case SEMESTER_II -> criteriaGroupMapper.mapToEntityForSecondSemester(criteriaGroupDTO, isNewEvaluation);
+            case SEMESTER_I -> criteriaGroupMapper.mapToEntityForFirstSemester(criteriaGroupDTO, IS_SAVE_MODE);
+            case SEMESTER_II -> criteriaGroupMapper.mapToEntityForSecondSemester(criteriaGroupDTO, IS_SAVE_MODE);
         };
         criteriaGroup.setCriteria(savedCriteria);
         return isGradeWeightRelevant(criteriaGroup) ? criteriaGroup : null;
@@ -89,8 +91,8 @@ public class CriteriaSaveServiceImpl implements CriteriaSaveService {
         return !(Math.abs(criteriaGroup.getGradeWeight()) < 1e-6);
     }
 
-    private Set<Criterion> saveCriteria(List<CriterionDTO> criterionDTOS, boolean isNewEvaluation) {
-        List<Criterion> criteria = criterionMapper.mapToEntitiesList(criterionDTOS, isNewEvaluation);
+    private Set<Criterion> saveCriteria(List<CriterionDTO> criterionDTOS) {
+        List<Criterion> criteria = criterionMapper.mapToEntitiesList(criterionDTOS, IS_SAVE_MODE);
         return new HashSet<>(criterionDAO.saveAll(criteria));
     }
 }

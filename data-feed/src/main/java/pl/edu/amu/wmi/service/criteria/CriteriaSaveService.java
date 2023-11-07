@@ -4,5 +4,5 @@ import pl.edu.amu.wmi.entity.EvaluationCardTemplate;
 import pl.edu.amu.wmi.model.CriteriaSectionDTO;
 
 public interface CriteriaSaveService {
-    void saveCriteriaSection(CriteriaSectionDTO criteriaSection, EvaluationCardTemplate evaluationCardTemplate, boolean isNewEvaluation);
+    void saveCriteriaSection(CriteriaSectionDTO criteriaSection, EvaluationCardTemplate evaluationCardTemplate);
 }
