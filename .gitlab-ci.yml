@@ -72,6 +72,8 @@ deploy:
     - sudo docker version
     - sudo docker compose version
   script:
+    - sudo echo "Creating db backup..."
+    - sudo cp -Rf ${CI_PROJECT_DIR}/db/* /pri-db-backup/
     - sudo echo "Deployment..."
     - sudo echo "Project dir=${CI_PROJECT_DIR}"
     - sudo echo "POSTGRES_URL=${POSTGRES_URL}" >> ${CI_PROJECT_DIR}/config.env
