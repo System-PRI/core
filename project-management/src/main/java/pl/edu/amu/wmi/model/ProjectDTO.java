@@ -16,4 +16,10 @@ public class ProjectDTO {
 
     private boolean accepted;
 
+    private double pointsFirstSemester;
+
+    private double pointsSecondSemester;
+
+    private boolean criteriaMet;
+
 }
