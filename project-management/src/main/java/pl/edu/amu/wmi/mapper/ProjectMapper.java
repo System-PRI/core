@@ -50,7 +50,11 @@ public interface ProjectMapper {
 
     @Named("PointsToPercent")
     default String mapPointsToPercent(Double points) {
-        return points.toString() + "%";
+        if (points == null) {
+            return "0%";
+        } else {
+            return points + "%";
+        }
     }
 
 }
