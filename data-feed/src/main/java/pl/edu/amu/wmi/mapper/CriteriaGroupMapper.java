@@ -30,8 +30,15 @@ public interface CriteriaGroupMapper {
     void update(@MappingTarget CriteriaGroup persistedEntity, CriteriaGroup updateEntity);
 
     @Mapping(target = "name", source = "key")
+    @Mapping(target = "idFirstSemester", source = "idFirstSemester")
+    @Mapping(target = "idSecondSemester", source = "idSecondSemester")
     @Mapping(target = "gradeWeightFirstSemester",source = "weightFirstSemester")
     @Mapping(target = "gradeWeightSecondSemester", source = "weightSecondSemester")
     @Mapping(target = "criteria", source = "criteria")
-    CriteriaGroupDTO mapToDto(String key, Double weightFirstSemester, Double weightSecondSemester, List<Criterion> criteria);
+    CriteriaGroupDTO mapToDto(String key,
+                              Long idFirstSemester,
+                              Long idSecondSemester,
+                              Double weightFirstSemester,
+                              Double weightSecondSemester,
+                              List<Criterion> criteria);
 }
