@@ -45,12 +45,9 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
 
         Set<String> criteriaSectionNames = extractCriteriaSectionNames(criteriaSectionsFirstSemester, criteriaSectionsSecondSemester);
 
-        List<CriteriaSectionDTO> criteriaSectionDTOs = new ArrayList<>();
-
-        criteriaSectionNames.forEach(criteriaSectionName -> {
-            CriteriaSectionDTO criteriaSectionDTO = createCriteriaSectionDTO(criteriaSectionName, criteriaSectionsFirstSemester, criteriaSectionsSecondSemester);
-            criteriaSectionDTOs.add(criteriaSectionDTO);
-        });
+        List<CriteriaSectionDTO> criteriaSectionDTOs = criteriaSectionNames.stream()
+                .map(criteriaSectionName -> createCriteriaSectionDTO(criteriaSectionName, criteriaSectionsFirstSemester, criteriaSectionsSecondSemester))
+                .toList();
 
         EvaluationCriteriaDTO evaluationCriteriaDTO = evaluationCriteriaMapper.mapToDto(evaluationCardTemplate);
         evaluationCriteriaDTO.criteriaSections().addAll(criteriaSectionDTOs);
@@ -70,12 +67,9 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
         Double criteriaSectionGradeWeightSecondSemester = getCriteriaSectionWeight(criteriaSectionSecondSemester);
 
         Map<String, List<CriteriaGroup>> criteriaGroups = createCriteriaGroupMap(criteriaSectionFirstSemester, criteriaSectionSecondSemester);
-        List<CriteriaGroupDTO> criteriaGroupDTOs = new ArrayList<>();
-
-        criteriaGroups.entrySet().forEach(entry -> {
-            CriteriaGroupDTO criteriaGroupDTO = createCriteriaGroupDTO(entry);
-            criteriaGroupDTOs.add(criteriaGroupDTO);
-        });
+        List<CriteriaGroupDTO> criteriaGroupDTOs = criteriaGroups.entrySet().stream()
+                        .map(this::createCriteriaGroupDTO)
+                        .toList();
 
         return new CriteriaSectionDTO(
                 criteriaSectionFirstSemesterId,
