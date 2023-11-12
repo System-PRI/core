@@ -16,7 +16,6 @@ import pl.edu.amu.wmi.model.ProjectGradeDetailsDTO;
 import pl.edu.amu.wmi.service.GradeService;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -70,24 +69,20 @@ public class GradeServiceImpl implements GradeService {
      * @return Points value which was received by the project in the chosen semester
      */
     private Double getPointsForSemester(Project project, Semester semester) {
-        Double points = 0.0;
-        if (semester.equals(Semester.SEMESTER_I))
-            points = project.getEvaluationCard().getTotalPointsFirstSemester();
-        else if (semester.equals(Semester.SEMESTER_II))
-            points = project.getEvaluationCard().getTotalPointsSecondSemester();
-        return points;
+        return switch (semester) {
+            case SEMESTER_I -> project.getEvaluationCard().getTotalPointsFirstSemester();
+            case SEMESTER_II -> project.getEvaluationCard().getTotalPointsSecondSemester();
+        };
     }
 
     /**
      * @return List of criteria sections which are related to the project in chosen semester
      */
     private List<CriteriaSection> getCriteriaSectionsForSemester(Project project, Semester semester) {
-        List<CriteriaSection> sections = new ArrayList<>();
-        if (semester.equals(Semester.SEMESTER_I))
-            sections = project.getEvaluationCard().getEvaluationCardTemplate().getCriteriaSectionsFirstSemester();
-        else if (semester.equals(Semester.SEMESTER_II))
-            sections = project.getEvaluationCard().getEvaluationCardTemplate().getCriteriaSectionsSecondSemester();
-        return sections;
+        return switch (semester) {
+            case SEMESTER_I -> project.getEvaluationCard().getEvaluationCardTemplate().getCriteriaSectionsFirstSemester();
+            case SEMESTER_II -> project.getEvaluationCard().getEvaluationCardTemplate().getCriteriaSectionsSecondSemester();
+        };
     }
 
     /**
@@ -127,7 +122,7 @@ public class GradeServiceImpl implements GradeService {
                 .filter(g -> g.getCriteriaGroup().getName().equals(criteriaGroupName))
                 .findFirst()
                 .orElse(null);
-        Double points = null;
+        Integer points = null;
         if (grade != null)
             points = grade.getPoints();
         return CriterionCategory.findByPointsReceived(points);
