@@ -53,9 +53,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         return grades;
     }
 
-    private List<Grade> createEmptyGradesForSemester(List<CriteriaSection> criteriaSectionsFirstSemester) {
+    private List<Grade> createEmptyGradesForSemester(List<CriteriaSection> criteriaSections) {
         List<Grade> grades = new ArrayList<>();
-        criteriaSectionsFirstSemester.forEach(criteriaSection -> {
+        criteriaSections.forEach(criteriaSection -> {
                     List<Grade> gradesForSection = createEmptyGradesForCriteriaSection(criteriaSection);
                     grades.addAll(gradesForSection);
                 });
