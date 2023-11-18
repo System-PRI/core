@@ -5,6 +5,8 @@ import freemarker.template.TemplateException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,19 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@PropertySource(value = "classpath:email.properties")
 public class NotificationServiceImpl implements NotificationService {
 
     private static final String USER = "user";
+
+    /**
+     * variable to disable sending mails to users during development
+     */
+    @Value("${email.to.university.domain.enabled}")
+    private Boolean emailToUniversityDomainEnabled;
+
+    @Value("${email.university.domain}")
+    private String universityEmailDomain;
 
     private final Configuration configuration;
     private final JavaMailSender javaMailSender;
@@ -36,6 +48,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void sendEmail(UserInfoDTO userInfo, EMailTemplate eMailTemplate) {
 
+        if (!emailToUniversityDomainEnabled && (emailIsInUniversityDomain(userInfo.getEmail()))) {
+            log.info("Sending e-mails to university domain is skipped");
+            return;
+        }
+
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
@@ -43,14 +60,15 @@ public class NotificationServiceImpl implements NotificationService {
             helper.setTo(userInfo.getEmail());
             String emailContent = getEmailContent(eMailTemplate, userInfo);
             helper.setText(emailContent, true);
-
-            // TODO: 11/18/2023 add method to not sent spam (based on feature flag)
-
             javaMailSender.send(mimeMessage);
         } catch (MessagingException | IOException | TemplateException e) {
             log.error("Error during sending e-mail to user with email: {}", userInfo.getEmail(), e);
             throw new NotificationManagementException("Error during sending e-mail to user with email: " + userInfo.getEmail());
         }
+    }
+
+    private boolean emailIsInUniversityDomain(String email) {
+        return email.contains(universityEmailDomain);
     }
 
     @Override
