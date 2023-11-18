@@ -22,6 +22,7 @@ public enum CriterionCategory {
     }
 
     private static final Map<Integer, CriterionCategory> criterionCategories;
+
     static {
         criterionCategories = new HashMap<>();
         for (CriterionCategory category : CriterionCategory.values()) {
@@ -29,8 +30,18 @@ public enum CriterionCategory {
         }
     }
 
-    public static CriterionCategory findByPointsReceived(Integer points) {
-        return criterionCategories.get(points);
+    public static CriterionCategory getByPointsReceived(Integer points) {
+        if (points != null)
+            return criterionCategories.get(points);
+        else
+            return null;
+    }
+
+    public static Integer getPoints(CriterionCategory criterion) {
+        if (criterion != null)
+            return criterion.points;
+        else
+            return null;
     }
 
 }
