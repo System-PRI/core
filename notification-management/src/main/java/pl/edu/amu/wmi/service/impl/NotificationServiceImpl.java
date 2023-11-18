@@ -70,7 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void sendEmail(List<UserInfoDTO> userInfos, EMailTemplate eMailTemplate) {
+    public void sendEmails(List<UserInfoDTO> userInfos, EMailTemplate eMailTemplate) {
         userInfos.forEach(userInfo ->
                 sendEmail(userInfo, eMailTemplate)
         );

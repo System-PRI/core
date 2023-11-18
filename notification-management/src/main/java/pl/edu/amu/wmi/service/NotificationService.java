@@ -9,6 +9,6 @@ public interface NotificationService {
 
     void sendEmail(UserInfoDTO userInfo, EMailTemplate eMailTemplate);
 
-    void sendEmail(List<UserInfoDTO> userInfos, EMailTemplate eMailTemplate);
+    void sendEmails(List<UserInfoDTO> userInfos, EMailTemplate eMailTemplate);
 
 }
