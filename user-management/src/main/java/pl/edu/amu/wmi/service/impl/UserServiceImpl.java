@@ -12,6 +12,7 @@ import pl.edu.amu.wmi.enumerations.UserRole;
 import pl.edu.amu.wmi.exception.UserManagementException;
 import pl.edu.amu.wmi.mapper.UserMapper;
 import pl.edu.amu.wmi.model.user.UserDTO;
+import pl.edu.amu.wmi.service.SessionDataService;
 import pl.edu.amu.wmi.service.UserService;
 
 import java.text.MessageFormat;
@@ -29,11 +30,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
 
-    public UserServiceImpl(UserDataDAO userDataDAO, StudentDAO studentDAO, SupervisorDAO supervisorDAO, UserMapper userMapper) {
+    private final SessionDataService sessionDataService;
+
+
+    public UserServiceImpl(UserDataDAO userDataDAO, StudentDAO studentDAO, SupervisorDAO supervisorDAO, UserMapper userMapper, SessionDataService sessionDataService) {
         this.userDataDAO = userDataDAO;
         this.studentDAO = studentDAO;
         this.supervisorDAO = supervisorDAO;
         this.userMapper = userMapper;
+        this.sessionDataService = sessionDataService;
     }
 
     @Override
@@ -56,7 +61,19 @@ public class UserServiceImpl implements UserService {
                 final List<String> studentStudyYears = getStudyYearsForStudent(students);
                 studyYears.addAll(studentStudyYears);
 
-                final String actualStudyYear = getActualStudyYear(studyYear, studentStudyYears);
+                String actualStudyYearFromSessionData = sessionDataService.findActualStudyYear(indexNumber);
+                String actualStudyYear;
+                if (Objects.nonNull(actualStudyYearFromSessionData)) {
+                    actualStudyYear = actualStudyYearFromSessionData;
+                } else {
+                    actualStudyYear = getActualStudyYear(studyYear, studentStudyYears);
+                }
+
+                if (Objects.isNull(actualStudyYearFromSessionData)) {
+                    log.info("Actual study year was updated in StudyYearContext");
+                    sessionDataService.updateActualStudyYear(actualStudyYear, indexNumber);
+                }
+
                 userDTO.setActualYear(actualStudyYear);
 
                 final Student entity = findStudentByActualStudyYear(students, actualStudyYear, indexNumber);
@@ -77,7 +94,19 @@ public class UserServiceImpl implements UserService {
                 final List<String> supervisorStudyYears = getStudyYearsForSupervisor(supervisors);
                 studyYears.addAll(supervisorStudyYears);
 
-                final String actualStudyYear = getActualStudyYear(studyYear, supervisorStudyYears);
+                String actualStudyYearFromSessionData = sessionDataService.findActualStudyYear(indexNumber);
+                String actualStudyYear;
+                if (Objects.nonNull(actualStudyYearFromSessionData)) {
+                    actualStudyYear = actualStudyYearFromSessionData;
+                } else {
+                    actualStudyYear = getActualStudyYear(studyYear, supervisorStudyYears);
+                }
+
+                if (Objects.isNull(actualStudyYearFromSessionData)) {
+                    log.info("Actual study year was updated in StudyYearContext");
+                    sessionDataService.updateActualStudyYear(actualStudyYear, indexNumber);
+                }
+
                 userDTO.setActualYear(actualStudyYear);
 
                 final Supervisor entity = findSupervisorByActualStudyYear(supervisors, actualStudyYear, indexNumber);
