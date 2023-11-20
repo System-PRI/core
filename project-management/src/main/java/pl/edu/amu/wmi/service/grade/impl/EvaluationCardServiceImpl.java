@@ -7,8 +7,11 @@ import pl.edu.amu.wmi.dao.EvaluationCardDAO;
 import pl.edu.amu.wmi.dao.EvaluationCardTemplateDAO;
 import pl.edu.amu.wmi.entity.*;
 import pl.edu.amu.wmi.enumerations.Semester;
+import pl.edu.amu.wmi.exception.grade.EvaluationCardException;
 import pl.edu.amu.wmi.exception.project.ProjectManagementException;
+import pl.edu.amu.wmi.model.grade.GradeDetailsDTO;
 import pl.edu.amu.wmi.service.grade.EvaluationCardService;
+import pl.edu.amu.wmi.service.grade.GradeService;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -22,11 +25,14 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     private final EvaluationCardDAO evaluationCardDAO;
     private final EvaluationCardTemplateDAO evaluationCardTemplateDAO;
+    private final GradeService gradeService;
 
     public EvaluationCardServiceImpl(EvaluationCardDAO evaluationCardDAO,
-                                     EvaluationCardTemplateDAO evaluationCardTemplateDAO) {
+                                     EvaluationCardTemplateDAO evaluationCardTemplateDAO,
+                                     GradeService gradeService) {
         this.evaluationCardDAO = evaluationCardDAO;
         this.evaluationCardTemplateDAO = evaluationCardTemplateDAO;
+        this.gradeService = gradeService;
     }
 
     @Override
@@ -72,17 +78,76 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
 
     // TODO: 11/18/2023 - Once SYSPRI-223 is ready, update the disqualification and approval conditions
+    /**
+     * Updates project evaluation card based on received GradeDetailsDTO object. Method triggers
+     * GradeService.updateProjectGradesForSemester(Semester semester, List<Grade> projectGradesForSemester, GradeDetailsDTO projectGradeDetails)
+     * method to update single grades entities belonging to the project evaluation card.
+     * Based on updated grades points and evaluation card qualification is calculated.
+     * Also, each Criteria Group modification date is being updated (TODO 11/19.2023: SYSPRI-231)
+     * On the end method returns updated project's grades information as a GradeDetailsDTO object.
+     *
+     * @param semester  - semester that the grades are updated for
+     * @param projectId - project that the grades update is for
+     * @param gradeDetails - request body containing all update information
+     * @return GradeDetailsDTO - contain updated project's grades information
+     */
     @Override
-    public void updateEvaluationCard(List<Grade> gradesForSemester, Semester semester, Project project) {
-        EvaluationCard evaluationCard = project.getEvaluationCard();
+    @Transactional
+    public GradeDetailsDTO updateEvaluationCard(Semester semester, Long projectId, GradeDetailsDTO gradeDetails) {
+        EvaluationCard evaluationCard = evaluationCardDAO.findById(projectId)
+                .orElseThrow(() -> new EvaluationCardException(MessageFormat.format("Evaluation card for project with id: {0} not found", projectId)));
 
-        List<Double> gradesWeightsForSemester = gradesForSemester.stream()
+        List<Grade> gradesForSemester = getGradesForSemester(semester, evaluationCard);
+        gradeService.updateProjectGradesForSemester(semester, gradesForSemester, gradeDetails);
+
+        updateCriteriaGroupModificationDate(gradesForSemester);
+
+        Double totalPointsSemester = calculateTotalPointsWithWeight(gradesForSemester);
+        setTotalPointsForSemester(semester, evaluationCard, totalPointsSemester);
+
+        boolean isDisqualified = checkDisqualification(gradesForSemester);
+        evaluationCard.setDisqualified(isDisqualified);
+        evaluationCard.setApprovedForDefense(!isDisqualified);
+        evaluationCardDAO.save(evaluationCard);
+
+        return gradeService.findByProjectIdAndSemester(semester, projectId);
+    }
+
+    /**
+     * Fetches grades for semester from provided evaluation card.
+     */
+    private List<Grade> getGradesForSemester(Semester semester, EvaluationCard evaluationCard) {
+        List<Grade> grades = evaluationCard.getGrades();
+        return grades.stream()
+                .filter(grade -> isGradeForSemester(grade, semester))
+                .toList();
+    }
+
+    /**
+     * Confirms if grade belongs to the semester.
+     */
+    private boolean isGradeForSemester(Grade grade, Semester semester) {
+        return grade.getCriteriaGroup().getCriteriaSection().getSemester().equals(semester);
+    }
+
+    /**
+     * Updates evaluation card's criteria groups modification date based on relevant grade's modification date.
+     * TODO 11/19.2023: SYSPRI-231
+     */
+    private void updateCriteriaGroupModificationDate(List<Grade> grades) {
+        grades.forEach(grade -> grade.getCriteriaGroup().setModificationDate(grade.getModificationDate()));
+    }
+
+    /**
+     * Calculates total points with weight (weighted average) of provided grade objects.
+     * Every grade belongs to the criteria group which contains grade weight.
+     * Then the overall weight is used as a divisor for a sum of weighted points.
+     */
+    private Double calculateTotalPointsWithWeight(List<Grade> grades) {
+        List<Double> gradesWeightsForSemester = grades.stream()
                 .map(grade -> grade.getCriteriaGroup().getGradeWeight()).toList();
 
-        gradesForSemester.forEach(grade -> grade.getCriteriaGroup()
-                .setModificationDate(grade.getModificationDate()));
-
-        Double totalPointsWithWeight = gradesForSemester.stream()
+        Double totalPointsWithWeight = grades.stream()
                 .map(Grade::getPointsWithWeight)
                 .filter(Objects::nonNull)
                 .reduce(0.0, Double::sum);
@@ -90,14 +155,12 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                 .filter(Objects::nonNull)
                 .reduce(0.0, Double::sum);
 
-        Double totalPointsSemester = totalPointsWithWeight / totalWeight;
-        setTotalPointsForSemester(semester, evaluationCard, totalPointsSemester);
-
-        boolean isDisqualified = checkDisqualification(gradesForSemester);
-        evaluationCard.setDisqualified(isDisqualified);
-        evaluationCard.setApprovedForDefense(!isDisqualified);
+        return totalPointsWithWeight / totalWeight;
     }
 
+    /**
+     * Sets evaluation card's total points by semester.
+     */
     private void setTotalPointsForSemester(Semester semester, EvaluationCard evaluationCard, Double totalPoints) {
         switch (semester) {
             case SEMESTER_I ->
@@ -107,8 +170,12 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         }
     }
 
+    /**
+     * Confirms if all grades are selected and none of them are disqualifying.
+     */
     private boolean checkDisqualification(List<Grade> gradesForSemester) {
         return gradesForSemester.stream().anyMatch(Grade::isDisqualifying) ||
                 gradesForSemester.stream().anyMatch(g -> g.getPointsWithWeight() == null);
     }
+
 }

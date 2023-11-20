@@ -17,6 +17,7 @@ import pl.edu.amu.wmi.model.project.ProjectDTO;
 import pl.edu.amu.wmi.model.project.ProjectDetailsDTO;
 import pl.edu.amu.wmi.model.project.SupervisorAvailabilityDTO;
 import pl.edu.amu.wmi.service.externallink.ExternalLinkService;
+import pl.edu.amu.wmi.service.grade.EvaluationCardService;
 import pl.edu.amu.wmi.service.grade.GradeService;
 import pl.edu.amu.wmi.service.project.ProjectService;
 import pl.edu.amu.wmi.service.project.SupervisorProjectService;
@@ -36,12 +37,15 @@ public class ProjectController {
 
     private final GradeService gradeService;
 
+    private final EvaluationCardService evaluationCardService;
+
     @Autowired
-    public ProjectController(ProjectService projectService, ExternalLinkService externalLinkService, SupervisorProjectService supervisorProjectService, GradeService gradeService) {
+    public ProjectController(ProjectService projectService, ExternalLinkService externalLinkService, SupervisorProjectService supervisorProjectService, GradeService gradeService, EvaluationCardService evaluationCardService) {
         this.projectService = projectService;
         this.externalLinkService = externalLinkService;
         this.supervisorProjectService = supervisorProjectService;
         this.gradeService = gradeService;
+        this.evaluationCardService = evaluationCardService;
     }
 
     @GetMapping("")
@@ -163,8 +167,8 @@ public class ProjectController {
     }
 
     @PutMapping("/{projectId}/grade")
-    public ResponseEntity<GradeDetailsDTO> putGradeDetailsByProjectId(@RequestParam Semester semester, @PathVariable Long projectId, @RequestBody GradeDetailsDTO projectGradeDetails) {
+    public ResponseEntity<GradeDetailsDTO> putGradeDetailsByProjectId(@RequestParam String semester, @PathVariable Long projectId, @RequestBody GradeDetailsDTO projectGradeDetails) {
         return ResponseEntity.ok()
-                .body(gradeService.updateProjectGradesForSemester(semester, projectId, projectGradeDetails));
+                .body(evaluationCardService.updateEvaluationCard(Semester.getByShortSemesterName(semester), projectId, projectGradeDetails));
     }
 }

@@ -1,6 +1,5 @@
 package pl.edu.amu.wmi.service.grade.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,28 +17,23 @@ import pl.edu.amu.wmi.service.grade.GradeService;
 import java.text.MessageFormat;
 import java.util.*;
 
-@Slf4j
 @Service
 public class GradeServiceImpl implements GradeService {
 
     private final ProjectDAO projectDAO;
     private final ProjectCriteriaSectionMapper projectCriteriaSectionMapper;
-    private final EvaluationCardServiceImpl evaluationCardService;
 
 
     @Autowired
-    public GradeServiceImpl(ProjectDAO projectDAO, ProjectCriteriaSectionMapper projectCriteriaSectionMapper, EvaluationCardServiceImpl evaluationCardService) {
+    public GradeServiceImpl(ProjectDAO projectDAO,
+                            ProjectCriteriaSectionMapper projectCriteriaSectionMapper) {
         this.projectDAO = projectDAO;
         this.projectCriteriaSectionMapper = projectCriteriaSectionMapper;
-        this.evaluationCardService = evaluationCardService;
     }
 
-    // TODO: Add and update Javadoc
-    // TODO: Do refactor of everything here
-    // TODO: Add new folder structure
-
+    // TODO 11/20/2023: Move to EvaluationCardService
     /**
-     * Creates a ProjectGradeDetailsDTO object that contains grade information for a specific project.
+     * Creates a GradeDetailsDTO object that contains grade information for a specific project.
      * In addition to information about the criteria related to the project, there is also information about the
      * selected criteria for each Criteria Group. The selected criterion is calculated based on the points obtained by
      * the project in a specific Criteria Group.
@@ -82,7 +76,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     /**
-     * @return Points value which was received by the project in the chosen semester
+     * Returns points for semester of the specific project.
      */
     private Double getPointsForSemester(Project project, Semester semester) {
         return switch (semester) {
@@ -91,13 +85,18 @@ public class GradeServiceImpl implements GradeService {
         };
     }
 
+    /**
+     * Calculates points based on data stored in EvaluationCard entity which are in range 0.0 - 4.0.
+     * The method goal is to return string representation of the value as a percent.
+     * To do so it use operation of proportion. As value 4 is 100% then it is divisor.
+     */
     private String pointsToOverallPercent(Double points) {
         Double pointsOverall = points * 100 / 4;
         return String.format("%.2f", pointsOverall) + "%";
     }
 
     /**
-     * @return List of criteria sections which are related to the project in chosen semester
+     * Returns list of criteria sections which are related to the project in chosen semester
      */
     private List<CriteriaSection> getCriteriaSectionsForSemester(Project project, Semester semester) {
         return switch (semester) {
@@ -108,27 +107,32 @@ public class GradeServiceImpl implements GradeService {
         };
     }
 
+    /**
+     * Updates each project's grade for the chosen semester based on data provided in GradeDetailsDTO.
+     * Firstly it takes all criteria groups from the request body, then it creates a map of a groups and new selected
+     * criteria (CriteriaGroupDTO id : CriterionCategory). When map is ready, then it iterates through current project grades
+     * and updates each of them.
+     *
+     * @param semester  - semester that grades are updated for
+     * @param projectGradesForSemester - list of current project grades for semester
+     * @param projectGradeDetails - request GradeDetailsDTO that contains all updated data
+     */
+    @Override
     @Transactional
-    public GradeDetailsDTO updateProjectGradesForSemester(Semester semester, Long projectId, GradeDetailsDTO projectGradeDetails) {
-        Project project = projectDAO.findById(projectId)
-                .orElseThrow(() -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
-
+    public void updateProjectGradesForSemester(Semester semester, List<Grade> projectGradesForSemester, GradeDetailsDTO projectGradeDetails) {
         List<CriteriaGroupDTO> groups = getCriteriaGroupsToUpdate(projectGradeDetails);
         Map<Long, CriterionCategory> newSelectedCriteriaByGroupId = getSelectedCriteriaByGroupId(groups);
 
-        List<Grade> projectGradesForSemester = getGradesForSemester(semester, project);
         projectGradesForSemester.forEach(grade -> {
             Long gradeCriteriaGroupId = grade.getCriteriaGroup().getId();
             CriterionCategory newSelectedCriterion = newSelectedCriteriaByGroupId.get(gradeCriteriaGroupId);
             updateGrade(grade, newSelectedCriterion);
         });
-
-        evaluationCardService.updateEvaluationCard(projectGradesForSemester, semester, project);
-        projectDAO.save(project);
-
-        return projectGradeDetails;
     }
 
+    /**
+     * Returns list of all criteria group extracted from GradeDetailsDTO's criteria sections.
+     */
     private List<CriteriaGroupDTO> getCriteriaGroupsToUpdate(GradeDetailsDTO projectGradeDetails) {
         List<CriteriaSectionDTO> sections = projectGradeDetails.getSections();
         return sections.stream()
@@ -137,6 +141,9 @@ public class GradeServiceImpl implements GradeService {
                 .toList();
     }
 
+    /**
+     * Returns map of selected criterion for criteria group based on CriteriaGroupDTO's list.
+     */
     private Map<Long, CriterionCategory> getSelectedCriteriaByGroupId(List<CriteriaGroupDTO> criteriaGroups) {
         Map<Long, CriterionCategory> selectedCriteriaByGroupId = new HashMap<>();
         for (CriteriaGroupDTO group : criteriaGroups) {
@@ -145,22 +152,14 @@ public class GradeServiceImpl implements GradeService {
         return selectedCriteriaByGroupId;
     }
 
-    private List<Grade> getGradesForSemester(Semester semester, Project project) {
-        List<Grade> projectGrades = project.getEvaluationCard().getGrades();
-        return projectGrades.stream()
-                .filter(grade -> isGradeForSemester(grade, semester))
-                .toList();
-    }
-
-    private boolean isGradeForSemester(Grade grade, Semester semester) {
-        return grade.getCriteriaGroup().getCriteriaSection().getSemester().equals(semester);
-    }
-
-    private void updateGrade(Grade grade, CriterionCategory criterionCategory) {
+    /**
+     * Updates grade's point, points with weight and disqualification based on newSelectedCriterionCategory.
+     */
+    private void updateGrade(Grade grade, CriterionCategory newSelectedCriterionCategory) {
         CriteriaGroup gradeCriteriaGroup = grade.getCriteriaGroup();
-        Integer criterionPoints = CriterionCategory.getPoints(criterionCategory);
+        Integer criterionPoints = CriterionCategory.getPoints(newSelectedCriterionCategory);
         Optional<Criterion> criterion = gradeCriteriaGroup.getCriteria().stream()
-                .filter(c -> c.getCriterionCategory().equals(criterionCategory))
+                .filter(c -> c.getCriterionCategory().equals(newSelectedCriterionCategory))
                 .findFirst();
         Double groupWeight = grade.getCriteriaGroup().getGradeWeight();
 
