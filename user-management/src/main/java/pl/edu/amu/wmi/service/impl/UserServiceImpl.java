@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO getUser(String indexNumber, String studyYear) {
+    public UserDTO getUser(String indexNumber, String studyYearFromHeader) {
         try {
             UserData userData = this.userDataDAO.findByIndexNumber(indexNumber).orElseThrow(()
                     -> new UserManagementException(MessageFormat.format("User with index: {0} not found", indexNumber)));
@@ -61,18 +61,7 @@ public class UserServiceImpl implements UserService {
                 final List<String> studentStudyYears = getStudyYearsForStudent(students);
                 studyYears.addAll(studentStudyYears);
 
-                String actualStudyYearFromSessionData = sessionDataService.findActualStudyYear(indexNumber);
-                String actualStudyYear;
-                if (Objects.nonNull(actualStudyYearFromSessionData)) {
-                    actualStudyYear = actualStudyYearFromSessionData;
-                } else {
-                    actualStudyYear = getActualStudyYear(studyYear, studentStudyYears);
-                }
-
-                if (Objects.isNull(actualStudyYearFromSessionData)) {
-                    log.info("Actual study year was updated in StudyYearContext");
-                    sessionDataService.updateActualStudyYear(actualStudyYear, indexNumber);
-                }
+                String actualStudyYear = findActualStudyYear(studyYearFromHeader, indexNumber, studentStudyYears);
 
                 userDTO.setActualYear(actualStudyYear);
 
@@ -94,18 +83,7 @@ public class UserServiceImpl implements UserService {
                 final List<String> supervisorStudyYears = getStudyYearsForSupervisor(supervisors);
                 studyYears.addAll(supervisorStudyYears);
 
-                String actualStudyYearFromSessionData = sessionDataService.findActualStudyYear(indexNumber);
-                String actualStudyYear;
-                if (Objects.nonNull(actualStudyYearFromSessionData)) {
-                    actualStudyYear = actualStudyYearFromSessionData;
-                } else {
-                    actualStudyYear = getActualStudyYear(studyYear, supervisorStudyYears);
-                }
-
-                if (Objects.isNull(actualStudyYearFromSessionData)) {
-                    log.info("Actual study year was updated in StudyYearContext");
-                    sessionDataService.updateActualStudyYear(actualStudyYear, indexNumber);
-                }
+                String actualStudyYear = findActualStudyYear(studyYearFromHeader, indexNumber, supervisorStudyYears);
 
                 userDTO.setActualYear(actualStudyYear);
 
@@ -121,9 +99,25 @@ public class UserServiceImpl implements UserService {
             return userDTO;
 
         } catch (Exception exception) {
-            log.error("Exception during fetching the user data with index number: {} and study year: {}", indexNumber, studyYear, exception);
+            log.error("Exception during fetching the user data with index number: {} and study year: {}", indexNumber, studyYearFromHeader, exception);
             throw exception;
         }
+    }
+
+    private String findActualStudyYear(String studyYear, String indexNumber, List<String> studyYears) {
+        String actualStudyYearFromSessionData = sessionDataService.findActualStudyYear(indexNumber);
+        String actualStudyYear;
+        if (Objects.nonNull(actualStudyYearFromSessionData)) {
+            actualStudyYear = actualStudyYearFromSessionData;
+        } else {
+            actualStudyYear = getActualStudyYear(studyYear, studyYears);
+        }
+
+        if (Objects.isNull(actualStudyYearFromSessionData)) {
+            log.info("Actual study year was updated in SessionData");
+            sessionDataService.updateActualStudyYear(actualStudyYear, indexNumber);
+        }
+        return actualStudyYear;
     }
 
     private List<Long> getSupervisorAssignedProjects(Supervisor entity) {
