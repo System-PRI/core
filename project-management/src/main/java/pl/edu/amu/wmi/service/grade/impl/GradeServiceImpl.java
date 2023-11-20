@@ -111,7 +111,7 @@ public class GradeServiceImpl implements GradeService {
      * Updates each project's grade for the chosen semester based on data provided in GradeDetailsDTO.
      * Firstly it takes all criteria groups from the request body, then it creates a map of a groups and new selected
      * criteria (CriteriaGroupDTO id : CriterionCategory). When map is ready, then it iterates through current project grades
-     * and updates each of them.
+     * and updates each of them. Objects are updated using cascade.
      *
      * @param semester  - semester that grades are updated for
      * @param projectGradesForSemester - list of current project grades for semester

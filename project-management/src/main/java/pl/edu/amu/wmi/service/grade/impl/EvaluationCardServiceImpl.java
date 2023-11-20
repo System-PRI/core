@@ -100,10 +100,15 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         List<Grade> gradesForSemester = getGradesForSemester(semester, evaluationCard);
         gradeService.updateProjectGradesForSemester(semester, gradesForSemester, gradeDetails);
 
-        updateCriteriaGroupModificationDate(gradesForSemester);
+        updateCriteriaGroupModificationDate();
 
         Double totalPointsSemester = calculateTotalPointsWithWeight(gradesForSemester);
-        setTotalPointsForSemester(semester, evaluationCard, totalPointsSemester);
+        switch (semester) {
+            case SEMESTER_I ->
+                    evaluationCard.setTotalPointsFirstSemester(totalPointsSemester);
+            case SEMESTER_II ->
+                    evaluationCard.setTotalPointsSecondSemester(totalPointsSemester);
+        }
 
         boolean isDisqualified = checkDisqualification(gradesForSemester);
         evaluationCard.setDisqualified(isDisqualified);
@@ -130,12 +135,8 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         return grade.getCriteriaGroup().getCriteriaSection().getSemester().equals(semester);
     }
 
-    /**
-     * Updates evaluation card's criteria groups modification date based on relevant grade's modification date.
-     * TODO 11/19.2023: SYSPRI-231
-     */
-    private void updateCriteriaGroupModificationDate(List<Grade> grades) {
-        grades.forEach(grade -> grade.getCriteriaGroup().setModificationDate(grade.getModificationDate()));
+    private void updateCriteriaGroupModificationDate() {
+        // TODO 11/19.2023: SYSPRI-231
     }
 
     /**
@@ -156,18 +157,6 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                 .reduce(0.0, Double::sum);
 
         return totalPointsWithWeight / totalWeight;
-    }
-
-    /**
-     * Sets evaluation card's total points by semester.
-     */
-    private void setTotalPointsForSemester(Semester semester, EvaluationCard evaluationCard, Double totalPoints) {
-        switch (semester) {
-            case SEMESTER_I ->
-                    evaluationCard.setTotalPointsFirstSemester(totalPoints);
-            case SEMESTER_II ->
-                    evaluationCard.setTotalPointsSecondSemester(totalPoints);
-        }
     }
 
     /**
