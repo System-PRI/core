@@ -109,6 +109,10 @@ public class ProjectServiceImpl implements ProjectService {
             List<Long> supervisorProjectIds = getSupervisorProjectIds(supervisor);
             Comparator<Project> bySupervisorAssignedAndAcceptedProjects = createComparatorBySupervisorAssignedAndAcceptedProjects(supervisor);
 
+            if (isUserRoleCoordinator(userIndexNumber)) {
+                projectEntityList.sort(bySupervisorAssignedAndAcceptedProjects);
+                return projectMapper.mapToDTOs(projectEntityList);
+            }
             return prepareSortedProjectListWithRestrictions(projectEntityList, supervisorProjectIds, bySupervisorAssignedAndAcceptedProjects);
         }
     }
@@ -119,18 +123,18 @@ public class ProjectServiceImpl implements ProjectService {
                 .thenComparing((Project p) -> !isProjectEqualToStudentsConfirmed(p, student));
     }
 
-    private static List<Long> getStudentProjectsIds(Student student) {
+    private List<Long> getStudentProjectsIds(Student student) {
         return student.getAssignedProjects().stream()
                 .map(sp -> sp.getProject().getId()).toList();
     }
 
-    private static Comparator<Project> createComparatorBySupervisorAssignedAndAcceptedProjects(Supervisor supervisor) {
+    private Comparator<Project> createComparatorBySupervisorAssignedAndAcceptedProjects(Supervisor supervisor) {
         return Comparator
                 .comparing((Project p) -> !p.getSupervisor().equals(supervisor))
                 .thenComparing((Project p) -> !p.getAcceptanceStatus().equals(ACCEPTED));
     }
 
-    private static List<Long> getSupervisorProjectIds(Supervisor supervisor) {
+    private List<Long> getSupervisorProjectIds(Supervisor supervisor) {
         return supervisor.getProjects().stream()
                 .map(BaseAbstractEntity::getId)
                 .toList();

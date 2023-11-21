@@ -1,5 +1,6 @@
 package pl.edu.amu.wmi.mapper.project;
 
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -9,6 +10,8 @@ import pl.edu.amu.wmi.mapper.externallink.ExternalLinkMapper;
 import pl.edu.amu.wmi.mapper.grade.PointsMapper;
 import pl.edu.amu.wmi.model.project.ProjectDTO;
 import pl.edu.amu.wmi.model.project.ProjectDetailsDTO;
+
+import java.util.List;
 
 import static pl.edu.amu.wmi.enumerations.AcceptanceStatus.ACCEPTED;
 import static pl.edu.amu.wmi.enumerations.AcceptanceStatus.CONFIRMED;
@@ -29,6 +32,7 @@ public interface ProjectMapper {
     @Mapping(target = "pointsFirstSemester", source = "evaluationCard.totalPointsFirstSemester", qualifiedByName = "PointsToPercent")
     @Mapping(target = "pointsSecondSemester", source = "evaluationCard.totalPointsSecondSemester", qualifiedByName = "PointsToPercent")
     @Mapping(target = "criteriaMet", source = "evaluationCard.disqualified", qualifiedByName = "DisqualifiedToCriteriaMet")
+    @Named("mapWithoutRestrictions")
     ProjectDTO mapToProjectDto(Project entity);
 
     @Named("AcceptedToBoolean")
@@ -51,5 +55,9 @@ public interface ProjectMapper {
     @Mapping(target = "pointsFirstSemester", ignore = true)
     @Mapping(target = "pointsSecondSemester", ignore = true)
     @Mapping(target = "criteriaMet", ignore = true)
+    @Mapping(target = "externalLinks", ignore = true)
     ProjectDTO mapToProjectDtoWithRestrictions(Project entity);
+
+    @IterableMapping(qualifiedByName = "mapWithoutRestrictions")
+    List<ProjectDTO> mapToDTOs(List<Project> projectEntityList);
 }

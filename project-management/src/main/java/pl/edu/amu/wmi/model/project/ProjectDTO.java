@@ -3,6 +3,9 @@ package pl.edu.amu.wmi.model.project;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.edu.amu.wmi.model.externallink.ExternalLinkDTO;
+
+import java.util.Set;
 
 
 @Data
@@ -24,5 +27,7 @@ public class ProjectDTO {
     private String pointsSecondSemester;
 
     private Boolean criteriaMet;
+
+    private Set<ExternalLinkDTO> externalLinks;
 
 }
