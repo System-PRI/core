@@ -1,5 +1,6 @@
 package pl.edu.amu.wmi.model.project;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,10 +17,12 @@ public class ProjectDTO {
 
     private boolean accepted;
 
+    @JsonProperty("firstSemesterGrade")
     private String pointsFirstSemester;
 
+    @JsonProperty("secondSemesterGrade")
     private String pointsSecondSemester;
 
-    private boolean criteriaMet;
+    private Boolean criteriaMet;
 
 }

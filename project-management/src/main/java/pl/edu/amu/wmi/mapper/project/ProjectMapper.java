@@ -10,8 +10,6 @@ import pl.edu.amu.wmi.mapper.grade.PointsMapper;
 import pl.edu.amu.wmi.model.project.ProjectDTO;
 import pl.edu.amu.wmi.model.project.ProjectDetailsDTO;
 
-import java.util.List;
-
 import static pl.edu.amu.wmi.enumerations.AcceptanceStatus.ACCEPTED;
 import static pl.edu.amu.wmi.enumerations.AcceptanceStatus.CONFIRMED;
 
@@ -33,8 +31,6 @@ public interface ProjectMapper {
     @Mapping(target = "criteriaMet", source = "evaluationCard.disqualified", qualifiedByName = "DisqualifiedToCriteriaMet")
     ProjectDTO mapToProjectDto(Project entity);
 
-    List<ProjectDTO> mapToDtoList(List<Project> entityList);
-
     @Named("AcceptedToBoolean")
     default boolean mapAccepted(AcceptanceStatus status) {
         return status.equals(ACCEPTED);
@@ -50,4 +46,10 @@ public interface ProjectMapper {
         return !isDisqualified;
     }
 
+    @Mapping(target = "supervisor", source = "entity.supervisor")
+    @Mapping(target = "accepted", source = "acceptanceStatus", qualifiedByName = "AcceptedToBoolean")
+    @Mapping(target = "pointsFirstSemester", ignore = true)
+    @Mapping(target = "pointsSecondSemester", ignore = true)
+    @Mapping(target = "criteriaMet", ignore = true)
+    ProjectDTO mapToProjectDtoWithRestrictions(Project entity);
 }
