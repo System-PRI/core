@@ -111,8 +111,10 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                     evaluationCard.setTotalPointsSecondSemester(totalPointsSemester);
         }
 
+        // TODO 11/22/2023: SYSPRI-223 - when the task is completed, disqualification logic must be changed.
         boolean isDisqualified = checkDisqualification(gradesForSemester);
         evaluationCard.setDisqualified(isDisqualified);
+        // TODO 11/22/2023: When evaluation card changes are completed, approval logic must be changed.
         evaluationCard.setApprovedForDefense(!isDisqualified);
         evaluationCardDAO.save(evaluationCard);
 
