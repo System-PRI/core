@@ -200,7 +200,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectEntity.setExternalLinks(externalLinkEntities);
 
         EvaluationCard evaluationCard = new EvaluationCard();
-        projectEntity.setEvaluationCard(evaluationCard);
+        projectEntity.addEvaluationCard(evaluationCard);
         evaluationCard.setProject(projectEntity);
 
         projectEntity = projectDAO.save(projectEntity);
