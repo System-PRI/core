@@ -73,5 +73,6 @@ public class Project extends AbstractEntity {
 
     public void addEvaluationCard(EvaluationCard evaluationCard) {
         this.evaluationCards.add(evaluationCard);
+        evaluationCard.setProject(this);
     }
 }

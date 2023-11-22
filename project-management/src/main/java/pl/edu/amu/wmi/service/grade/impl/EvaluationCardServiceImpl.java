@@ -9,6 +9,7 @@ import pl.edu.amu.wmi.dao.ProjectDAO;
 import pl.edu.amu.wmi.entity.*;
 import pl.edu.amu.wmi.enumerations.CriterionCategory;
 import pl.edu.amu.wmi.enumerations.EvaluationPhase;
+import pl.edu.amu.wmi.enumerations.EvaluationStatus;
 import pl.edu.amu.wmi.enumerations.Semester;
 import pl.edu.amu.wmi.exception.grade.EvaluationCardException;
 import pl.edu.amu.wmi.exception.project.ProjectManagementException;
@@ -47,7 +48,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     @Override
     @Transactional
-    public void createEvaluationCard(Project project, String studyYear) {
+    public void createEvaluationCard(Project project, String studyYear, Semester semester, EvaluationPhase phase, EvaluationStatus status) {
         Optional<EvaluationCardTemplate> evaluationCardTemplate = evaluationCardTemplateDAO.findByStudyYear(studyYear);
         if (evaluationCardTemplate.isEmpty()) {
             log.info("Evaluation criteria have been not yet uploaded to the system - EvaluationCard will be updated later");
@@ -57,11 +58,14 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         List<Grade> grades = createEmptyGrades(template);
 
         EvaluationCard evaluationCard = new EvaluationCard();
-        evaluationCard.setProject(project);
         evaluationCard.setEvaluationCardTemplate(template);
         evaluationCard.setGrades(grades);
 
-        project.setEvaluationCard(evaluationCard);
+        evaluationCard.setSemester(semester);
+        evaluationCard.setEvaluationPhase(phase);
+        evaluationCard.setEvaluationStatus(status);
+
+        project.addEvaluationCard(evaluationCard);
 
         evaluationCardDAO.save(evaluationCard);
     }
