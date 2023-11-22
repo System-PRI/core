@@ -48,8 +48,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
         List<Grade> grades = createEmptyGrades(template);
 
-        EvaluationCard evaluationCard = evaluationCardDAO.findById(project.getId()).orElseThrow(()
-                -> new ProjectManagementException(MessageFormat.format("Evaluation card for project: {0} not found", project.getId())));
+        EvaluationCard evaluationCard = project.getEvaluationCard();
         evaluationCard.setEvaluationCardTemplate(template);
         evaluationCard.setGrades(grades);
         evaluationCardDAO.save(evaluationCard);

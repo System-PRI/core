@@ -217,6 +217,8 @@ public class ProjectServiceImpl implements ProjectService {
         projectEntity.setEvaluationCard(evaluationCard);
         evaluationCard.setProject(projectEntity);
 
+        evaluationCardService.addEmptyGradesToEvaluationCard(projectEntity, studyYear);
+
         projectEntity = projectDAO.save(projectEntity);
 
         return projectMapper.mapToProjectDetailsDto(projectEntity);
@@ -380,7 +382,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         } else if (getUserRoleByUserIndex(userIndexNumber).equals(SUPERVISOR)) {
             log.info("Project with id: {} was accepted by all students and a supervisor", projectId);
-            evaluationCardService.addEmptyGradesToEvaluationCard(projectEntity, studyYear);
             projectEntity.setAcceptanceStatus(ACCEPTED);
         } else {
             // TODO: 6/3/2023 handle wrong role exception
