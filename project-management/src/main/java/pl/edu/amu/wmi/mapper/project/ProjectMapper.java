@@ -34,8 +34,6 @@ public interface ProjectMapper {
 
     @Mapping(target = "supervisor", source = "entity.supervisor")
     @Mapping(target = "accepted", source = "acceptanceStatus", qualifiedByName = "AcceptedToBoolean")
-//    @Mapping(target = "pointsFirstSemester", source = "evaluationCard.totalPoints", qualifiedByName = "PointsToPercent")
-//    @Mapping(target = "criteriaMet", source = "evaluationCard.disqualified", qualifiedByName = "DisqualifiedToCriteriaMet")
     @Named("mapWithoutRestrictions")
         // TODO: 11/22/2023 add manual mapping for points for semester and set default value
         // TODO: 11/22/2023 add manual mapping for disqualified
