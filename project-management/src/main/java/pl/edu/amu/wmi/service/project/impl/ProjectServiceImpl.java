@@ -217,7 +217,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectEntity.setEvaluationCard(evaluationCard);
         evaluationCard.setProject(projectEntity);
 
-        evaluationCardService.addEmptyGradesToEvaluationCard(projectEntity, studyYear);
+        evaluationCardService.createEvaluationCard(projectEntity, studyYear);
 
         projectEntity = projectDAO.save(projectEntity);
 

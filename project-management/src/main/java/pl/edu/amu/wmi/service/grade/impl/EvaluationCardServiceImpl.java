@@ -38,19 +38,22 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     @Override
     @Transactional
-    public void addEmptyGradesToEvaluationCard(Project project, String studyYear) {
+    public void createEvaluationCard(Project project, String studyYear) {
         Optional<EvaluationCardTemplate> evaluationCardTemplate = evaluationCardTemplateDAO.findByStudyYear(studyYear);
         if (evaluationCardTemplate.isEmpty()) {
             log.info("Evaluation criteria have been not yet uploaded to the system - EvaluationCard will be updated later");
             return;
         }
         EvaluationCardTemplate template = evaluationCardTemplate.get();
-
         List<Grade> grades = createEmptyGrades(template);
 
-        EvaluationCard evaluationCard = project.getEvaluationCard();
+        EvaluationCard evaluationCard = new EvaluationCard();
+        evaluationCard.setProject(project);
         evaluationCard.setEvaluationCardTemplate(template);
         evaluationCard.setGrades(grades);
+
+        project.setEvaluationCard(evaluationCard);
+
         evaluationCardDAO.save(evaluationCard);
     }
 
