@@ -86,15 +86,19 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                 .toList();
     }
 
-    // TODO 11/20/2023: Move to EvaluationCardService
     /**
-     * Creates a GradeDetailsDTO object that contains grade information for a specific project.
-     * In addition to information about the criteria related to the project, there is also information about the
-     * selected criteria for each Criteria Group. The selected criterion is calculated based on the points obtained by
-     * the project in a specific Criteria Group.
+     * Creates an EvaluationCardDTO object that contains grades information for a specific project.
+     * In details, EvaluationCardDTO object contains all evaluation cards assigned to a project, grouped by semesters
+     * and evaluation phases
+     * In addition to information about the criteria related to the evaluation card, there is also information about the
+     * selected criteria for each Criteria Group for every existing evaluation card.
+     * The selected criterion is calculated based on the points obtained by
+     * the evaluation card in a specific Criteria Group.
      *
-     * @param projectId - project that the evaluation card is fetched for
-     * @return Project grade details object that is distinguishable by semesters
+     * @param projectId - project that the evaluation cards are fetched for
+     * @param studyYear - study year that the evaluation cards are fetched for
+     * @return object which contains information about all evaluation cards assigned to the project grouped by semesters
+     * and evaluation phases
      */
     @Override
     public EvaluationCardDTO findEvaluationCards(Long projectId, String studyYear) {
@@ -119,11 +123,8 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
             evaluationCardDetails.setEditable(true);
             evaluationCardDetails.setVisible(true);
 
-
-
             List<CriteriaSection> sections = getCriteriaSectionsForSemester(evaluationCardTemplate, evaluationCardEntity.getSemester());
             List<CriteriaSectionDTO> sectionDTOs = projectCriteriaSectionMapper.mapToDtoList(sections);
-
 
             List<Grade> projectGrades = evaluationCardEntity.getGrades();
             Map<Long, Integer> projectPointsByGroupId = new HashMap<>();
@@ -165,7 +166,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     }
 
     /**
-     * Returns list of criteria sections which are related to the project in chosen semester
+     * Returns list of criteria sections which are related to the project in chosen semester based on evaluation card template
      */
     private List<CriteriaSection> getCriteriaSectionsForSemester(EvaluationCardTemplate template, Semester semester) {
         return switch (semester) {
