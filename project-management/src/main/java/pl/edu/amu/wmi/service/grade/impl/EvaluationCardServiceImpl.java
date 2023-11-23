@@ -293,6 +293,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     /**
      * Confirms if all grades are selected and none of them are disqualifying.
      */
+    // TODO 11/23/2023: Add logic to handle different evaluation card's phase
     private boolean checkDisqualification(List<Grade> gradesForSemester) {
         return gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(Grade::isDisqualifying) ||
                 gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));

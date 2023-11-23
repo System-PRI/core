@@ -9,6 +9,7 @@ import pl.edu.amu.wmi.entity.CriteriaSection;
 import pl.edu.amu.wmi.entity.Criterion;
 import pl.edu.amu.wmi.entity.EvaluationCardTemplate;
 import pl.edu.amu.wmi.enumerations.Semester;
+import pl.edu.amu.wmi.exception.BusinessException;
 import pl.edu.amu.wmi.exception.DataFeedConfigurationException;
 import pl.edu.amu.wmi.mapper.CriteriaGroupMapper;
 import pl.edu.amu.wmi.mapper.EvaluationCriteriaMapper;
@@ -120,7 +121,7 @@ public class EvaluationCriteriaServiceImpl implements EvaluationCriteriaService 
         boolean isDefenseSectionSecondSemester = criteriaSectionSecondSemester.isDefenseSection();
         boolean isDefenseSection = isDefenseSectionFirstSemester && isDefenseSectionSecondSemester;
         if (isDefenseSectionFirstSemester != isDefenseSectionSecondSemester)
-            throw new DataFeedConfigurationException("Criteria Sections have different defense flags");
+            throw new BusinessException("Criteria Sections have different defense flags");
         return isDefenseSection;
     }
 
