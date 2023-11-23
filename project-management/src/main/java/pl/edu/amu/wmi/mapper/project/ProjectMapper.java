@@ -41,6 +41,7 @@ public interface ProjectMapper {
     @Mapping(target = "accepted", source = "acceptanceStatus", qualifiedByName = "AcceptedToBoolean")
     @Mapping(target = "pointsFirstSemester", source = "entity", qualifiedByName = "GetPointsForFirstSemester")
     @Mapping(target = "pointsSecondSemester", source = "entity", qualifiedByName = "GetPointsForSecondSemester")
+    @Mapping(target = "criteriaMet", source = "entity", qualifiedByName = "GetCriteriaMet")
     @Named("mapWithoutRestrictions")
         // TODO: 11/22/2023 add manual mapping for disqualified
     ProjectDTO mapToProjectDto(Project entity);
@@ -55,6 +56,18 @@ public interface ProjectMapper {
         return getPointsForSemester(entity, Semester.SECOND);
     }
 
+    @Named("GetCriteriaMet")
+    default boolean getCriteriaMet(Project entity) {
+        // TODO: 11/23/2023 remove hardcoded values | add correct logic
+        return entity.getEvaluationCards().stream()
+                .filter(evaluationCard -> Objects.equals(Semester.FIRST, evaluationCard.getSemester()))
+                .filter(evaluationCard -> Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCard.getEvaluationPhase()))
+                .filter(evaluationCard -> Objects.equals(EvaluationStatus.ACTIVE, evaluationCard.getEvaluationStatus()))
+                .map(evaluationCard -> !evaluationCard.isDisqualified())
+                .findFirst()
+                .orElse(false);
+    }
+
     private String getPointsForSemester(Project entity, Semester semester) {
         // TODO: 11/23/2023 implement logic to take the most recent active or published result
         Double points = entity.getEvaluationCards().stream()
@@ -64,7 +77,7 @@ public interface ProjectMapper {
                 .map(EvaluationCard::getTotalPoints)
                 .findFirst()
                 .orElse(0.0);
-        return String.format("%.2f", points) + "%";
+        return String.format("%.2f", (points * 100 / 4)) + "%";
 
     }
 
