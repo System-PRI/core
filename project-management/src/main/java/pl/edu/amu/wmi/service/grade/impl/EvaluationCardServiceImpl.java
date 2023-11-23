@@ -192,9 +192,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         EvaluationCard evaluationCard = evaluationCardDAO.findById(evaluationCardId)
                 .orElseThrow(() -> new EvaluationCardException(MessageFormat.format("Evaluation card with id: {0} not found", evaluationCardId)));
 
-        // TODO 11/22/2023: When Evaluation Card changes are completed, then semester needs to be taken from Evaluation Card.
-        Semester semester = Semester.SEMESTER_I;
-//        Semester semester = evaluationCard.getSemester();
+        Semester semester = evaluationCard.getSemester();
 
         Long criteriaGroupId = singleGroupGradeUpdate.getId();
         Grade gradeToUpdate = evaluationCard.getGrades()
@@ -268,8 +266,12 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
      * Confirms if all grades are selected and none of them are disqualifying.
      */
     private boolean checkDisqualification(List<Grade> gradesForSemester) {
-        return gradesForSemester.stream().anyMatch(Grade::isDisqualifying) ||
-                gradesForSemester.stream().anyMatch(g -> g.getPointsWithWeight() == null);
+        return gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(Grade::isDisqualifying) ||
+                gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));
+    }
+
+    private boolean isGradeFromDefenseSection(Grade grade) {
+        return grade.getCriteriaGroup().getCriteriaSection().isDefenseSection();
     }
 
 }
