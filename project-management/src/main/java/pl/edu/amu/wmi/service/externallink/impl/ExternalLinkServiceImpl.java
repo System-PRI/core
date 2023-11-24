@@ -99,11 +99,7 @@ public class ExternalLinkServiceImpl implements ExternalLinkService {
 
     @Transactional
     @Override
-    public Set<ExternalLinkDTO> updateExternalLinks(Long projectId, Set<ExternalLinkDTO> externalLinks) {
-
-        Project projectEntity = projectDAO.findById(projectId).orElseThrow(()
-                -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
-
+    public List<ExternalLink> updateExternalLinks(Set<ExternalLinkDTO> externalLinks) {
         Set<ExternalLink> externalLinkEntities = new HashSet<>();
 
         externalLinks.forEach(externalLinkDto -> {
@@ -114,13 +110,7 @@ public class ExternalLinkServiceImpl implements ExternalLinkService {
             externalLinkEntities.add(externalLink);
         });
 
-        externalLinkDAO.saveAll(externalLinkEntities);
-
-        projectEntity.setExternalLinks(externalLinkEntities);
-
-        projectDAO.save(projectEntity);
-
-        return externalLinkMapper.mapToDtoSet(projectEntity.getExternalLinks());
+        return externalLinkDAO.saveAll(externalLinkEntities);
     }
 
     @Override
