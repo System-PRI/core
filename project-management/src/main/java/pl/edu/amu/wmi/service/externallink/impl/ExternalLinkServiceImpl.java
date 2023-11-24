@@ -33,49 +33,11 @@ public class ExternalLinkServiceImpl implements ExternalLinkService {
 
     private final ExternalLinkDefinitionDAO externalLinkDefinitionDAO;
 
-    private final ProjectDAO projectDAO;
-
-    private final ExternalLinkMapper externalLinkMapper;
-
-    private final SupervisorProjectMapper supervisorMapper;
 
     @Autowired
-    public ExternalLinkServiceImpl(ExternalLinkDAO externalLinkDAO, ExternalLinkDefinitionDAO externalLinkDefinitionDAO, ProjectDAO projectDAO, ExternalLinkMapper externalLinkMapper, SupervisorProjectMapper supervisorMapper) {
+    public ExternalLinkServiceImpl(ExternalLinkDAO externalLinkDAO, ExternalLinkDefinitionDAO externalLinkDefinitionDAO) {
         this.externalLinkDAO = externalLinkDAO;
         this.externalLinkDefinitionDAO = externalLinkDefinitionDAO;
-        this.projectDAO = projectDAO;
-        this.externalLinkMapper = externalLinkMapper;
-        this.supervisorMapper = supervisorMapper;
-    }
-
-    @Override
-    public List<ExternalLinkDataDTO> findAll() {
-
-        List<Project> projectEntityList = projectDAO.findAll();
-
-        return projectEntityList.stream()
-                .map(project -> new ExternalLinkDataDTO(
-                        project.getId(),
-                        project.getName(),
-                        supervisorMapper.mapToDto(project.getSupervisor()),
-                        externalLinkMapper.mapToDtoSet(project.getExternalLinks())))
-                .toList();
-
-    }
-
-    @Override
-    public Set<ExternalLinkDTO> findByProjectId(Long projectId) {
-
-        Project projectEntity = projectDAO.findById(projectId).orElseThrow(()
-                -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
-
-        Set<Long> projectLinksIds = projectEntity.getExternalLinks().stream()
-                .map(BaseAbstractEntity::getId)
-                .collect(Collectors.toSet());
-
-        return externalLinkDAO.findAllById(projectLinksIds).stream()
-                .map(externalLinkMapper::mapToDto)
-                .collect(Collectors.toSet());
     }
 
     @Transactional
