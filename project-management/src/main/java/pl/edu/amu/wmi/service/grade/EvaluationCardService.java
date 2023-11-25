@@ -18,4 +18,7 @@ public interface EvaluationCardService {
     UpdatedGradeDTO updateEvaluationCard(Long evaluationCardId, SingleGroupGradeUpdateDTO singleGroupGradeUpdate);
 
     Map<Semester, Map<EvaluationPhase, EvaluationCardDetails>> findEvaluationCards(Long projectId, String studyYear, String indexNumber);
+
+    boolean isUserAllowedToSeeEvaluationDetails(String studyYear, String username, Long projectId);
+
 }

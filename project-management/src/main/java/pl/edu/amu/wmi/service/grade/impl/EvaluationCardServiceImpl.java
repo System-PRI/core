@@ -125,9 +125,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         evaluationCardsEntities.forEach(evaluationCardEntity -> {
             EvaluationCardDetails evaluationCardDetails = createEvaluationCardDetails(evaluationCardEntity, project, evaluationCardTemplate, indexNumber);
 
-            if (Objects.equals(Semester.FIRST, evaluationCardEntity.getSemester())) {
+            if (Objects.equals(Semester.FIRST, evaluationCardEntity.getSemester()) && Objects.nonNull(evaluationCardDetails)) {
                 evaluationCardsFirstSemester.put(evaluationCardEntity.getEvaluationPhase(), evaluationCardDetails);
-            } else {
+            } else if (Objects.equals(Semester.SECOND, evaluationCardEntity.getSemester()) && Objects.nonNull(evaluationCardDetails)) {
                 evaluationCardsSecondSemester.put(evaluationCardEntity.getEvaluationPhase(), evaluationCardDetails);
             }
         });
@@ -141,14 +141,33 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         return evaluationCardMap;
     }
 
+    @Override
+    public boolean isUserAllowedToSeeEvaluationDetails(String studyYear, String indexNumber, Long projectId) {
+        Project project = projectDAO.findById(projectId).orElseThrow(() ->
+                new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
+
+        boolean isStudentAMemberOfProject = isStudentAMemberOfProject(indexNumber, project);
+
+        boolean isSupervisorAllowedToSeeGrades = project.getEvaluationCards().stream()
+                .anyMatch(evaluationCard -> isSupervisorAllowedToSeeGrades(project, evaluationCard, indexNumber));
+
+        return isStudentAMemberOfProject || isSupervisorAllowedToSeeGrades;
+    }
+
+    private static boolean isStudentAMemberOfProject(String indexNumber, Project project) {
+        return project.getStudents().stream()
+                .map(Student::getIndexNumber)
+                .anyMatch(studentIndexId -> Objects.equals(indexNumber, studentIndexId));
+    }
+
     private EvaluationCardDetails createEvaluationCardDetails(EvaluationCard evaluationCardEntity, Project project, EvaluationCardTemplate evaluationCardTemplate, String indexNumber) {
+        if (determineIfEvaluationCardIsVisible(evaluationCardEntity, project, indexNumber)) {
+            return null;
+        }
+
         EvaluationCardDetails evaluationCardDetails = new EvaluationCardDetails();
         evaluationCardDetails.setId(evaluationCardEntity.getId());
         evaluationCardDetails.setGrade(pointsToOverallPercent(evaluationCardEntity.getTotalPoints()));
-
-        if (!Objects.equals(AcceptanceStatus.ACCEPTED, project.getAcceptanceStatus())) {
-            // TODO: 11/23/2023 editable to false
-        }
 
         boolean isEditable = determineIfEvaluationCardIsEditable(evaluationCardEntity, project, indexNumber);
 
@@ -171,6 +190,11 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         return evaluationCardDetails;
     }
 
+    private boolean determineIfEvaluationCardIsVisible(EvaluationCard evaluationCardEntity, Project project, String indexNumber) {
+        return isStudentAMemberOfProject(indexNumber, project)
+                || isSupervisorAllowedToSeeGrades(project, evaluationCardEntity, indexNumber);
+    }
+
     private boolean isUserAProjectSupervisor(Supervisor supervisor, String indexNumber) {
         return Objects.equals(supervisor.getIndexNumber(), indexNumber);
     }
@@ -182,15 +206,28 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         if (isUserAProjectSupervisor(project.getSupervisor(), indexNumber) && Objects.equals(EvaluationStatus.ACTIVE, evaluationCardEntity.getEvaluationStatus())) {
             return true;
         }
-        if (Objects.equals(UserRole.SUPERVISOR, projectMemberService.getUserRoleByUserIndex(indexNumber))
-                && !Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCardEntity.getEvaluationPhase())
-                && Objects.equals(EvaluationStatus.ACTIVE, evaluationCardEntity.getEvaluationStatus())) {
+        if (isSupervisorAllowedToEditGrades(evaluationCardEntity, indexNumber)) {
             return true;
         }
+        // coordinator can always edit project
         if (projectMemberService.isUserRoleCoordinator(indexNumber)) {
             return true;
         }
         return false;
+    }
+
+    private boolean isSupervisorAllowedToEditGrades(EvaluationCard evaluationCardEntity, String indexNumber) {
+        return Objects.equals(UserRole.SUPERVISOR, projectMemberService.getUserRoleByUserIndex(indexNumber))
+                && !Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCardEntity.getEvaluationPhase())
+                && Objects.equals(EvaluationStatus.ACTIVE, evaluationCardEntity.getEvaluationStatus());
+    }
+
+    private boolean isSupervisorAllowedToSeeGrades(Project project, EvaluationCard evaluationCardEntity, String indexNumber) {
+        boolean isUserAProjectSupervisor = isUserAProjectSupervisor(project.getSupervisor(), indexNumber);
+        boolean isUserASupervisorAndProjectPhaseIsDifferentThanSemester = Objects.equals(UserRole.SUPERVISOR, projectMemberService.getUserRoleByUserIndex(indexNumber))
+                && !Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCardEntity.getEvaluationPhase());
+
+        return isUserAProjectSupervisor || isUserASupervisorAndProjectPhaseIsDifferentThanSemester;
     }
 
     /**
