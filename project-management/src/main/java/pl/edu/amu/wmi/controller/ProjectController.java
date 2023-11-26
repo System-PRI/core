@@ -22,10 +22,11 @@ import pl.edu.amu.wmi.model.project.ProjectDetailsDTO;
 import pl.edu.amu.wmi.model.project.SupervisorAvailabilityDTO;
 import pl.edu.amu.wmi.service.externallink.ExternalLinkService;
 import pl.edu.amu.wmi.service.grade.EvaluationCardService;
+import pl.edu.amu.wmi.service.permission.PermissionService;
 import pl.edu.amu.wmi.service.project.ProjectService;
 import pl.edu.amu.wmi.service.project.SupervisorProjectService;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +43,8 @@ public class ProjectController {
 
     private final EvaluationCardService evaluationCardService;
 
+    private final PermissionService permissionService;
+
     // TODO: 11/23/2023 remove project dao from controller after tests
     private final ProjectDAO projectDAO;
 
@@ -50,11 +53,12 @@ public class ProjectController {
                              ExternalLinkService externalLinkService,
                              SupervisorProjectService supervisorProjectService,
                              EvaluationCardService evaluationCardService,
-                             ProjectDAO projectDAO) {
+                             PermissionService permissionService, ProjectDAO projectDAO) {
         this.projectService = projectService;
         this.externalLinkService = externalLinkService;
         this.supervisorProjectService = supervisorProjectService;
         this.evaluationCardService = evaluationCardService;
+        this.permissionService = permissionService;
         this.projectDAO = projectDAO;
     }
 
@@ -156,9 +160,8 @@ public class ProjectController {
     @GetMapping("/{projectId}/evaluation-card")
     public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetails>>> getGradeDetailsByProjectId(@RequestHeader("study-year") String studyYear, @PathVariable Long projectId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!evaluationCardService.isUserAllowedToSeeEvaluationDetails(studyYear, userDetails.getUsername(), projectId)) {
-            // TODO: 11/23/2023 implement response with error - todo check if it is necessary, maybe empty map will be enough
-            return ResponseEntity.ok().body(new HashMap<>());
+        if (!permissionService.isUserAllowedToSeeProjectDetails(studyYear, userDetails.getUsername(), projectId)) {
+            return ResponseEntity.ok().body(Collections.emptyMap());
         }
         return ResponseEntity.ok()
                 .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));

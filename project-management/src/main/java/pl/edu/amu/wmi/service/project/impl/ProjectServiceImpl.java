@@ -15,11 +15,13 @@ import pl.edu.amu.wmi.model.project.ProjectDetailsDTO;
 import pl.edu.amu.wmi.model.project.StudentDTO;
 import pl.edu.amu.wmi.service.externallink.ExternalLinkService;
 import pl.edu.amu.wmi.service.grade.EvaluationCardService;
+import pl.edu.amu.wmi.service.permission.PermissionService;
 import pl.edu.amu.wmi.service.project.ProjectMemberService;
 import pl.edu.amu.wmi.service.project.ProjectService;
 
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static pl.edu.amu.wmi.enumerations.AcceptanceStatus.*;
@@ -52,6 +54,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ExternalLinkService externalLinkService;
 
     private final ProjectMemberService projectMemberService;
+    private final PermissionService permissionService;
 
     @Autowired
     public ProjectServiceImpl(ProjectDAO projectDAO,
@@ -64,7 +67,7 @@ public class ProjectServiceImpl implements ProjectService {
                               StudentProjectMapper studentMapper,
                               EvaluationCardService evaluationCardService,
                               ExternalLinkService externalLinkService,
-                              ProjectMemberService projectMemberService) {
+                              ProjectMemberService projectMemberService, PermissionService permissionService) {
         this.projectDAO = projectDAO;
         this.studentDAO = studentDAO;
         this.supervisorDAO = supervisorDAO;
@@ -76,21 +79,18 @@ public class ProjectServiceImpl implements ProjectService {
         this.studentMapper = studentMapper;
         this.evaluationCardService = evaluationCardService;
         this.projectMemberService = projectMemberService;
+        this.permissionService = permissionService;
     }
 
     @Override
     public ProjectDetailsDTO findByIdWithRestrictions(String studyYear, String userIndexNumber, Long id) {
         Project project = projectDAO.findById(id).orElseThrow(()
                 -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", id)));
-        Student student = studentDAO.findByStudyYearAndUserData_IndexNumber(studyYear, userIndexNumber);
-        Supervisor supervisor = supervisorDAO.findByStudyYearAndUserData_IndexNumber(studyYear, userIndexNumber);
 
         List<StudentDTO> studentDTOs = prepareStudentDTOs(project);
-        List<Long> studentProjectsIds = getStudentProjectsIds(student);
-        List<Long> supervisorProjectIds = getSupervisorProjectIds(supervisor);
-
         ProjectDetailsDTO projectDetailsDTO;
-        if (projectMemberService.isUserRoleCoordinator(userIndexNumber) || studentProjectsIds.contains(project.getId()) || supervisorProjectIds.contains(project.getId()))
+        if (permissionService.isUserAllowedToSeeProjectDetails(studyYear, userIndexNumber, project.getId()))
+            // TODO: 11/25/2023 what with external links in defense / retake phase ??
             projectDetailsDTO = projectMapper.mapToProjectDetailsDto(project);
         else
             projectDetailsDTO = projectMapper.mapToProjectDetailsWithRestrictionsDto(project);
@@ -127,7 +127,7 @@ public class ProjectServiceImpl implements ProjectService {
             Comparator<Project> byStudentAssignedAndConfirmedProjects =
                     createComparatorByStudentAssignedAndConfirmedProjects(studentProjectsIds, student);
 
-            return prepareSortedProjectListWithRestrictions(projectEntityList, studentProjectsIds, byStudentAssignedAndConfirmedProjects);
+            return prepareSortedProjectListWithRestrictions(projectEntityList, studentProjectsIds, byStudentAssignedAndConfirmedProjects, false);
         } else {
             List<Long> supervisorProjectIds = getSupervisorProjectIds(supervisor);
             Comparator<Project> bySupervisorAssignedAndAcceptedProjects = createComparatorBySupervisorAssignedAndAcceptedProjects(supervisor);
@@ -136,7 +136,7 @@ public class ProjectServiceImpl implements ProjectService {
                 projectEntityList.sort(bySupervisorAssignedAndAcceptedProjects);
                 return projectMapper.mapToDTOs(projectEntityList);
             }
-            return prepareSortedProjectListWithRestrictions(projectEntityList, supervisorProjectIds, bySupervisorAssignedAndAcceptedProjects);
+            return prepareSortedProjectListWithRestrictions(projectEntityList, supervisorProjectIds, bySupervisorAssignedAndAcceptedProjects, true);
         }
     }
 
@@ -168,17 +168,26 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private List<ProjectDTO> prepareSortedProjectListWithRestrictions(List<Project> projects, List<Long> userProjectIds,
-                                                                      Comparator<Project> comparator) {
+                                                                      Comparator<Project> comparator, boolean isSupervisor) {
         projects.sort(comparator);
         List<ProjectDTO> projectDTOs = new ArrayList<>();
         projects.forEach(project -> {
             if (userProjectIds.contains(project.getId())) {
                 projectDTOs.add(projectMapper.mapToProjectDto(project));
+            } else if (isSupervisor && isProjectInDefenseOrRetakePhase(project)) {
+                projectDTOs.add(projectMapper.mapToProjectDtoWithRestrictionsInPhaseDefense(project));
             } else {
                 projectDTOs.add(projectMapper.mapToProjectDtoWithRestrictions(project));
             }
         });
         return projectDTOs;
+    }
+
+    private boolean isProjectInDefenseOrRetakePhase(Project project) {
+        Predicate<EvaluationCard> isDefensePhase = evaluationCard -> Objects.equals(EvaluationPhase.DEFENSE_PHASE, evaluationCard.getEvaluationPhase());
+        Predicate<EvaluationCard> isRetakePhase = evaluationCard -> Objects.equals(EvaluationPhase.RETAKE_PHASE, evaluationCard.getEvaluationPhase());
+        return project.getEvaluationCards().stream()
+                .anyMatch(isDefensePhase.or(isRetakePhase));
     }
 
     private boolean isProjectEqualToStudentsConfirmed(Project project, Student student) {

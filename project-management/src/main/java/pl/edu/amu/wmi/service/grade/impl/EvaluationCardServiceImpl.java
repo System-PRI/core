@@ -7,7 +7,10 @@ import pl.edu.amu.wmi.dao.EvaluationCardDAO;
 import pl.edu.amu.wmi.dao.EvaluationCardTemplateDAO;
 import pl.edu.amu.wmi.dao.ProjectDAO;
 import pl.edu.amu.wmi.entity.*;
-import pl.edu.amu.wmi.enumerations.*;
+import pl.edu.amu.wmi.enumerations.CriterionCategory;
+import pl.edu.amu.wmi.enumerations.EvaluationPhase;
+import pl.edu.amu.wmi.enumerations.EvaluationStatus;
+import pl.edu.amu.wmi.enumerations.Semester;
 import pl.edu.amu.wmi.exception.grade.EvaluationCardException;
 import pl.edu.amu.wmi.exception.project.ProjectManagementException;
 import pl.edu.amu.wmi.mapper.grade.ProjectCriteriaSectionMapper;
@@ -17,7 +20,7 @@ import pl.edu.amu.wmi.model.grade.SingleGroupGradeUpdateDTO;
 import pl.edu.amu.wmi.model.grade.UpdatedGradeDTO;
 import pl.edu.amu.wmi.service.grade.EvaluationCardService;
 import pl.edu.amu.wmi.service.grade.GradeService;
-import pl.edu.amu.wmi.service.project.ProjectMemberService;
+import pl.edu.amu.wmi.service.permission.PermissionService;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -30,19 +33,20 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     private final EvaluationCardTemplateDAO evaluationCardTemplateDAO;
     private final ProjectDAO projectDAO;
     private final GradeService gradeService;
-    private final ProjectMemberService projectMemberService;
+    private final PermissionService permissionService;
     private final ProjectCriteriaSectionMapper projectCriteriaSectionMapper;
 
     public EvaluationCardServiceImpl(EvaluationCardDAO evaluationCardDAO,
                                      EvaluationCardTemplateDAO evaluationCardTemplateDAO,
                                      ProjectDAO projectDAO,
                                      GradeService gradeService,
-                                     ProjectMemberService projectMemberService, ProjectCriteriaSectionMapper projectCriteriaSectionMapper) {
+                                     PermissionService permissionService,
+                                     ProjectCriteriaSectionMapper projectCriteriaSectionMapper) {
         this.evaluationCardDAO = evaluationCardDAO;
         this.evaluationCardTemplateDAO = evaluationCardTemplateDAO;
         this.projectDAO = projectDAO;
         this.gradeService = gradeService;
-        this.projectMemberService = projectMemberService;
+        this.permissionService = permissionService;
         this.projectCriteriaSectionMapper = projectCriteriaSectionMapper;
     }
 
@@ -119,8 +123,8 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
         List<EvaluationCard> evaluationCardsEntities = project.getEvaluationCards();
 
-        Map<EvaluationPhase, EvaluationCardDetails> evaluationCardsFirstSemester = new HashMap<>();
-        Map<EvaluationPhase, EvaluationCardDetails> evaluationCardsSecondSemester = new HashMap<>();
+        Map<EvaluationPhase, EvaluationCardDetails> evaluationCardsFirstSemester = new EnumMap<>(EvaluationPhase.class);
+        Map<EvaluationPhase, EvaluationCardDetails> evaluationCardsSecondSemester = new EnumMap<>(EvaluationPhase.class);
 
         evaluationCardsEntities.forEach(evaluationCardEntity -> {
             EvaluationCardDetails evaluationCardDetails = createEvaluationCardDetails(evaluationCardEntity, project, evaluationCardTemplate, indexNumber);
@@ -141,27 +145,8 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         return evaluationCardMap;
     }
 
-    @Override
-    public boolean isUserAllowedToSeeEvaluationDetails(String studyYear, String indexNumber, Long projectId) {
-        Project project = projectDAO.findById(projectId).orElseThrow(() ->
-                new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
-
-        boolean isStudentAMemberOfProject = isStudentAMemberOfProject(indexNumber, project);
-
-        boolean isSupervisorAllowedToSeeGrades = project.getEvaluationCards().stream()
-                .anyMatch(evaluationCard -> isSupervisorAllowedToSeeGrades(project, evaluationCard, indexNumber));
-
-        return isStudentAMemberOfProject || isSupervisorAllowedToSeeGrades;
-    }
-
-    private static boolean isStudentAMemberOfProject(String indexNumber, Project project) {
-        return project.getStudents().stream()
-                .map(Student::getIndexNumber)
-                .anyMatch(studentIndexId -> Objects.equals(indexNumber, studentIndexId));
-    }
-
     private EvaluationCardDetails createEvaluationCardDetails(EvaluationCard evaluationCardEntity, Project project, EvaluationCardTemplate evaluationCardTemplate, String indexNumber) {
-        if (determineIfEvaluationCardIsVisible(evaluationCardEntity, project, indexNumber)) {
+        if (!permissionService.isEvaluationCardVisibleForUser(evaluationCardEntity, project, indexNumber)) {
             return null;
         }
 
@@ -169,7 +154,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         evaluationCardDetails.setId(evaluationCardEntity.getId());
         evaluationCardDetails.setGrade(pointsToOverallPercent(evaluationCardEntity.getTotalPoints()));
 
-        boolean isEditable = determineIfEvaluationCardIsEditable(evaluationCardEntity, project, indexNumber);
+        boolean isEditable = permissionService.isEvaluationCardEditableForUser(evaluationCardEntity, project, indexNumber);
 
         evaluationCardDetails.setEditable(isEditable);
 
@@ -188,46 +173,6 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
         evaluationCardDetails.setSections(sectionDTOs);
         return evaluationCardDetails;
-    }
-
-    private boolean determineIfEvaluationCardIsVisible(EvaluationCard evaluationCardEntity, Project project, String indexNumber) {
-        return isStudentAMemberOfProject(indexNumber, project)
-                || isSupervisorAllowedToSeeGrades(project, evaluationCardEntity, indexNumber);
-    }
-
-    private boolean isUserAProjectSupervisor(Supervisor supervisor, String indexNumber) {
-        return Objects.equals(supervisor.getIndexNumber(), indexNumber);
-    }
-
-    private boolean determineIfEvaluationCardIsEditable(EvaluationCard evaluationCardEntity, Project project, String indexNumber) {
-        if (!Objects.equals(AcceptanceStatus.ACCEPTED, project.getAcceptanceStatus())) {
-            return false;
-        }
-        if (isUserAProjectSupervisor(project.getSupervisor(), indexNumber) && Objects.equals(EvaluationStatus.ACTIVE, evaluationCardEntity.getEvaluationStatus())) {
-            return true;
-        }
-        if (isSupervisorAllowedToEditGrades(evaluationCardEntity, indexNumber)) {
-            return true;
-        }
-        // coordinator can always edit project
-        if (projectMemberService.isUserRoleCoordinator(indexNumber)) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isSupervisorAllowedToEditGrades(EvaluationCard evaluationCardEntity, String indexNumber) {
-        return Objects.equals(UserRole.SUPERVISOR, projectMemberService.getUserRoleByUserIndex(indexNumber))
-                && !Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCardEntity.getEvaluationPhase())
-                && Objects.equals(EvaluationStatus.ACTIVE, evaluationCardEntity.getEvaluationStatus());
-    }
-
-    private boolean isSupervisorAllowedToSeeGrades(Project project, EvaluationCard evaluationCardEntity, String indexNumber) {
-        boolean isUserAProjectSupervisor = isUserAProjectSupervisor(project.getSupervisor(), indexNumber);
-        boolean isUserASupervisorAndProjectPhaseIsDifferentThanSemester = Objects.equals(UserRole.SUPERVISOR, projectMemberService.getUserRoleByUserIndex(indexNumber))
-                && !Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCardEntity.getEvaluationPhase());
-
-        return isUserAProjectSupervisor || isUserASupervisorAndProjectPhaseIsDifferentThanSemester;
     }
 
     /**

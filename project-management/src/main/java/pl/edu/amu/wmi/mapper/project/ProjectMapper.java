@@ -123,6 +123,14 @@ public interface ProjectMapper {
     @Mapping(target = "externalLinks", ignore = true)
     ProjectDTO mapToProjectDtoWithRestrictions(Project entity);
 
+    @Mapping(target = "supervisor", source = "entity.supervisor")
+    @Mapping(target = "accepted", source = "acceptanceStatus", qualifiedByName = "AcceptedToBoolean")
+    @Mapping(target = "pointsFirstSemester", source = "entity", qualifiedByName = "GetPointsForFirstSemester")
+    @Mapping(target = "pointsSecondSemester", source = "entity", qualifiedByName = "GetPointsForSecondSemester")
+    @Mapping(target = "criteriaMet", ignore = true)
+    @Mapping(target = "externalLinks", ignore = true)
+    ProjectDTO mapToProjectDtoWithRestrictionsInPhaseDefense(Project entity);
+
     @IterableMapping(qualifiedByName = "mapWithoutRestrictions")
     List<ProjectDTO> mapToDTOs(List<Project> projectEntityList);
 }
