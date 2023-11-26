@@ -200,6 +200,7 @@ public class ProjectServiceImpl implements ProjectService {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDtoWithRestrictionsInPhaseDefense(entity);
                 projectDTO.setPointsFirstSemester(evaluationCardService.getPointsForSemester(entity, Semester.FIRST));
                 projectDTO.setPointsSecondSemester(evaluationCardService.getPointsForSemester(entity, Semester.SECOND));
+                projectDTO.setCriteriaMet(getCriteriaMet(entity));
                 return projectDTO;
             }
             case WITH_FULL_RESTRICTIONS -> {

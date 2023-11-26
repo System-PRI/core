@@ -184,7 +184,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     }
 
     /**
-     * finds the most recent evaluation card in semester
+     * check if an evaluation card is the most recent one in semester
      */
     private boolean isEvaluationCardTheMostRecentOne(Project project, EvaluationCard evaluationCard) {
         Optional<EvaluationCard> theMostRecentEvaluationCard = findTheMostRecentEvaluationCard(project.getEvaluationCards(), evaluationCard.getSemester());
