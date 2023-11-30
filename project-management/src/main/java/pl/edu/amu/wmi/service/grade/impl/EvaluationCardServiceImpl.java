@@ -87,9 +87,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     private List<Grade> createEmptyGradesForSemester(List<CriteriaSection> criteriaSections) {
         List<Grade> grades = new ArrayList<>();
         criteriaSections.forEach(criteriaSection -> {
-                    List<Grade> gradesForSection = createEmptyGradesForCriteriaSection(criteriaSection);
-                    grades.addAll(gradesForSection);
-                });
+            List<Grade> gradesForSection = createEmptyGradesForCriteriaSection(criteriaSection);
+            grades.addAll(gradesForSection);
+        });
         return grades;
     }
 
@@ -209,10 +209,8 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
      */
     private List<CriteriaSection> getCriteriaSectionsForSemester(EvaluationCardTemplate template, Semester semester) {
         return switch (semester) {
-            case FIRST ->
-                    template.getCriteriaSectionsFirstSemester();
-            case SECOND ->
-                    template.getCriteriaSectionsSecondSemester();
+            case FIRST -> template.getCriteriaSectionsFirstSemester();
+            case SECOND -> template.getCriteriaSectionsSecondSemester();
         };
     }
 
@@ -337,6 +335,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                 .orElseThrow(() -> new EvaluationCardException(MessageFormat.format("Evaluation card with id: {0} not found", evaluationCardId)));
 
         evaluationCard.setEvaluationStatus(EvaluationStatus.PUBLISHED);
+        log.info("Status was set to published for evaluation card with id: {}", evaluationCard.getId());
         evaluationCardDAO.save(evaluationCard);
     }
 
@@ -350,8 +349,11 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                         studyYear
                 );
 
-        if(!evaluationCards.isEmpty()) {
-            evaluationCards.forEach(e -> e.setEvaluationStatus(EvaluationStatus.PUBLISHED));
+        if (!evaluationCards.isEmpty()) {
+            evaluationCards.forEach(e -> {
+                e.setEvaluationStatus(EvaluationStatus.PUBLISHED);
+                log.info("Status was set to published for evaluation card with id: {}", e.getId());
+            });
             evaluationCardDAO.saveAll(evaluationCards);
         }
     }
