@@ -176,7 +176,6 @@ public class ProjectController {
                 .body(evaluationCardService.updateEvaluationCard(evaluationCardId, singleGroupGradeUpdate));
     }
 
-    // TODO: Change response type to DTO
     @Secured({"COORDINATOR"})
     @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/publish")
     public ResponseEntity<EvaluationCardStatusDTO> publishEvaluationCard(@PathVariable Long evaluationCardId) {
