@@ -244,7 +244,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         Double totalPointsSemester = calculateTotalPointsWithWeight(gradesForSemester);
         evaluationCard.setTotalPoints(totalPointsSemester);
 
-        boolean isDisqualified = checkDisqualification(gradesForSemester);
+        boolean isDisqualified = isDisqualified(evaluationCard.getEvaluationPhase(), gradesForSemester);
         boolean criteriaMet = !isDisqualified;
         evaluationCard.setDisqualified(isDisqualified);
         evaluationCard.setApprovedForDefense(criteriaMet);
@@ -295,12 +295,24 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     }
 
     /**
-     * Confirms if all grades are selected and none of them are disqualifying.
+     * Check, taking into account the grading phase, that all grades have been selected and none of them are disqualifying.
+     * If there is no single grade selected or one of them is disqualifying, the entire project is disqualified.
      */
-    // TODO 11/23/2023: Add logic to handle different evaluation card's phase
-    private boolean checkDisqualification(List<Grade> gradesForSemester) {
+    private boolean isDisqualified(EvaluationPhase evaluationPhase, List<Grade> gradesForSemester) {
+       if(evaluationPhase.equals(EvaluationPhase.SEMESTER_PHASE))
+           return isDisqualifiedWithoutDefenseSection(gradesForSemester);
+       else
+           return isDisqualifiedWithDefenseSection(gradesForSemester);
+    }
+
+    private boolean isDisqualifiedWithoutDefenseSection(List<Grade> gradesForSemester) {
         return gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(Grade::isDisqualifying) ||
                 gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));
+    }
+
+    private boolean isDisqualifiedWithDefenseSection(List<Grade> gradesForSemester) {
+        return gradesForSemester.stream().anyMatch(Grade::isDisqualifying) ||
+                gradesForSemester.stream().anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));
     }
 
     private boolean isGradeFromDefenseSection(Grade grade) {
