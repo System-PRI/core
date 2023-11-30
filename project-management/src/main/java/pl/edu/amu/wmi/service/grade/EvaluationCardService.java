@@ -6,7 +6,6 @@ import pl.edu.amu.wmi.enumerations.EvaluationPhase;
 import pl.edu.amu.wmi.enumerations.EvaluationStatus;
 import pl.edu.amu.wmi.enumerations.Semester;
 import pl.edu.amu.wmi.model.grade.EvaluationCardDetailsDTO;
-import pl.edu.amu.wmi.model.grade.EvaluationCardStatusDTO;
 import pl.edu.amu.wmi.model.grade.SingleGroupGradeUpdateDTO;
 import pl.edu.amu.wmi.model.grade.UpdatedGradeDTO;
 
@@ -27,8 +26,8 @@ public interface EvaluationCardService {
 
     String getPointsForSemester(Project entity, Semester semester);
 
-    EvaluationCardStatusDTO publishEvaluationCard(Long evaluationCardId);
+    void publishEvaluationCard(Long evaluationCardId);
 
-    List<EvaluationCardStatusDTO> publishEvaluationCards(String studyYear);
+    void publishEvaluationCards(String studyYear);
 
 }

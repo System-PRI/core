@@ -13,7 +13,6 @@ import pl.edu.amu.wmi.enumerations.EvaluationStatus;
 import pl.edu.amu.wmi.enumerations.Semester;
 import pl.edu.amu.wmi.exception.grade.EvaluationCardException;
 import pl.edu.amu.wmi.exception.project.ProjectManagementException;
-import pl.edu.amu.wmi.mapper.grade.EvaluationCardMapper;
 import pl.edu.amu.wmi.mapper.grade.ProjectCriteriaSectionMapper;
 import pl.edu.amu.wmi.model.grade.*;
 import pl.edu.amu.wmi.service.grade.EvaluationCardService;
@@ -36,7 +35,6 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     private final PermissionService permissionService;
     private final ProjectMemberService projectMemberService;
     private final ProjectCriteriaSectionMapper projectCriteriaSectionMapper;
-    private final EvaluationCardMapper evaluationCardMapper;
 
     public EvaluationCardServiceImpl(EvaluationCardDAO evaluationCardDAO,
                                      EvaluationCardTemplateDAO evaluationCardTemplateDAO,
@@ -44,8 +42,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                                      GradeService gradeService,
                                      PermissionService permissionService,
                                      ProjectMemberService projectMemberService,
-                                     ProjectCriteriaSectionMapper projectCriteriaSectionMapper,
-                                     EvaluationCardMapper evaluationCardMapper) {
+                                     ProjectCriteriaSectionMapper projectCriteriaSectionMapper) {
         this.evaluationCardDAO = evaluationCardDAO;
         this.evaluationCardTemplateDAO = evaluationCardTemplateDAO;
         this.projectDAO = projectDAO;
@@ -53,7 +50,6 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         this.permissionService = permissionService;
         this.projectMemberService = projectMemberService;
         this.projectCriteriaSectionMapper = projectCriteriaSectionMapper;
-        this.evaluationCardMapper = evaluationCardMapper;
     }
 
     @Override
@@ -336,19 +332,17 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     @Override
     @Transactional
-    public EvaluationCardStatusDTO publishEvaluationCard(Long evaluationCardId) {
+    public void publishEvaluationCard(Long evaluationCardId) {
         EvaluationCard evaluationCard = evaluationCardDAO.findById(evaluationCardId)
                 .orElseThrow(() -> new EvaluationCardException(MessageFormat.format("Evaluation card with id: {0} not found", evaluationCardId)));
 
         evaluationCard.setEvaluationStatus(EvaluationStatus.PUBLISHED);
         evaluationCardDAO.save(evaluationCard);
-
-        return evaluationCardMapper.mapToDto(evaluationCard);
     }
 
     @Override
     @Transactional
-    public List<EvaluationCardStatusDTO> publishEvaluationCards(String studyYear) {
+    public void publishEvaluationCards(String studyYear) {
         List<EvaluationCard> evaluationCards =
                 evaluationCardDAO.findAllByEvaluationPhaseAndEvaluationStatusAndEvaluationCardTemplate_StudyYear(
                         EvaluationPhase.DEFENSE_PHASE,
@@ -360,8 +354,6 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
             evaluationCards.forEach(e -> e.setEvaluationStatus(EvaluationStatus.PUBLISHED));
             evaluationCardDAO.saveAll(evaluationCards);
         }
-
-        return evaluationCardMapper.mapToDtoList(evaluationCards);
     }
 
 }

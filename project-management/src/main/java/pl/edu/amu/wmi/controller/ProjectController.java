@@ -178,16 +178,16 @@ public class ProjectController {
 
     @Secured({"COORDINATOR"})
     @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/publish")
-    public ResponseEntity<EvaluationCardStatusDTO> publishEvaluationCard(@PathVariable Long evaluationCardId) {
-        return ResponseEntity.ok()
-                .body(evaluationCardService.publishEvaluationCard(evaluationCardId));
+    public ResponseEntity<Void> publishEvaluationCard(@PathVariable Long evaluationCardId) {
+        evaluationCardService.publishEvaluationCard(evaluationCardId);
+        return ResponseEntity.ok().build();
     }
 
     @Secured({"COORDINATOR"})
     @PutMapping("/{projectId}/evaluation-card/publish")
-    public ResponseEntity<List<EvaluationCardStatusDTO>> publishEvaluationCards(@RequestHeader("study-year") String studyYear) {
-        return ResponseEntity.ok()
-                .body(evaluationCardService.publishEvaluationCards(studyYear));
+    public ResponseEntity<Void> publishEvaluationCards(@RequestHeader("study-year") String studyYear) {
+        evaluationCardService.publishEvaluationCards(studyYear);
+        return ResponseEntity.ok().build();
     }
 
     // TODO: 11/22/2023 remove this endpoint (only for tests)
