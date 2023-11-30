@@ -306,17 +306,33 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
     }
 
     private boolean isDisqualifiedWithoutDefenseSection(List<Grade> gradesForSemester) {
-        return gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(Grade::isDisqualifying) ||
-                gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));
+        return isDisqualifiedBySelectedGradeWithoutDefenseSection(gradesForSemester) ||
+                isDisqualifiedByNotSelectedGradeWithoutDefenseSection(gradesForSemester);
     }
 
-    private boolean isDisqualifiedWithDefenseSection(List<Grade> gradesForSemester) {
-        return gradesForSemester.stream().anyMatch(Grade::isDisqualifying) ||
-                gradesForSemester.stream().anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));
+    private boolean isDisqualifiedBySelectedGradeWithoutDefenseSection(List<Grade> gradesForSemester) {
+        return gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(Grade::isDisqualifying);
+    }
+
+    private boolean isDisqualifiedByNotSelectedGradeWithoutDefenseSection(List<Grade> gradesForSemester) {
+        return gradesForSemester.stream().filter(g -> !isGradeFromDefenseSection(g)).anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));
     }
 
     private boolean isGradeFromDefenseSection(Grade grade) {
         return grade.getCriteriaGroup().getCriteriaSection().isDefenseSection();
+    }
+
+    private boolean isDisqualifiedWithDefenseSection(List<Grade> gradesForSemester) {
+        return isDisqualifiedBySelectedGradeWithDefenseSection(gradesForSemester) ||
+                isDisqualifiedByNotSelectedGradeWithDefenseSection(gradesForSemester);
+    }
+
+    private boolean isDisqualifiedBySelectedGradeWithDefenseSection(List<Grade> gradesForSemester) {
+        return gradesForSemester.stream().anyMatch(Grade::isDisqualifying);
+    }
+
+    private boolean isDisqualifiedByNotSelectedGradeWithDefenseSection(List<Grade> gradesForSemester) {
+        return gradesForSemester.stream().anyMatch(g -> Objects.isNull(g.getPointsWithWeight()));
     }
 
     @Override
