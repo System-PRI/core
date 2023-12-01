@@ -243,20 +243,19 @@ public class ProjectServiceImpl implements ProjectService {
         Supervisor supervisorEntity = supervisorDAO.findByStudyYearAndUserData_IndexNumber(studyYear, project.getSupervisor().getIndexNumber());
         StudyYear studyYearEntity = studyYearDAO.findByStudyYear(studyYear);
 
-        projectEntity.setSupervisor(supervisorEntity);
-        projectEntity.setStudyYear(studyYearEntity);
-        projectEntity.setAcceptanceStatus(acceptanceStatusByStudentsAmount(project));
-
+        String adminIndexNumber = project.getAdmin();
         for (StudentDTO student : project.getStudents()) {
             Student entity = studentDAO.findByStudyYearAndUserData_IndexNumber(studyYear, student.getIndexNumber());
-            if (isProjectAdmin(entity, userIndexNumber)) {
+            if (isProjectAdmin(entity, adminIndexNumber)) {
                 entity.setProjectAdmin(true);
                 entity.getUserData().getRoles().add(roleDAO.findByName(PROJECT_ADMIN));
             }
-
-            projectEntity.addStudent(entity, student.getRole(), isProjectAdmin(entity, userIndexNumber));
+            projectEntity.addStudent(entity, student.getRole(), isProjectAdmin(entity, adminIndexNumber));
         }
 
+        projectEntity.setSupervisor(supervisorEntity);
+        projectEntity.setStudyYear(studyYearEntity);
+        projectEntity.setAcceptanceStatus(acceptanceStatusByStudentsAmount(project));
         projectEntity.setExternalLinks(externalLinkService.createEmptyExternalLinks(studyYear));
 
         EvaluationCard evaluationCard = new EvaluationCard();
@@ -495,8 +494,8 @@ public class ProjectServiceImpl implements ProjectService {
         return project.getAssignedStudents().stream().allMatch(StudentProject::isProjectConfirmed);
     }
 
-    private boolean isProjectAdmin(Student entity, String userIndexNumber) {
-        return Objects.equals(userIndexNumber, entity.getIndexNumber());
+    private boolean isProjectAdmin(Student entity, String adminIndexNumber) {
+        return Objects.equals(adminIndexNumber, entity.getIndexNumber());
     }
 
     private StudentProject getStudentProjectOfAdmin(Project project) {
