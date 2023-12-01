@@ -114,8 +114,8 @@ public class ProjectController {
             @Valid @RequestBody ProjectDetailsDTO project) {
 
         ProjectDetailsDTO projectDetailsDTO = projectService.saveProject(project, studyYear, userIndexNumber);
-        projectService.acceptProject(studyYear, userIndexNumber, projectDetailsDTO.getId());
-        projectService.updateProjectAdmin(projectDetailsDTO.getId(), userIndexNumber);
+        projectService.acceptProject(studyYear, project.getAdmin(), projectDetailsDTO.getId());
+        projectService.updateProjectAdmin(projectDetailsDTO.getId(), project.getAdmin());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(projectDetailsDTO);
     }
