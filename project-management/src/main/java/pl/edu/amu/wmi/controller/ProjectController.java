@@ -144,6 +144,7 @@ public class ProjectController {
 
     @PatchMapping("/{projectId}/accept")
     public ResponseEntity<ProjectDetailsDTO> acceptProject(
+            @RequestHeader("study-year") String studyYear,
             @RequestHeader("index-number") String userIndexNumber,
             @PathVariable Long projectId) {
         return ResponseEntity.ok()
