@@ -38,9 +38,7 @@ public class SupervisorProjectServiceImpl implements SupervisorProjectService {
         supervisorEntities
                 .forEach(supervisor -> {
                     SupervisorAvailabilityDTO dto = supervisorProjectMapper.mapToAvailabilityDto(supervisor);
-                    dto.setAssigned((int) supervisor.getProjects().stream()
-                            .filter(p -> Objects.equals(AcceptanceStatus.ACCEPTED, p.getAcceptanceStatus()))
-                            .count());
+                    dto.setAssigned(countSupervisorAcceptedProjects(supervisor));
                     supervisorAvailabilityDTOS.add(dto);
                 });
         return supervisorAvailabilityDTOS;
@@ -56,16 +54,16 @@ public class SupervisorProjectServiceImpl implements SupervisorProjectService {
                     supervisorIndexNumber,
                     studyYear));
 
-        int supervisorMaxNumberOfProjects = 0;
-
-        if (Objects.nonNull(supervisor.getMaxNumberOfProjects()))
-            supervisorMaxNumberOfProjects = supervisor.getMaxNumberOfProjects();
-
-        int supervisorAlreadyAcceptedProjects = (int) supervisor.getProjects().stream()
-                .filter(p -> Objects.equals(AcceptanceStatus.ACCEPTED, p.getAcceptanceStatus()))
-                .count();
+        int supervisorMaxNumberOfProjects = Objects.nonNull(supervisor.getMaxNumberOfProjects()) ? supervisor.getMaxNumberOfProjects() : 0;
+        int supervisorAlreadyAcceptedProjects = countSupervisorAcceptedProjects(supervisor);
 
         return supervisorAlreadyAcceptedProjects < supervisorMaxNumberOfProjects;
+    }
+
+    private int countSupervisorAcceptedProjects(Supervisor supervisor) {
+        return (int) supervisor.getProjects().stream()
+                .filter(p -> Objects.equals(AcceptanceStatus.ACCEPTED, p.getAcceptanceStatus()))
+                .count();
     }
 
     @Override

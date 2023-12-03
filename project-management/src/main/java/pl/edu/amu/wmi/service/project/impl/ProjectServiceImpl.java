@@ -461,9 +461,7 @@ public class ProjectServiceImpl implements ProjectService {
             as.getStudent().setConfirmedProject(projectEntity);
         });
 
-        if (isProjectConfirmedByAllStudents(projectEntity)) {
-            projectEntity.setAcceptanceStatus(CONFIRMED);
-        }
+        projectEntity.setAcceptanceStatus(CONFIRMED);
 
         studentProjectDAO.saveAll(studentProjectEntities);
         projectDAO.save(projectEntity);
