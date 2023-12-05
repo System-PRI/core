@@ -1,4 +1,4 @@
-package pl.edu.amu.wmi.service.impl;
+package pl.edu.amu.wmi.service.scheduleconfig.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,9 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.edu.amu.wmi.dao.DefenseScheduleConfigDAO;
 import pl.edu.amu.wmi.entity.DefenseScheduleConfig;
 import pl.edu.amu.wmi.enumerations.DefensePhase;
-import pl.edu.amu.wmi.mapper.DefenseScheduleConfigMapper;
-import pl.edu.amu.wmi.model.DefenseScheduleConfigDTO;
-import pl.edu.amu.wmi.service.DefenseScheduleConfigService;
+import pl.edu.amu.wmi.mapper.scheduleconfig.DefenseScheduleConfigMapper;
+import pl.edu.amu.wmi.model.scheduleconfig.DefenseScheduleConfigDTO;
+import pl.edu.amu.wmi.service.scheduleconfig.DefenseScheduleConfigService;
 
 @Slf4j
 @Service
@@ -34,4 +34,5 @@ public class DefenseScheduleConfigServiceImpl implements DefenseScheduleConfigSe
         log.info("Defense schedule config was created with id: {}", defenseScheduleConfigEntity.getId());
         defenseScheduleConfigDAO.save(defenseScheduleConfigEntity);
     }
+
 }

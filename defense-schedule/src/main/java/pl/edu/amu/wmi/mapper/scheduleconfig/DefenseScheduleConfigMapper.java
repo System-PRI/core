@@ -1,9 +1,9 @@
-package pl.edu.amu.wmi.mapper;
+package pl.edu.amu.wmi.mapper.scheduleconfig;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pl.edu.amu.wmi.entity.DefenseScheduleConfig;
-import pl.edu.amu.wmi.model.DefenseScheduleConfigDTO;
+import pl.edu.amu.wmi.model.scheduleconfig.DefenseScheduleConfigDTO;
 
 
 @Mapper(componentModel = "spring")
