@@ -50,11 +50,11 @@ public class DefenseTimeSlotServiceImpl implements DefenseTimeSlotService {
         List<LocalTime> defenseHours = getDefenseHours(startTime, endTime, defenseSlotDuration);
 
         defenseDays.forEach(day -> {
-            log.info("Defense timeslots were created for day: {}", day.toString());
             defenseHours.forEach(hour -> {
                 DefenseTimeSlot defenseTimeSlot = createSingleTimeSlot(day, hour, hour.plusMinutes(defenseSlotDuration), defenseSlotDuration, studyYear, defenseScheduleConfig);
                 defenseTimeSlotDAO.save(defenseTimeSlot);
             });
+            log.info("Defense timeslots were created for day: {}", day.toString());
         });
     }
 

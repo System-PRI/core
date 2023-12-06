@@ -50,11 +50,11 @@ public class SupervisorDefenseAssignmentServiceImpl implements SupervisorDefense
             throw new BusinessException(MessageFormat.format("Time slots for defense schedule config with id: {0} were not found", defenseScheduleConfigId));
 
         supervisors.forEach(supervisor -> {
-            log.info("Supervisor defense assignments were created for supervisor with id: {}", supervisor.getId());
             defenseTimeSlots.forEach(timeslot -> {
                 SupervisorDefenseAssignment supervisorDefenseAssignment = createSingleSupervisorDefenseAssignment(supervisor, timeslot);
                 supervisorDefenseAssignmentDAO.save(supervisorDefenseAssignment);
             });
+            log.info("Supervisor defense assignments were created for supervisor with id: {}", supervisor.getId());
         });
     }
 
