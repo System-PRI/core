@@ -3,13 +3,14 @@ package pl.edu.amu.wmi.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.ldap.core.support.BaseLdapPathContextSource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.ldap.LdapBindAuthenticationManagerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,30 +24,49 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 )
 public class WebSecurityConfig {
 
+//    @Value("${ldap.url}")
+//    private String ldapUrl;
+
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
 
+    @Autowired
+    private CustomLdapUserDetailsMapper customLdapUserDetailsMapper;
+
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter();
     }
 
+//    @Bean
+//    public DaoAuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+//
+//        authProvider.setUserDetailsService(userDetailsService);
+//        authProvider.setPasswordEncoder(passwordEncoder());
+//
+//        return authProvider;
+//    }
+
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+//
+//        return authConfig.getAuthenticationManager();
+//    }
+
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-
-        return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(BaseLdapPathContextSource contextSource) throws Exception {
+        LdapBindAuthenticationManagerFactory factory = new LdapBindAuthenticationManagerFactory(contextSource);
+        factory.setUserDnPatterns("sAMAccountName={0}");
+//        factory.setUserDnPatterns("cn={0},OU=Students,OU=People");
+        factory.setUserSearchFilter("sAMAccountName={0}");
+//        factory.setUserSearchFilter("(&(objectCategory=person)(sAMAccountName={0}))");
+//        factory.setUserSearchBase("OU=Students,OU=People,DC=labs,DC=wmi,DC=amu,DC=edu,DC=pl");
+        factory.setUserDetailsContextMapper(customLdapUserDetailsMapper);
+        return factory.createAuthenticationManager();
     }
 
     @Bean
@@ -65,11 +85,28 @@ public class WebSecurityConfig {
                                 .anyRequest().authenticated()
                 );
 
-        http.authenticationProvider(authenticationProvider());
+//        http.authenticationProvider(authenticationProvider());
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    @Autowired
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .ldapAuthentication()
+                .userDetailsContextMapper(customLdapUserDetailsMapper)
+                .userDnPatterns("sAMAccountName={0}")
+//                .userSearchFilter("(&(objectCategory=person)(sAMAccountName={0}))")
+//                .groupSearchBase("objectCategory=person")
+                .contextSource()
+                .url("ldap://labs.wmi.amu.edu.pl/DC=labs,DC=wmi,DC=amu,DC=edu,DC=pl")
+//                .url("ldap://labs.wmi.amu.edu.pl")
+                .port(636);
+//                .and()
+//                .passwordCompare()
+//                .passwordEncoder(new BCryptPasswordEncoder())
+//                .passwordAttribute("userPassword");
+    }
 }
