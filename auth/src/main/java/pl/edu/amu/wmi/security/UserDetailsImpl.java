@@ -28,15 +28,6 @@ public class UserDetailsImpl implements LdapUserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String indexNumber, String email, String password, LdapUserDetails ldapUserDetails) {
-        super();
-        this.id = id;
-        this.indexNumber = indexNumber;
-        this.email = email;
-        this.password = password;
-        this.ldapUserDetails = ldapUserDetails;
-    }
-
     public UserDetailsImpl(Long id, String indexNumber, String email, String password, Collection<? extends GrantedAuthority> authorities) {
         super();
         this.id = id;

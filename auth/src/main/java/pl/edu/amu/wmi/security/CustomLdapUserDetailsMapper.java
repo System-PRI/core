@@ -25,7 +25,6 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
     @Override
     public UserDetails mapUserFromContext(DirContextOperations ctx, String   username,
                                           Collection<? extends GrantedAuthority> authorities) {
-
         UserData user = userDataDAO.findByIndexNumber(username)
                 .orElseThrow(() -> new UsernameNotFoundException(MessageFormat.format("User with index number not found: {0}", username)));
 
@@ -38,9 +37,7 @@ public class CustomLdapUserDetailsMapper extends LdapUserDetailsMapper {
 
     private Set<GrantedAuthority> getAuthorities(UserData user) {
         Set<GrantedAuthority> authorities = new HashSet<>();
-
-        //populate authorities/user roles from User (db entity) and UserRole entities
-
+        //populate authorities/user roles from UserData (db entity)
         for (Role userRole : user.getRoles()) {
             authorities.add(new SimpleGrantedAuthority(userRole.getName().name()));
         }

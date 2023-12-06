@@ -62,11 +62,6 @@
             <version>${io.jsonwebtoken.version}</version>
             <scope>runtime</scope>
         </dependency>
-<!--local instance of instance-->
-        <dependency>
-            <groupId>com.unboundid</groupId>
-            <artifactId>unboundid-ldapsdk</artifactId>
-        </dependency>
     </dependencies>
 
 </project>
