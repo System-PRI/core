@@ -44,14 +44,7 @@ public class DefenseScheduleConfigServiceImpl implements DefenseScheduleConfigSe
         defenseScheduleConfigEntity = defenseScheduleConfigDAO.save(defenseScheduleConfigEntity);
         log.info("Defense schedule config was created with id: {}", defenseScheduleConfigEntity.getId());
 
-        /*
-         * Create all defense timeslots for the selected configuration.
-         */
         defenseTimeSlotService.createDefenseTimeSlots(studyYear, defenseScheduleConfigEntity.getId());
-
-        /*
-         * Create supervisor defense assignment for all supervisors and all defense timeslots.
-         */
         supervisorDefenseAssignmentService.createSupervisorDefenseAssignments(studyYear, defenseScheduleConfigEntity.getId());
     }
 
