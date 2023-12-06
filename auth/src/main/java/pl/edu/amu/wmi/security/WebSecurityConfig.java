@@ -1,12 +1,12 @@
 package pl.edu.amu.wmi.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,8 +14,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.util.Arrays;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
@@ -25,8 +23,14 @@ import static org.springframework.security.web.util.matcher.AntPathRequestMatche
 )
 public class WebSecurityConfig {
 
-//    @Value("${ldap.url}")
-//    private String ldapUrl;
+    @Value("${spring.ldap.urls}")
+    private String ldapUrl;
+
+    @Value(("${spring.ldap.base}"))
+    private String ldapBase;
+
+    @Value(("${pri.ldap.domain}"))
+    private String ldapDomain;
 
     @Autowired
     UserDetailsServiceImpl userDetailsService;
@@ -43,24 +47,21 @@ public class WebSecurityConfig {
     }
 
     @Autowired
-    public AuthenticationProvider activeDirectoryLdapAuthenticationProvider() {
-        ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider("labs.wmi.amu.edu.pl", "ldap://labs.wmi.amu.edu.pl/", "DC=labs,DC=wmi,DC=amu,DC=edu,DC=pl");
-        // TODO: 12/6/2023 should any filters be added?
-//        provider.setSearchFilter("OU=People");
+    public void configure(AuthenticationManagerBuilder authManagerBuilder) throws Exception {
+        ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(
+                ldapDomain,
+                ldapUrl,
+                ldapBase);
+        // TODO: 12/6/2023 SYSPRI-315 should any filters be added?
         provider.setConvertSubErrorCodesToExceptions(true);
         provider.setUseAuthenticationRequestCredentials(true);
         provider.setUserDetailsContextMapper(customLdapUserDetailsMapper);
-        return provider;
-    }
-
-    @Autowired
-    public void configure(AuthenticationManagerBuilder authManagerBuilder) throws Exception {
-        authManagerBuilder.authenticationProvider(activeDirectoryLdapAuthenticationProvider());
+        authManagerBuilder.authenticationProvider(provider);
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() {
-        return new ProviderManager(Arrays.asList(activeDirectoryLdapAuthenticationProvider()));
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean
