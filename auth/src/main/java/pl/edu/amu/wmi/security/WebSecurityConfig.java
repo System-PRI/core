@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -32,6 +33,9 @@ public class WebSecurityConfig {
     @Value(("${pri.ldap.domain}"))
     private String ldapDomain;
 
+    @Value(("${ldap.authentication.enabled}"))
+    private boolean ldapAuthenticationEnabled;
+
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
@@ -48,15 +52,34 @@ public class WebSecurityConfig {
 
     @Autowired
     public void configure(AuthenticationManagerBuilder authManagerBuilder) throws Exception {
-        ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(
-                ldapDomain,
-                ldapUrl,
-                ldapBase);
-        // TODO: 12/6/2023 SYSPRI-315 should any filters be added?
-        provider.setConvertSubErrorCodesToExceptions(true);
-        provider.setUseAuthenticationRequestCredentials(true);
-        provider.setUserDetailsContextMapper(customLdapUserDetailsMapper);
-        authManagerBuilder.authenticationProvider(provider);
+        if (ldapAuthenticationEnabled) {
+            ActiveDirectoryLdapAuthenticationProvider provider = new ActiveDirectoryLdapAuthenticationProvider(
+                    ldapDomain,
+                    ldapUrl,
+                    ldapBase);
+            // TODO: 12/6/2023 SYSPRI-315 should any filters be added?
+            provider.setConvertSubErrorCodesToExceptions(true);
+            provider.setUseAuthenticationRequestCredentials(true);
+            provider.setUserDetailsContextMapper(customLdapUserDetailsMapper);
+            authManagerBuilder.authenticationProvider(provider);
+        } else {
+            useMockLdapData(authManagerBuilder);
+        }
+
+    }
+
+    private void useMockLdapData(AuthenticationManagerBuilder authManagerBuilder) throws Exception {
+        authManagerBuilder
+                .ldapAuthentication()
+                .userDnPatterns("uid={0},ou=people")
+                .groupSearchBase("ou=groups")
+                .userDetailsContextMapper(customLdapUserDetailsMapper)
+                .contextSource()
+                .url("ldap://localhost:8389/dc=springframework,dc=org")
+                .and()
+                .passwordCompare()
+                .passwordEncoder(new BCryptPasswordEncoder())
+                .passwordAttribute("userPassword");
     }
 
     @Bean
