@@ -14,8 +14,6 @@ import pl.edu.amu.wmi.service.supervisoravailability.SupervisorAvailabilityServi
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -33,13 +31,10 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
 
     @Override
     @Transactional
-    public void putSupervisorAvailability(String studyYear, String username, Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorAvailabilitySurvey) {
-        Supervisor supervisor = supervisorDAO.findByStudyYearAndUserData_IndexNumber(studyYear, username);
+    public void putSupervisorAvailability(String studyYear, Long supervisorId, List<SupervisorDefenseAssignmentDTO> supervisorDefenseAssignments) {
+        Supervisor supervisor = supervisorDAO.findById(supervisorId)
+                .orElseThrow(() -> new BusinessException(MessageFormat.format("Supervisors with id: {0} for study year: {1} was not found", supervisorId, studyYear)));
 
-        if (Objects.isNull(supervisor))
-            throw new BusinessException(MessageFormat.format("Supervisors with index: {0} for study year: {1} was not found", username, studyYear));
-
-        List<SupervisorDefenseAssignmentDTO> supervisorDefenseAssignments = supervisorAvailabilitySurvey.values().stream().flatMap(List::stream).toList();
         List<Long> selectedTimeSlotsIds = supervisorDefenseAssignments.stream().map(SupervisorDefenseAssignmentDTO::getDefenseSlotId).toList();
 
         clearNotSelectedTimeSlots(supervisor, selectedTimeSlotsIds);
