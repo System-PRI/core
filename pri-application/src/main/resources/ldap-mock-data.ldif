@@ -19,28 +19,13 @@ objectclass: top
 objectclass: organizationalUnit
 ou: people
 
-dn: ou=space cadets,dc=springframework,dc=org
-objectclass: top
-objectclass: organizationalUnit
-ou: space cadets
-
-dn: ou=\"quoted people\",dc=springframework,dc=org
-objectclass: top
-objectclass: organizationalUnit
-ou: "quoted people"
-
-dn: ou=otherpeople,dc=springframework,dc=org
-objectclass: top
-objectclass: organizationalUnit
-ou: otherpeople
-
 dn: uid=s123456,ou=people,dc=springframework,dc=org
 objectclass: top
 objectclass: person
 objectclass: organizationalPerson
 objectclass: inetOrgPerson
-cn: Ben Alex
-sn: Alex
+cn: Test1 Test1
+sn: Test1
 uid: s123456
 userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
 
@@ -49,7 +34,27 @@ objectclass: top
 objectclass: person
 objectclass: organizationalPerson
 objectclass: inetOrgPerson
-cn: Ben Alex1
-sn: Alex1
+cn: Test2 Test2
+sn: Test2
 uid: s111111
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=s222222,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test3 Test3
+sn: Test3
+uid: s222222
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=s762042,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test4 Test4
+sn: Test3
+uid: s762042
 userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
