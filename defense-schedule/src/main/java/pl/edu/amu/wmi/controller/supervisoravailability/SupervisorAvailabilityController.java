@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.edu.amu.wmi.model.supervisordefense.SupervisorDefenseAssignmentDTO;
 import pl.edu.amu.wmi.service.supervisoravailability.SupervisorAvailabilityService;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/schedule/availability/supervisor")
@@ -27,9 +26,9 @@ public class SupervisorAvailabilityController {
     public ResponseEntity<Void> putSupervisorAvailability(
             @RequestHeader("study-year") String studyYear,
             @PathVariable Long supervisorId,
-            @Valid @RequestBody List<SupervisorDefenseAssignmentDTO> supervisorDefenseAssignments) {
-        supervisorAvailabilityService.putSupervisorAvailability(studyYear, supervisorId, supervisorDefenseAssignments);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+            @Valid @RequestBody SupervisorDefenseAssignmentDTO supervisorDefenseAssignment) {
+        supervisorAvailabilityService.putSupervisorAvailability(studyYear, supervisorId, supervisorDefenseAssignment);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

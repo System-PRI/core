@@ -4,13 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.edu.amu.wmi.entity.SupervisorDefenseAssignment;
 
-import java.util.List;
-
-
 @Repository
 public interface SupervisorDefenseAssignmentDAO extends JpaRepository<SupervisorDefenseAssignment, Long> {
-
-    List<SupervisorDefenseAssignment> findAllBySupervisor_Id(Long supervisorId);
 
     SupervisorDefenseAssignment findBySupervisor_IdAndDefenseTimeSlot_Id(Long supervisorId, Long defenseTimeSlotId);
 
