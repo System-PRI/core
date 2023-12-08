@@ -40,7 +40,7 @@ public class SupervisorAvailabilityController {
             @RequestHeader("study-year") String studyYear,
             @PathVariable Long supervisorId) {
         return ResponseEntity.ok()
-                .body(supervisorAvailabilityService.getSupervisorAvailabilitySurvey(studyYear, supervisorId));
+                .body(supervisorAvailabilityService.getSupervisorAvailabilitySurvey(supervisorId));
     }
 
 }

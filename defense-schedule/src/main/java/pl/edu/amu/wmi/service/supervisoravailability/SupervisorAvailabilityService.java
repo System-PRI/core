@@ -10,5 +10,5 @@ public interface SupervisorAvailabilityService {
 
     void putSupervisorAvailability(String studyYear, Long supervisorId, SupervisorDefenseAssignmentDTO supervisorDefenseAssignment);
 
-    Map<String, List<SupervisorDefenseAssignmentDTO>> getSupervisorAvailabilitySurvey(String studyYear, Long supervisorId);
+    Map<String, List<SupervisorDefenseAssignmentDTO>> getSupervisorAvailabilitySurvey(Long supervisorId);
 }
