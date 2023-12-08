@@ -36,25 +36,37 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
     public void createProjectDefenses(Long defenseScheduleConfigId, String studyYear) {
         List<DefenseTimeSlot> timeSlots = defenseTimeSlotService.getAllTimeSlotsForDefenseConfig(defenseScheduleConfigId);
 
-        for (DefenseTimeSlot defenseTimeSlot : timeSlots) {
-            Map<CommitteeIdentifier, List<SupervisorDefenseAssignment>> committeeMap = defenseTimeSlot.getSupervisorDefenseAssignments().stream()
-                    .filter(supervisorDefenseAssignment -> Objects.nonNull(supervisorDefenseAssignment.getCommitteeIdentifier()))
-                    .collect(Collectors.groupingBy(SupervisorDefenseAssignment::getCommitteeIdentifier));
-            for (Map.Entry<CommitteeIdentifier, List<SupervisorDefenseAssignment>> committee : committeeMap.entrySet()) {
-                if (!committee.getValue().isEmpty()) {
-                    if (!isChairpersonSetCorrectlyForCommittee(committee.getValue(), defenseTimeSlot, committee.getKey())) {
-                        throw new BusinessException(MessageFormat.format("Project defense for committee with identifier: " +
-                                "{0} for time slot {1} {2} cannot be created. Committee has to have exactly one chairperson selected",
-                                committee.getKey(), defenseTimeSlot.getDate(), defenseTimeSlot.getStartTime()));
-                    }
-                    ProjectDefense projectDefense = new ProjectDefense();
-                    projectDefense.addSupervisorDefenseAssignments(committee.getValue());
-                    projectDefense.setStudyYear(studyYear);
-                    projectDefenseDAO.save(projectDefense);
-                }
-            }
-        }
+        timeSlots.forEach(defenseTimeSlot ->
+            createProjectDefensesForTimeSlot(studyYear, defenseTimeSlot)
+        );
         log.info("Project defense slots have been created for study year {}", studyYear);
+    }
+
+    private void createProjectDefensesForTimeSlot(String studyYear, DefenseTimeSlot defenseTimeSlot) {
+        Map<CommitteeIdentifier, List<SupervisorDefenseAssignment>> committeeMap = mapCommitteesByCommitteeIdentifiers(defenseTimeSlot);
+        committeeMap.forEach((committeeIdentifier, supervisorDefenseAssignments) -> {
+            if (!supervisorDefenseAssignments.isEmpty()) {
+                if (!isChairpersonSetCorrectlyForCommittee(supervisorDefenseAssignments, defenseTimeSlot, committeeIdentifier)) {
+                    throw new BusinessException(MessageFormat.format("Project defense for committee with identifier: " +
+                                    "{0} for time slot {1} {2} cannot be created. Committee has to have exactly one chairperson selected",
+                            committeeIdentifier, defenseTimeSlot.getDate(), defenseTimeSlot.getStartTime()));
+                }
+                createNewProjectDefense(studyYear, supervisorDefenseAssignments);
+            }
+        });
+    }
+
+    private void createNewProjectDefense(String studyYear, List<SupervisorDefenseAssignment> supervisorDefenseAssignments) {
+        ProjectDefense projectDefense = new ProjectDefense();
+        projectDefense.addSupervisorDefenseAssignments(supervisorDefenseAssignments);
+        projectDefense.setStudyYear(studyYear);
+        projectDefenseDAO.save(projectDefense);
+    }
+
+    private Map<CommitteeIdentifier, List<SupervisorDefenseAssignment>> mapCommitteesByCommitteeIdentifiers(DefenseTimeSlot defenseTimeSlot) {
+        return defenseTimeSlot.getSupervisorDefenseAssignments().stream()
+                .filter(supervisorDefenseAssignment -> Objects.nonNull(supervisorDefenseAssignment.getCommitteeIdentifier()))
+                .collect(Collectors.groupingBy(SupervisorDefenseAssignment::getCommitteeIdentifier));
     }
 
     private boolean isChairpersonSetCorrectlyForCommittee(List<SupervisorDefenseAssignment> supervisorDefenseAssignments,
