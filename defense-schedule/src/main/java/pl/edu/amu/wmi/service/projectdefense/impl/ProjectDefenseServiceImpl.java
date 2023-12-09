@@ -72,12 +72,18 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
     @Override
     public Map<String, List<ProjectDefenseDTO>> getProjectDefenses(String studyYear, String indexNumber) {
         List<ProjectDefense> projectDefenses = projectDefenseDAO.findAllByStudyYear(studyYear);
-        Map<LocalDate, List<ProjectDefense>> projectDefenseMap = projectDefenses.stream().collect(Collectors.groupingBy(projectDefense -> projectDefense.getDefenseTimeslot().getDate()));
+        return createProjectDefenseDTOMap(studyYear, indexNumber, projectDefenses);
+    }
+
+    private Map<String, List<ProjectDefenseDTO>> createProjectDefenseDTOMap(String studyYear, String indexNumber, List<ProjectDefense> projectDefenses) {
+        Map<LocalDate, List<ProjectDefense>> projectDefenseMap = mapProjectDefenseByDate(projectDefenses);
 
         UserRole userRole = projectMemberService.getUserRoleByUserIndex(indexNumber, UserRoleType.SPECIAL);
         Project projectAdminProject = Objects.equals(UserRole.PROJECT_ADMIN, userRole) ? projectDAO.findByProjectAdmin(indexNumber, studyYear) : null;
         DefensePhase defensePhase = defenseScheduleConfigDAO.findByStudyYearAndIsActiveIsTrue(studyYear).getDefensePhase();
+
         Map<String, List<ProjectDefenseDTO>> projectDefenseDTOMap = new TreeMap<>();
+
         projectDefenseMap.forEach((date, defenses) -> {
             List<ProjectDefenseDTO> projectDefenseDTOs = mapProjectDefensesToDTOs(defenses, indexNumber, projectAdminProject, userRole, defensePhase);
             projectDefenseDTOMap.put(date.format(dateTimeFormatter), projectDefenseDTOs);
@@ -85,55 +91,75 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
         return projectDefenseDTOMap;
     }
 
+    private Map<LocalDate, List<ProjectDefense>> mapProjectDefenseByDate(List<ProjectDefense> projectDefenses) {
+        return projectDefenses.stream()
+                .collect(Collectors.groupingBy(projectDefense -> projectDefense.getDefenseTimeslot().getDate()));
+    }
+
     /**
-     * Map project defense entities to dtos and set the value of a field isEditable for every {@link ProjectDefenseDTO} object based on user role and project attributes
+     * Maps project defense entities to dto list and set the value of a field isEditable for every {@link ProjectDefenseDTO} object based on the user role,
+     * the project defense process phase and project attributes
      * - for user with role COORDINATOR all project defenses are editable
      * - for users with role SUPERVISOR or STUDENT - none project defenses are editable (no mapping needed as isEditable is set to false by default)
-     * - for user with role PROJECT_ADMIN project is editable if the supervisor of the project is in the committee and time slot is free
+     * - for user with role PROJECT_ADMIN project is editable if the project defense phase is equal to DEFENSE_PROJECT_REGISTRATION, the supervisor
+     * of the project is a member of the committee and the time slot is free (or used by a project of a user)
      *
-     * @param defenses
-     * @param indexNumber
-     * @param project
-     * @param userRole
-     * @param defensePhase
-     * @return
+     * @param defenses     - project defenses entities to be mapped
+     * @param indexNumber  - index number of the user
+     * @param project      - project of the user (not null only for a user with a role PROJECT_ADMIN)
+     * @param userRole     - the highest role of the user
+     * @param defensePhase - the phase of the project defense process
+     * @return mapped and sorted list of objects {@link ProjectDefenseDTO}
      */
     private List<ProjectDefenseDTO> mapProjectDefensesToDTOs(List<ProjectDefense> defenses, String indexNumber,
                                                              Project project, UserRole userRole, DefensePhase defensePhase) {
-        switch (userRole) {
+        return switch (userRole) {
             case COORDINATOR -> {
-                List<ProjectDefenseDTO> projectDefenseDTOs = projectDefenseMapper.mapToDTOs(defenses).stream()
-                        .sorted(projectDefenseByTimeComparator())
-                        .toList();
+                List<ProjectDefenseDTO> projectDefenseDTOs = mapProjectDefensesToDTOsWithSorting(defenses);
                 projectDefenseDTOs.forEach(projectDefense -> projectDefense.setEditable(true));
-                return projectDefenseDTOs;
+                yield projectDefenseDTOs;
             }
             case PROJECT_ADMIN -> {
                 if (Objects.equals(DefensePhase.DEFENSE_PROJECT_REGISTRATION, defensePhase)) {
-                    List<ProjectDefenseDTO> projectDefenseDTOs = new ArrayList<>();
-                    defenses.forEach(projectDefense -> {
-                        boolean isEditable = permissionService.isProjectDefenseEditableForProjectAdmin(projectDefense, indexNumber, project);
-                        ProjectDefenseDTO projectDefenseDTO = projectDefenseMapper.mapToDto(projectDefense);
-                        projectDefenseDTO.setEditable(isEditable);
-                        projectDefenseDTOs.add(projectDefenseDTO);
-                    });
-                    return projectDefenseDTOs.stream()
+                    List<ProjectDefenseDTO> projectDefenseDTOs = mapProjectDefensesToDTOsForProjectAdmin(defenses, indexNumber, project);
+                    yield projectDefenseDTOs.stream()
                             .sorted(projectDefenseByTimeComparator())
                             .toList();
                 } else {
-                    return projectDefenseMapper.mapToDTOs(defenses).stream()
-                            .sorted(projectDefenseByTimeComparator())
-                            .toList();
+                    yield mapProjectDefensesToDTOsWithSorting(defenses);
                 }
             }
-            case STUDENT, SUPERVISOR -> {
-                return projectDefenseMapper.mapToDTOs(defenses).stream()
-                        .sorted(projectDefenseByTimeComparator())
-                        .toList();
-            }
-        }
+            case STUDENT, SUPERVISOR -> mapProjectDefensesToDTOsWithSorting(defenses);
+        };
+    }
 
+    /**
+     * Maps project defense entities to dto list and set the value of a field isEditable for every {@link ProjectDefenseDTO} object for a user with
+     * a PROJECT_ADMIN role. The value of isEditable is set to true if the project defense phase is equal to DEFENSE_PROJECT_REGISTRATION AND the supervisor
+     * of the project is a member of the committee and the time slot is free (or used by a project of a user)
+     *
+     * @param defenses    - project defenses entities to be mapped
+     * @param indexNumber - index number of a user with PROJECT_ADMIN role
+     * @param project     - project of a user with PROJECT_ADMIN role
+     * @return mapped list of objects {@link ProjectDefenseDTO}
+     */
+    private List<ProjectDefenseDTO> mapProjectDefensesToDTOsForProjectAdmin(List<ProjectDefense> defenses, String indexNumber, Project project) {
+        List<ProjectDefenseDTO> projectDefenseDTOs = new ArrayList<>();
+        defenses.forEach(projectDefense -> {
+            boolean isEditable = permissionService.isProjectDefenseEditableForProjectAdmin(projectDefense, indexNumber, project);
+            ProjectDefenseDTO projectDefenseDTO = projectDefenseMapper.mapToDto(projectDefense);
+            projectDefenseDTO.setEditable(isEditable);
+            projectDefenseDTOs.add(projectDefenseDTO);
+        });
+        return projectDefenseDTOs;
+    }
 
+    /**
+     * Maps a list of {@link ProjectDefense entities} to list of {@link ProjectDefenseDTO} with sorting by time
+     * @param defenses
+     * @return
+     */
+    private List<ProjectDefenseDTO> mapProjectDefensesToDTOsWithSorting(List<ProjectDefense> defenses) {
         return projectDefenseMapper.mapToDTOs(defenses).stream()
                 .sorted(projectDefenseByTimeComparator())
                 .toList();
