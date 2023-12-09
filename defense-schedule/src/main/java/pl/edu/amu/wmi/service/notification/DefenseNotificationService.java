@@ -1,6 +1,9 @@
 package pl.edu.amu.wmi.service.notification;
 
+import pl.edu.amu.wmi.entity.Student;
 import pl.edu.amu.wmi.enumerations.DefensePhase;
+
+import java.util.List;
 
 public interface DefenseNotificationService {
 
@@ -12,4 +15,6 @@ public interface DefenseNotificationService {
      * @param defensePhase - the phase of project defense process
      */
     void notifyStudents(String studyYear, DefensePhase defensePhase);
+
+    void notifyStudentsAboutProjectDefenseAssignment(List<Student> students);
 }

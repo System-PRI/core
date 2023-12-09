@@ -4,6 +4,7 @@ import pl.edu.amu.wmi.entity.DefenseScheduleConfig;
 import pl.edu.amu.wmi.entity.ProjectDefense;
 import pl.edu.amu.wmi.enumerations.CommitteeIdentifier;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseDTO;
+import pl.edu.amu.wmi.model.projectdefense.ProjectDefensePatchDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -29,4 +30,6 @@ public interface ProjectDefenseService {
      * @return map of {@link ProjectDefenseDTO} grouped by date
      */
     Map<String, List<ProjectDefenseDTO>> getProjectDefenses(String studyYear, String username);
+
+    void assignProjectToProjectDefense(String studyYear, String indexNumber, Long projectDefenseId, ProjectDefensePatchDTO projectDefensePatchDTO);
 }
