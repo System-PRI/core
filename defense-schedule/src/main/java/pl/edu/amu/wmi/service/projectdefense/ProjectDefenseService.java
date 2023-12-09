@@ -31,5 +31,13 @@ public interface ProjectDefenseService {
      */
     Map<String, List<ProjectDefenseDTO>> getProjectDefenses(String studyYear, String username);
 
+    /**
+     * Assigns the project to selected project defense slot with additional validation if the change can be performed
+     *
+     * @param studyYear              - study year that project defense is connected with
+     * @param indexNumber            - index number of the user
+     * @param projectDefenseId       - id of the project defense slot
+     * @param projectDefensePatchDTO - contains the project id (or null value), that should be assigned to the project defense
+     */
     void assignProjectToProjectDefense(String studyYear, String indexNumber, Long projectDefenseId, ProjectDefensePatchDTO projectDefensePatchDTO);
 }
