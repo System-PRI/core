@@ -39,6 +39,7 @@ public class DefenseNotificationServiceImpl implements DefenseNotificationServic
 
     @Override
     public void notifyStudentsAboutProjectDefenseAssignment(List<Student> students) {
-        // TODO: 12/9/2023 implement this method
+        List<UserInfoDTO> userInfos = userInfoMapper.mapToUserInfos(students);
+        notificationService.sendEmails(userInfos, EMailTemplate.PROJECT_DEFENSE_ASSIGNMENT_CHANGE);
     }
 }
