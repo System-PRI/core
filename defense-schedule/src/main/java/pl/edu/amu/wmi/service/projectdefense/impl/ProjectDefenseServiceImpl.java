@@ -83,7 +83,6 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
     @Override
     @Transactional
     public void assignProjectToProjectDefense(String studyYear, String indexNumber, Long projectDefenseId, ProjectDefensePatchDTO projectDefensePatchDTO) {
-
         ProjectDefense projectDefense = projectDefenseDAO.findById(projectDefenseId).orElseThrow(() ->
                 new BusinessException(MessageFormat.format("Project defense with id: {0} not found", projectDefenseId)));
 
@@ -96,63 +95,71 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
         }
 
         DefensePhase defensePhase = defenseScheduleConfigDAO.findByStudyYearAndIsActiveIsTrue(studyYear).getDefensePhase();
-        if (Objects.equals(UserRole.COORDINATOR, projectMemberService.getUserRoleByUserIndex(indexNumber, UserRoleType.SPECIAL))) {
-            if (Objects.nonNull(projectDefensePatchDTO.projectId())) {
-                List<ProjectDefense> projectDefensesConnectedWithPreviousProject = projectDefenseDAO.findAllByProjectId(projectDefensePatchDTO.projectId());
-                projectDefensesConnectedWithPreviousProject.forEach(defense -> {
-                    defense.setProject(null);
-                    projectDefenseDAO.save(defense);
-                });
-            }
-            if (Objects.isNull(projectDefensePatchDTO.projectId())) {
-                if (Objects.nonNull(previouslyAssignedProject)) {
-                    projectDefense.setProject(null);
-                    projectDefenseDAO.save(projectDefense);
-                    defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(previouslyAssignedProject.getStudents()));
-                }
-            } else {
-                Project newlyAssignedProject = projectDAO.findById(projectDefensePatchDTO.projectId()).orElseThrow(() ->
-                        new BusinessException(MessageFormat.format("Project id: {0} not found", projectDefensePatchDTO.projectId())));
-                projectDefense.setProject(newlyAssignedProject);
-                projectDefenseDAO.save(projectDefense);
-                defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(newlyAssignedProject.getStudents()));
-                if (Objects.nonNull(previouslyAssignedProject)) {
-                    defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(previouslyAssignedProject.getStudents()));
-                }
-            }
+
+        if (projectMemberService.isUserRoleCoordinator(indexNumber)) {
+            assignProjectToProjectDefenseAsCoordinator(projectDefensePatchDTO, previouslyAssignedProject, projectDefense);
         }
-        if (Objects.equals(UserRole.PROJECT_ADMIN, projectMemberService.getUserRoleByUserIndex(indexNumber, UserRoleType.SPECIAL))
-                && Objects.equals(DefensePhase.DEFENSE_PROJECT_REGISTRATION, defensePhase)) {
-            if (Objects.nonNull(previouslyAssignedProject) && !projectMemberService.isStudentAnAdminOfTheProject(indexNumber, previouslyAssignedProject.getId())) {
-                return;
-            }
+        if (isUserAProjectAdminAndDefensePhaseAllowTheModifications(indexNumber, defensePhase)) {
+            assignProjectToProjectDefenseAsProjectAdmin(indexNumber, projectDefensePatchDTO, previouslyAssignedProject, projectDefense);
+        }
+    }
 
-            Project newlyAssignedProject = null;
-            if (Objects.nonNull(projectDefensePatchDTO.projectId())) {
-                newlyAssignedProject = projectDAO.findById(projectDefensePatchDTO.projectId()).orElseThrow(() ->
-                        new BusinessException(MessageFormat.format("Project id: {0} not found", projectDefensePatchDTO.projectId())));
-            }
+    private boolean isUserAProjectAdminAndDefensePhaseAllowTheModifications(String indexNumber, DefensePhase defensePhase) {
+        return Objects.equals(UserRole.PROJECT_ADMIN, projectMemberService.getUserRoleByUserIndex(indexNumber, UserRoleType.SPECIAL))
+                && Objects.equals(DefensePhase.DEFENSE_PROJECT_REGISTRATION, defensePhase);
+    }
 
-            if (Objects.isNull(newlyAssignedProject)) {
-                if (Objects.nonNull(previouslyAssignedProject)) {
-                    projectDefense.setProject(null);
-                    projectDefenseDAO.save(projectDefense);
-                    return;
-                }
-            }
-
-            if (permissionService.isProjectDefenseEditableForProjectAdmin(projectDefense, indexNumber, newlyAssignedProject)) {
-                if (Objects.nonNull(projectDefensePatchDTO.projectId())) {
-                    List<ProjectDefense> projectDefensesConnectedWithPreviousProject = projectDefenseDAO.findAllByProjectId(projectDefensePatchDTO.projectId());
-                    projectDefensesConnectedWithPreviousProject.forEach(defense -> {
-                        defense.setProject(null);
-                        projectDefenseDAO.save(defense);
-                    });
-                }
-                projectDefense.setProject(newlyAssignedProject);
+    private void assignProjectToProjectDefenseAsProjectAdmin(String indexNumber, ProjectDefensePatchDTO projectDefensePatchDTO, Project previouslyAssignedProject, ProjectDefense projectDefense) {
+        if (Objects.nonNull(previouslyAssignedProject) && !projectMemberService.isStudentAnAdminOfTheProject(indexNumber, previouslyAssignedProject.getId())) {
+            return;
+        }
+        Project newlyAssignedProject = null;
+        if (Objects.nonNull(projectDefensePatchDTO.projectId())) {
+            newlyAssignedProject = getProjectById(projectDefensePatchDTO.projectId());
+        }
+        if (Objects.isNull(newlyAssignedProject)) {
+            if (Objects.nonNull(previouslyAssignedProject)) {
+                projectDefense.setProject(null);
                 projectDefenseDAO.save(projectDefense);
             }
+        } else if (permissionService.isProjectDefenseEditableForProjectAdmin(projectDefense, indexNumber, newlyAssignedProject)) {
+            removeExistingProjectDefenseAssignments(projectDefensePatchDTO);
+            projectDefense.setProject(newlyAssignedProject);
+            projectDefenseDAO.save(projectDefense);
         }
+    }
+
+    private Project getProjectById(Long projectId) {
+        return projectDAO.findById(projectId).orElseThrow(() ->
+                new BusinessException(MessageFormat.format("Project id: {0} not found", projectId)));
+    }
+
+    private void assignProjectToProjectDefenseAsCoordinator(ProjectDefensePatchDTO projectDefensePatchDTO, Project previouslyAssignedProject, ProjectDefense projectDefense) {
+        // TODO: 12/9/2023 should the restriction, to not allow assign project to time slot where supervisor is not a committe member, be implemented? 
+        if (Objects.nonNull(projectDefensePatchDTO.projectId())) {
+            removeExistingProjectDefenseAssignments(projectDefensePatchDTO);
+        }
+        if (Objects.isNull(projectDefensePatchDTO.projectId())) {
+            if (Objects.nonNull(previouslyAssignedProject)) {
+                defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(previouslyAssignedProject.getStudents()));
+            }
+        } else {
+            Project newlyAssignedProject = getProjectById(projectDefensePatchDTO.projectId());
+            projectDefense.setProject(newlyAssignedProject);
+            projectDefenseDAO.save(projectDefense);
+            defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(newlyAssignedProject.getStudents()));
+            if (Objects.nonNull(previouslyAssignedProject)) {
+                defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(previouslyAssignedProject.getStudents()));
+            }
+        }
+    }
+
+    private void removeExistingProjectDefenseAssignments(ProjectDefensePatchDTO projectDefensePatchDTO) {
+        List<ProjectDefense> projectDefensesConnectedWithPreviousProject = projectDefenseDAO.findAllByProjectId(projectDefensePatchDTO.projectId());
+        projectDefensesConnectedWithPreviousProject.forEach(defense -> {
+            defense.setProject(null);
+            projectDefenseDAO.save(defense);
+        });
     }
 
     private Map<String, List<ProjectDefenseDTO>> createProjectDefenseDTOMap(String studyYear, String indexNumber, List<ProjectDefense> projectDefenses) {
