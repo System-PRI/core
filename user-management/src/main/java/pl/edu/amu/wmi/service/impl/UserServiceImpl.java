@@ -183,6 +183,7 @@ public class UserServiceImpl implements UserService {
                 .thenComparing((String studyYear) -> StringUtils.substringBefore(studyYear, "#"));
     }
 
+    // TODO: 12/9/2023 move logic to permission module 
     private String findRoleWithTheHighestPermissions(Set<Role> roles) {
         List<UserRole> roleNames = extractRoleNames(roles);
         return roleNames.contains(UserRole.COORDINATOR) ? UserRole.COORDINATOR.name() :
