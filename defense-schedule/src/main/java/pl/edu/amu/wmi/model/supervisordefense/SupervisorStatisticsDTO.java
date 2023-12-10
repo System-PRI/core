@@ -1,25 +1,19 @@
 package pl.edu.amu.wmi.model.supervisordefense;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Map;
 
-@Data
-@NoArgsConstructor
-public class SupervisorStatisticsDTO {
+public record SupervisorStatisticsDTO(
+        String supervisor,
 
-    private String supervisor;
+        Integer numberOfGroups,
 
-    private Integer numberOfGroups;
+        Integer totalNumberOfCommittees,
 
-    private Integer totalNumberOfCommittees;
+        /**
+         * result of totalNumberOfCommittees / numberOfGroups
+         */
+        Double load,
 
-    /**
-     * result of totalNumberOfCommittees / numberOfGroups
-     */
-    private Double load;
-
-    private Map<String, Integer> committeesPerDay;
-
+        Map<String, Integer> committeesPerDay
+) {
 }

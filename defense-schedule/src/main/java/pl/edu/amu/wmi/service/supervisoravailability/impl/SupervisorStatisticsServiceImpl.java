@@ -7,6 +7,7 @@ import pl.edu.amu.wmi.dao.SupervisorDAO;
 import pl.edu.amu.wmi.entity.ProjectDefense;
 import pl.edu.amu.wmi.entity.Supervisor;
 import pl.edu.amu.wmi.entity.SupervisorDefenseAssignment;
+import pl.edu.amu.wmi.enumerations.AcceptanceStatus;
 import pl.edu.amu.wmi.model.supervisordefense.SupervisorStatisticsDTO;
 import pl.edu.amu.wmi.service.supervisoravailability.SupervisorStatisticsService;
 
@@ -33,39 +34,52 @@ public class SupervisorStatisticsServiceImpl implements SupervisorStatisticsServ
     public List<SupervisorStatisticsDTO> getSupervisorStatistics(String studyYear) {
         List<Supervisor> supervisors = supervisorDAO.findAllByStudyYear(studyYear);
         List<ProjectDefense> projectDefenses = projectDefenseDAO.findAllByStudyYear(studyYear);
-        Map<LocalDate, List<ProjectDefense>> projectDefenseMap = projectDefenses.stream().collect(Collectors.groupingBy(projectDefense -> projectDefense.getDefenseTimeslot().getDate()));
+        Map<LocalDate, List<ProjectDefense>> projectDefenseByDateMap = projectDefenses.stream().collect(Collectors.groupingBy(projectDefense -> projectDefense.getDefenseTimeslot().getDate()));
         List<SupervisorStatisticsDTO> supervisorStatisticsDTOs = new ArrayList<>();
 
         supervisors.forEach(supervisor -> {
-            SupervisorStatisticsDTO supervisorStatisticsDTO = new SupervisorStatisticsDTO();
-            supervisorStatisticsDTO.setSupervisor(supervisor.getFullName());
-            int numberOfGroups = supervisor.getProjects().size();
-            supervisorStatisticsDTO.setNumberOfGroups(supervisor.getProjects().size());
-            int numberOfAssignedProjectDefenses = (int) projectDefenses.stream()
-                    .filter(defense -> isProjectSupervisorCommitteeMember(defense, supervisor))
-                    .filter(defense -> Objects.nonNull(defense.getProject()))
-                    .count();
-            supervisorStatisticsDTO.setTotalNumberOfCommittees(numberOfAssignedProjectDefenses);
-            if (numberOfGroups == 0) {
-                supervisorStatisticsDTO.setLoad(0.0);
-            } else {
-                double load = (double) numberOfAssignedProjectDefenses / (double) numberOfGroups;
-                supervisorStatisticsDTO.setLoad(load);
-            }
-
-            Map<String, Integer> supervisorDefensesMap = new TreeMap<>();
-            projectDefenseMap.forEach((date, defenses) -> {
-                int numberOfCommittees = (int) defenses.stream()
-                        .filter(defense -> isProjectSupervisorCommitteeMember(defense, supervisor))
-                        .filter(defense -> Objects.nonNull(defense.getProject()))
-                        .count();
-                supervisorDefensesMap.put(date.format(dateTimeFormatter), numberOfCommittees);
-            });
-            supervisorStatisticsDTO.setCommitteesPerDay(supervisorDefensesMap);
+            SupervisorStatisticsDTO supervisorStatisticsDTO = createStatisticsForSupervisor(supervisor, projectDefenses, projectDefenseByDateMap);
             supervisorStatisticsDTOs.add(supervisorStatisticsDTO);
         });
 
         return supervisorStatisticsDTOs;
+    }
+
+    private SupervisorStatisticsDTO createStatisticsForSupervisor(Supervisor supervisor, List<ProjectDefense> projectDefenses, Map<LocalDate, List<ProjectDefense>> projectDefenseByDateMap) {
+        int numberOfGroups = countTheNumberOfAcceptedSupervisorProjects(supervisor);
+        int numberOfAssignedProjectDefenses = countTheNumberOfDefensesAssignedToSupervisor(supervisor, projectDefenses);
+        double load = numberOfGroups == 0 ? 0.0 : (double) numberOfAssignedProjectDefenses / (double) numberOfGroups;
+        Map<String, Integer> committeesPerDayMap = createSupervisorDefensesByDateMap(supervisor, projectDefenseByDateMap);
+
+        return new SupervisorStatisticsDTO(
+                supervisor.getFullName(),
+                numberOfGroups,
+                numberOfAssignedProjectDefenses,
+                load,
+                committeesPerDayMap
+        );
+    }
+
+    private int countTheNumberOfAcceptedSupervisorProjects(Supervisor supervisor) {
+        return supervisor.getProjects().stream()
+                .filter(project -> Objects.equals(AcceptanceStatus.ACCEPTED, project.getAcceptanceStatus()))
+                .toList().size();
+    }
+
+    private int countTheNumberOfDefensesAssignedToSupervisor(Supervisor supervisor, List<ProjectDefense> projectDefenses) {
+        return (int) projectDefenses.stream()
+                .filter(defense -> isProjectSupervisorCommitteeMember(defense, supervisor))
+                .filter(defense -> Objects.nonNull(defense.getProject()))
+                .count();
+    }
+
+    private Map<String, Integer> createSupervisorDefensesByDateMap(Supervisor supervisor, Map<LocalDate, List<ProjectDefense>> projectDefenseByDateMap) {
+        Map<String, Integer> committeessPerDayMap = new TreeMap<>();
+        projectDefenseByDateMap.forEach((date, defenses) -> {
+            int numberOfCommittees = countTheNumberOfDefensesAssignedToSupervisor(supervisor, defenses);
+            committeessPerDayMap.put(date.format(dateTimeFormatter), numberOfCommittees);
+        });
+        return committeessPerDayMap;
     }
 
     // TODO: 12/10/2023 refactor needed - method should be taken from projectMember service
