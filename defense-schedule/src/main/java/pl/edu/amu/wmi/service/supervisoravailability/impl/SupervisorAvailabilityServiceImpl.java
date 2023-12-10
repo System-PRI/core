@@ -4,11 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.edu.amu.wmi.dao.SupervisorDAO;
 import pl.edu.amu.wmi.dao.SupervisorDefenseAssignmentDAO;
+import pl.edu.amu.wmi.entity.Supervisor;
 import pl.edu.amu.wmi.entity.SupervisorDefenseAssignment;
 import pl.edu.amu.wmi.mapper.supervisoravailability.SupervisorAvailabilityMapper;
 import pl.edu.amu.wmi.model.supervisordefense.SupervisorDefenseAssignmentDTO;
 import pl.edu.amu.wmi.service.supervisoravailability.SupervisorAvailabilityService;
+import pl.edu.amu.wmi.service.supervisordefense.SupervisorDefenseAssignmentService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,13 +27,19 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
+    private final SupervisorDefenseAssignmentService supervisorDefenseAssignmentService;
     private final SupervisorDefenseAssignmentDAO supervisorDefenseAssignmentDAO;
+    private final SupervisorDAO supervisorDAO;
     private final SupervisorAvailabilityMapper supervisorAvailabilityMapper;
 
     @Autowired
-    public SupervisorAvailabilityServiceImpl(SupervisorDefenseAssignmentDAO supervisorDefenseAssignmentDAO,
+    public SupervisorAvailabilityServiceImpl(SupervisorDefenseAssignmentService supervisorDefenseAssignmentService,
+                                             SupervisorDefenseAssignmentDAO supervisorDefenseAssignmentDAO,
+                                             SupervisorDAO supervisorDAO,
                                              SupervisorAvailabilityMapper supervisorAvailabilityMapper) {
+        this.supervisorDefenseAssignmentService = supervisorDefenseAssignmentService;
         this.supervisorDefenseAssignmentDAO = supervisorDefenseAssignmentDAO;
+        this.supervisorDAO = supervisorDAO;
         this.supervisorAvailabilityMapper = supervisorAvailabilityMapper;
     }
 
@@ -92,6 +101,35 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
      */
     private Comparator<SupervisorDefenseAssignmentDTO> defenseAvailabilityByTimeComparator() {
         return Comparator.comparing(SupervisorDefenseAssignmentDTO::getTime);
+    }
+
+    @Override
+    public Map<String, Map<String, List<SupervisorDefenseAssignmentDTO>>> getAggregatedSupervisorsAvailability(String studyYear) {
+        List<Supervisor> supervisorsByStudyYear = supervisorDAO.findAllByStudyYear(studyYear);
+        List<LocalDate> defenseDays = supervisorDefenseAssignmentService.getAllDefenseAssignmentDaysForStudyYear(studyYear);
+
+        return createAggregatedSupervisorAvailability(supervisorsByStudyYear, defenseDays);
+    }
+
+    private Map<String, Map<String, List<SupervisorDefenseAssignmentDTO>>> createAggregatedSupervisorAvailability(List<Supervisor> supervisorsByStudyYear, List<LocalDate> defenseDays) {
+        Map<String, Map<String, List<SupervisorDefenseAssignmentDTO>>> aggregatedSupervisorsAvailability = new TreeMap<>();
+
+        defenseDays.forEach(day -> {
+            Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorAvailabilityByDay = createSupervisorsAvailabilityByDay(supervisorsByStudyYear, day);
+            aggregatedSupervisorsAvailability.put(day.format(dateTimeFormatter), supervisorAvailabilityByDay);
+        });
+
+        return aggregatedSupervisorsAvailability;
+    }
+
+    private Map<String, List<SupervisorDefenseAssignmentDTO>> createSupervisorsAvailabilityByDay(List<Supervisor> supervisors, LocalDate day) {
+        Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorAvailabilityPerDay = new TreeMap<>();
+        supervisors.forEach(supervisor -> {
+            Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorMap = getSupervisorAvailabilitySurvey(supervisor.getId());
+            supervisorAvailabilityPerDay.put(supervisor.getUserData().getLastName().toUpperCase(), supervisorMap.get(day.format(dateTimeFormatter)));
+        });
+
+        return supervisorAvailabilityPerDay;
     }
 
 }
