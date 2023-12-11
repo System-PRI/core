@@ -11,17 +11,16 @@ import pl.edu.amu.wmi.model.supervisordefense.SupervisorDefenseAssignmentDTO;
 import pl.edu.amu.wmi.service.supervisoravailability.SupervisorAvailabilityService;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import static pl.edu.amu.wmi.util.CommonDateFormatter.commonDateFormatter;
+
 @Service
 @Slf4j
 public class SupervisorAvailabilityServiceImpl implements SupervisorAvailabilityService {
-
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final SupervisorDefenseAssignmentDAO supervisorDefenseAssignmentDAO;
     private final SupervisorAvailabilityMapper supervisorAvailabilityMapper;
@@ -71,8 +70,7 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
     private Map<String, Map<String, SupervisorDefenseAssignmentDTO>> createSupervisorAvailabilitySurvey(Map<LocalDate, List<SupervisorDefenseAssignment>> defenseAssignmentsByDate) {
         Map<String, Map<String, SupervisorDefenseAssignmentDTO>> supervisorAvailabilitySurvey = new TreeMap<>();
 
-        defenseAssignmentsByDate.keySet()
-                .forEach(day -> supervisorAvailabilitySurvey.put(day.format(dateTimeFormatter), createDefenseAssignmentsByTime(day, defenseAssignmentsByDate)));
+        defenseAssignmentsByDate.forEach((key, value) -> supervisorAvailabilitySurvey.put(key.format(commonDateFormatter()), createDefenseAssignmentsByTime(value)));
 
         return supervisorAvailabilitySurvey;
     }
@@ -80,10 +78,9 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
     /**
      * Creates Supervisor defense assignments per hour using the assignment list for the selected day.
      */
-    private Map<String, SupervisorDefenseAssignmentDTO> createDefenseAssignmentsByTime(LocalDate date, Map<LocalDate, List<SupervisorDefenseAssignment>> defenseAssignmentsByDate) {
+    private Map<String, SupervisorDefenseAssignmentDTO> createDefenseAssignmentsByTime(List<SupervisorDefenseAssignment> defenseAssignmentsByDate) {
         Map<String, SupervisorDefenseAssignmentDTO> defenseAssignmentsByTime = new TreeMap<>();
-        List<SupervisorDefenseAssignment> defenseAssignmentsEntities = defenseAssignmentsByDate.get(date);
-        List<SupervisorDefenseAssignmentDTO> defenseAssignments = supervisorAvailabilityMapper.mapToDtoList(defenseAssignmentsEntities);
+        List<SupervisorDefenseAssignmentDTO> defenseAssignments = supervisorAvailabilityMapper.mapToDtoList(defenseAssignmentsByDate);
 
         defenseAssignments.forEach(assignment -> defenseAssignmentsByTime.put(assignment.getTime(), assignment));
 
