@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SupervisorAvailabilityServiceImpl implements SupervisorAvailabilityService {
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final SupervisorDefenseAssignmentDAO supervisorDefenseAssignmentDAO;
     private final SupervisorAvailabilityMapper supervisorAvailabilityMapper;
