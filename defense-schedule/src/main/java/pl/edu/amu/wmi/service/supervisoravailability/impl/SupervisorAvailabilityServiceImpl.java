@@ -15,7 +15,6 @@ import pl.edu.amu.wmi.service.supervisordefense.SupervisorDefenseAssignmentServi
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SupervisorAvailabilityServiceImpl implements SupervisorAvailabilityService {
 
-    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final SupervisorDefenseAssignmentService supervisorDefenseAssignmentService;
     private final SupervisorDefenseAssignmentDAO supervisorDefenseAssignmentDAO;
@@ -59,7 +58,7 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
      * Returns Supervisor availability survey for the supervisor of a given study year.
      */
     @Override
-    public Map<String, List<SupervisorDefenseAssignmentDTO>> getSupervisorAvailabilitySurvey(Long supervisorId) {
+    public Map<String, Map<String, SupervisorDefenseAssignmentDTO>> getSupervisorAvailabilitySurvey(Long supervisorId) {
         List<SupervisorDefenseAssignment> supervisorDefenseAssignments = supervisorDefenseAssignmentDAO.findAllBySupervisor_Id(supervisorId);
 
         Map<LocalDate, List<SupervisorDefenseAssignment>> supervisorDefenseAssignmentsByDate = mapSupervisorDefenseAssignmentsByDate(supervisorDefenseAssignments);
@@ -78,55 +77,63 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
     /**
      * Creates Supervisor availability survey based on Supervisor defense assignments aggregated by assignment date.
      */
-    private Map<String, List<SupervisorDefenseAssignmentDTO>> createSupervisorAvailabilitySurvey(Map<LocalDate, List<SupervisorDefenseAssignment>> defenseAssignmentsByDate) {
-        Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorAvailabilitySurvey = new TreeMap<>();
+    private Map<String, Map<String, SupervisorDefenseAssignmentDTO>> createSupervisorAvailabilitySurvey(Map<LocalDate, List<SupervisorDefenseAssignment>> defenseAssignmentsByDate) {
+        Map<String, Map<String, SupervisorDefenseAssignmentDTO>> supervisorAvailabilitySurvey = new TreeMap<>();
+
         defenseAssignmentsByDate.keySet()
-                .forEach(key -> supervisorAvailabilitySurvey.put(key.format(dateTimeFormatter),
-                        convertDefenseAssignmentsToDtoWithSorting(defenseAssignmentsByDate.get(key))));
+                .forEach(day -> supervisorAvailabilitySurvey.put(day.format(dateTimeFormatter), createDefenseAssignmentsByTime(day, defenseAssignmentsByDate)));
+
         return supervisorAvailabilitySurvey;
     }
 
     /**
-     * Converts list of SupervisorDefenseAssignment to list of SupervisorDefenseAssignmentDTO sorted by assignment time.
+     * Creates Supervisor defense assignments per hour using the assignment list for the selected day.
      */
-    private List<SupervisorDefenseAssignmentDTO> convertDefenseAssignmentsToDtoWithSorting(List<SupervisorDefenseAssignment> defenseAssignments) {
-        return supervisorAvailabilityMapper.mapToDtoList(defenseAssignments)
-                .stream()
-                .sorted(defenseAvailabilityByTimeComparator())
-                .collect(Collectors.toList());
+    private Map<String, SupervisorDefenseAssignmentDTO> createDefenseAssignmentsByTime(LocalDate date, Map<LocalDate, List<SupervisorDefenseAssignment>> defenseAssignmentsByDate) {
+        Map<String, SupervisorDefenseAssignmentDTO> defenseAssignmentsByTime = new TreeMap<>();
+        List<SupervisorDefenseAssignment> defenseAssignmentsEntities = defenseAssignmentsByDate.get(date);
+        List<SupervisorDefenseAssignmentDTO> defenseAssignments = supervisorAvailabilityMapper.mapToDtoList(defenseAssignmentsEntities);
+
+        defenseAssignments.forEach(assignment -> defenseAssignmentsByTime.put(assignment.getTime(), assignment));
+
+        return defenseAssignmentsByTime;
     }
 
     /**
-     * Supervisor defense assignment time comparator.
+     * Returns the aggregated availability of Supervisors for all Supervisors in a given study year.
      */
-    private Comparator<SupervisorDefenseAssignmentDTO> defenseAvailabilityByTimeComparator() {
-        return Comparator.comparing(SupervisorDefenseAssignmentDTO::getTime);
-    }
-
     @Override
-    public Map<String, Map<String, List<SupervisorDefenseAssignmentDTO>>> getAggregatedSupervisorsAvailability(String studyYear) {
+    public Map<String, Map<String, Map<String, SupervisorDefenseAssignmentDTO>>> getAggregatedSupervisorsAvailability(String studyYear) {
         List<Supervisor> supervisorsByStudyYear = supervisorDAO.findAllByStudyYear(studyYear);
         List<LocalDate> defenseDays = supervisorDefenseAssignmentService.getAllDefenseAssignmentDaysForStudyYear(studyYear);
 
         return createAggregatedSupervisorAvailability(supervisorsByStudyYear, defenseDays);
     }
 
-    private Map<String, Map<String, List<SupervisorDefenseAssignmentDTO>>> createAggregatedSupervisorAvailability(List<Supervisor> supervisorsByStudyYear, List<LocalDate> defenseDays) {
-        Map<String, Map<String, List<SupervisorDefenseAssignmentDTO>>> aggregatedSupervisorsAvailability = new TreeMap<>();
+    /**
+     * Creates aggregated Supervisor availability for days for which defense is scheduled.
+     */
+    private Map<String, Map<String, Map<String, SupervisorDefenseAssignmentDTO>>> createAggregatedSupervisorAvailability(List<Supervisor> supervisorsByStudyYear, List<LocalDate> defenseDays) {
+        Map<String, Map<String, Map<String, SupervisorDefenseAssignmentDTO>>> aggregatedSupervisorsAvailability = new TreeMap<>();
 
         defenseDays.forEach(day -> {
-            Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorAvailabilityByDay = createSupervisorsAvailabilityByDay(supervisorsByStudyYear, day);
+            Map<String, Map<String, SupervisorDefenseAssignmentDTO>> supervisorAvailabilityByDay = createSupervisorsAvailabilityByDay(supervisorsByStudyYear, day);
             aggregatedSupervisorsAvailability.put(day.format(dateTimeFormatter), supervisorAvailabilityByDay);
         });
 
         return aggregatedSupervisorsAvailability;
     }
 
-    private Map<String, List<SupervisorDefenseAssignmentDTO>> createSupervisorsAvailabilityByDay(List<Supervisor> supervisors, LocalDate day) {
-        Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorAvailabilityPerDay = new TreeMap<>();
+    /**
+     * Creates the Supervisor's availability aggregated by the Supervisor's last name and then by the time of each
+     * time slot on the selected day.
+     */
+    private Map<String, Map<String, SupervisorDefenseAssignmentDTO>> createSupervisorsAvailabilityByDay(List<Supervisor> supervisors, LocalDate day) {
+        Map<String, Map<String, SupervisorDefenseAssignmentDTO>> supervisorAvailabilityPerDay = new TreeMap<>();
         supervisors.forEach(supervisor -> {
-            Map<String, List<SupervisorDefenseAssignmentDTO>> supervisorMap = getSupervisorAvailabilitySurvey(supervisor.getId());
-            supervisorAvailabilityPerDay.put(supervisor.getUserData().getLastName().toUpperCase(), supervisorMap.get(day.format(dateTimeFormatter)));
+            String supervisorLastName = supervisor.getUserData().getLastName().toUpperCase();
+            Map<String, Map<String, SupervisorDefenseAssignmentDTO>> availabilitySurvey = getSupervisorAvailabilitySurvey(supervisor.getId());
+            supervisorAvailabilityPerDay.put(supervisorLastName, availabilitySurvey.get(day.format(dateTimeFormatter)));
         });
 
         return supervisorAvailabilityPerDay;

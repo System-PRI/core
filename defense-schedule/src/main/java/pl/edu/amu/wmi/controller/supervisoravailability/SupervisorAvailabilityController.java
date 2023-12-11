@@ -40,7 +40,7 @@ public class SupervisorAvailabilityController {
 
     @Secured({"SUPERVISOR"})
     @GetMapping("/supervisor/{supervisorId}")
-    public ResponseEntity<Map<String, List<SupervisorDefenseAssignmentDTO>>> getSupervisorAvailability(
+    public ResponseEntity<Map<String, Map<String, SupervisorDefenseAssignmentDTO>>> getSupervisorAvailability(
             @RequestHeader("study-year") String studyYear,
             @PathVariable Long supervisorId) {
         return ResponseEntity.ok()
@@ -49,7 +49,7 @@ public class SupervisorAvailabilityController {
 
     @Secured({"COORDINATOR"})
     @GetMapping("/supervisor")
-    public ResponseEntity<Map<String, Map<String, List<SupervisorDefenseAssignmentDTO>>>> getSupervisorsAvailability(
+    public ResponseEntity<Map<String, Map<String, Map<String, SupervisorDefenseAssignmentDTO>>>> getSupervisorsAvailability(
             @RequestHeader("study-year") String studyYear) {
         return ResponseEntity.ok()
                 .body(supervisorAvailabilityService.getAggregatedSupervisorsAvailability(studyYear));
