@@ -4,4 +4,4 @@
 
 .after-merge-rule:
   rules:
-    - if: $CI_COMMIT_BRANCH == 'feat/SYSPRI-87_ldap'
+    - if: $CI_COMMIT_BRANCH == 'main'
