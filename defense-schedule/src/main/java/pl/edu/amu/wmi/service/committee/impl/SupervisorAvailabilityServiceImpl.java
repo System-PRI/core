@@ -11,7 +11,7 @@ import pl.edu.amu.wmi.entity.SupervisorDefenseAssignment;
 import pl.edu.amu.wmi.mapper.committee.SupervisorAvailabilityMapper;
 import pl.edu.amu.wmi.model.committee.SupervisorDefenseAssignmentDTO;
 import pl.edu.amu.wmi.service.committee.SupervisorAvailabilityService;
-import pl.edu.amu.wmi.service.supervisordefense.SupervisorDefenseAssignmentService;
+import pl.edu.amu.wmi.service.committee.SupervisorDefenseAssignmentService;
 
 import java.time.LocalDate;
 import java.util.List;
