@@ -77,6 +77,12 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
     }
 
     @Override
+    @Transactional
+    public void createProjectDefense(String studyYear, List<SupervisorDefenseAssignment> committeeMembers) {
+        createNewProjectDefense(studyYear, committeeMembers);
+    }
+
+    @Override
     public List<ProjectDefenseDTO> getProjectDefenses(String studyYear, String indexNumber) {
         List<ProjectDefense> projectDefenses = projectDefenseDAO.findAllByStudyYear(studyYear);
         return createProjectDefenseDTOs(studyYear, indexNumber, projectDefenses);
@@ -88,10 +94,10 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
         Map<LocalDate, List<ProjectDefense>> projectDefenseMap = projectDefenses.stream().collect(Collectors.groupingBy(projectDefense -> projectDefense.getDefenseTimeslot().getDate()));
         Map<String, List<ProjectDefenseSummaryDTO>> projectDefenseDTOMap = new TreeMap<>();
         projectDefenseMap.forEach((date, defenses) -> {
-            List<ProjectDefense> projectDefensesWithProjects = defenses.stream()
-                    .filter(defense -> Objects.nonNull(defense.getProject()))
-                    .toList();
-            projectDefenseDTOMap.put(date.format(commonDateFormatter()), projectDefenseMapper.mapToSummaryDTOs(projectDefensesWithProjects));
+                    List<ProjectDefense> projectDefensesWithProjects = defenses.stream()
+                            .filter(defense -> Objects.nonNull(defense.getProject()))
+                            .toList();
+                    projectDefenseDTOMap.put(date.format(commonDateFormatter()), projectDefenseMapper.mapToSummaryDTOs(projectDefensesWithProjects));
                 }
         );
         return projectDefenseDTOMap;
@@ -127,6 +133,18 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
         return projectsWithDefenseInfoForStudyYear.stream()
                 .map(this::mapTupleToProjectNameDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteProjectDefenses(List<Long> projectDefenseIdsToBeRemoved) {
+        projectDefenseIdsToBeRemoved.forEach(projectDefenseId -> {
+            Optional<ProjectDefense> entity = projectDefenseDAO.findById(projectDefenseId);
+            if (entity.isPresent()) {
+                projectDefenseDAO.delete(entity.get());
+                log.info("Project defense object with id: {} has been deleted", projectDefenseId);
+            }
+        });
     }
 
     private ProjectNameDTO mapTupleToProjectNameDto(Tuple tuple) {

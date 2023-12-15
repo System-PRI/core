@@ -2,6 +2,7 @@ package pl.edu.amu.wmi.service.projectdefense;
 
 import pl.edu.amu.wmi.entity.DefenseScheduleConfig;
 import pl.edu.amu.wmi.entity.ProjectDefense;
+import pl.edu.amu.wmi.entity.SupervisorDefenseAssignment;
 import pl.edu.amu.wmi.enumerations.CommitteeIdentifier;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseDTO;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefensePatchDTO;
@@ -22,6 +23,8 @@ public interface ProjectDefenseService {
      * @param studyYear               - study year that project defense object are created for
      */
     void createProjectDefenses(Long defenseScheduleConfigId, String studyYear);
+
+    void createProjectDefense(String studyYear, List<SupervisorDefenseAssignment> committeeMembers);
 
     /**
      * Returns all project defense slots for a study year with an information, if a slot can be edited by a user
@@ -57,4 +60,6 @@ public interface ProjectDefenseService {
      * @return list of project names
      */
     List<ProjectNameDTO> getProjectNames(String studyYear);
+
+    void deleteProjectDefenses(List<Long> projectDefenseIdsToBeRemoved);
 }
