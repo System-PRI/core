@@ -88,31 +88,8 @@ public class CommitteeServiceImpl implements CommitteeService {
         LocalDate date = LocalDate.parse(chairpersonAssignmentDTO.getDate(), commonDateFormatter());
 
         if (Objects.isNull(chairpersonAssignmentDTO.getChairpersonId())) {
-            CommitteeAssignmentCriteria criteria = CommitteeAssignmentCriteria.builder()
-                    .date(date)
-                    .committeeIdentifier(chairpersonAssignmentDTO.getCommitteeIdentifier())
-                    .studyYear(studyYear)
-                    .build();
+            deleteProjectDefensesConnectedWithChairperson(chairpersonAssignmentDTO, studyYear, date);
 
-            List<SupervisorDefenseAssignment> supervisorDefenseAssignments = committeeMemberDAO.findAllAssignmentsByCriteria(criteria);
-
-            List<Long> projectDefenseIdsToBeRemoved = supervisorDefenseAssignments.stream()
-                    .filter(sda -> Objects.equals(Boolean.TRUE, sda.isChairperson()))
-                    .map(sda -> sda.getProjectDefense().getId())
-                    .toList();
-            supervisorDefenseAssignments.forEach(supervisorDefenseAssignment -> {
-                supervisorDefenseAssignment.setChairperson(Boolean.FALSE);
-                supervisorDefenseAssignment.setCommitteeIdentifier(null);
-                supervisorDefenseAssignment.setProjectDefense(null);
-                supervisorDefenseAssignment.setClassroom(null);
-            });
-
-            supervisorDefenseAssignmentDAO.saveAll(supervisorDefenseAssignments);
-            projectDefenseService.deleteProjectDefenses(projectDefenseIdsToBeRemoved);
-
-            // logic to remove project defense slots
-            // unselect chairperson and class room
-            // unselect class room for other members
         } else {
             CommitteeAssignmentCriteria criteria = CommitteeAssignmentCriteria.builder()
                     .supervisorId(Long.valueOf(chairpersonAssignmentDTO.getChairpersonId()))
@@ -120,38 +97,71 @@ public class CommitteeServiceImpl implements CommitteeService {
                     .date(date)
                     .studyYear(studyYear)
                     .build();
+
             List<SupervisorDefenseAssignment> chairpersonAssignments = committeeMemberDAO.findAllAssignmentsByCriteria(criteria);
-
-            // update chairperson - class and boolean; create project defenses if not exists
             chairpersonAssignments.forEach(chairpersonAssignment -> {
-                // does the project defense exists?
-                CommitteeAssignmentCriteria otherCommitteeMembersCriteria = CommitteeAssignmentCriteria.builder()
-                        .committeeIdentifier(chairpersonAssignmentDTO.getCommitteeIdentifier())
-                        .defenseTimeslotId(chairpersonAssignment.getDefenseTimeSlot().getId())
-                        .excludedSupervisorIds(List.of(Long.valueOf(chairpersonAssignmentDTO.getChairpersonId())))
-                        .build();
-                List<SupervisorDefenseAssignment> otherCommitteeMembers = committeeMemberDAO.findAllAssignmentsByCriteria(otherCommitteeMembersCriteria);
-
-                otherCommitteeMembers.forEach(committeeMember -> {
-                    committeeMember.setChairperson(false);
-                    committeeMember.setClassroom(chairpersonAssignmentDTO.getClassroom());
-//                supervisorDefenseAssignmentDAO.save(committeeMember);
-                });
-                otherCommitteeMembers = supervisorDefenseAssignmentDAO.saveAll(otherCommitteeMembers);
-                chairpersonAssignment.setClassroom(chairpersonAssignmentDTO.getClassroom());
-                chairpersonAssignment.setChairperson(Boolean.TRUE);
-                chairpersonAssignment = supervisorDefenseAssignmentDAO.save(chairpersonAssignment);
-
-                if (Objects.isNull(chairpersonAssignment.getProjectDefense())) {
-                    List<SupervisorDefenseAssignment> committeeMembers = new ArrayList<>();
-                    committeeMembers.addAll(otherCommitteeMembers);
-                    committeeMembers.add(chairpersonAssignment);
-                    projectDefenseService.createProjectDefense(studyYear, committeeMembers);
+                List<SupervisorDefenseAssignment> committeeMembersWithoutProjectDefense = updateCommitteeMembers(chairpersonAssignmentDTO, chairpersonAssignment, studyYear, date);
+                if (!committeeMembersWithoutProjectDefense.isEmpty()) {
+                    projectDefenseService.createProjectDefense(studyYear, committeeMembersWithoutProjectDefense);
                 }
-
             });
         }
+    }
 
+    private List<SupervisorDefenseAssignment> updateCommitteeMembers(ChairpersonAssignmentDTO chairpersonAssignmentDTO, SupervisorDefenseAssignment chairpersonAssignment, String studyYear, LocalDate date) {
+
+        CommitteeAssignmentCriteria otherCommitteeMembersCriteria = CommitteeAssignmentCriteria.builder()
+                .committeeIdentifier(chairpersonAssignmentDTO.getCommitteeIdentifier())
+                .defenseTimeslotId(chairpersonAssignment.getDefenseTimeSlot().getId())
+                .excludedSupervisorIds(List.of(Long.valueOf(chairpersonAssignmentDTO.getChairpersonId())))
+                .build();
+        List<SupervisorDefenseAssignment> otherCommitteeMembers = committeeMemberDAO.findAllAssignmentsByCriteria(otherCommitteeMembersCriteria);
+
+        otherCommitteeMembers.forEach(committeeMember -> {
+            committeeMember.setChairperson(false);
+            committeeMember.setClassroom(chairpersonAssignmentDTO.getClassroom());
+        });
+        otherCommitteeMembers = supervisorDefenseAssignmentDAO.saveAll(otherCommitteeMembers);
+        chairpersonAssignment.setClassroom(chairpersonAssignmentDTO.getClassroom());
+        chairpersonAssignment.setChairperson(Boolean.TRUE);
+        chairpersonAssignment = supervisorDefenseAssignmentDAO.save(chairpersonAssignment);
+
+        List<SupervisorDefenseAssignment> committeeMembers = new ArrayList<>();
+        if (Objects.isNull(chairpersonAssignment.getProjectDefense())) {
+            committeeMembers.addAll(otherCommitteeMembers);
+            committeeMembers.add(chairpersonAssignment);
+        }
+
+        return committeeMembers;
+    }
+
+    private void deleteProjectDefensesConnectedWithChairperson(ChairpersonAssignmentDTO chairpersonAssignmentDTO, String studyYear, LocalDate date) {
+        CommitteeAssignmentCriteria criteria = CommitteeAssignmentCriteria.builder()
+                .date(date)
+                .committeeIdentifier(chairpersonAssignmentDTO.getCommitteeIdentifier())
+                .studyYear(studyYear)
+                .build();
+
+        List<SupervisorDefenseAssignment> supervisorDefenseAssignments = committeeMemberDAO.findAllAssignmentsByCriteria(criteria);
+        List<Long> projectDefenseIdsToBeRemoved = extractProjectDefenseIdsForDeletion(supervisorDefenseAssignments);
+        supervisorDefenseAssignments.forEach(CommitteeServiceImpl::resetSupervisorDefenseAssignmentData);
+        supervisorDefenseAssignmentDAO.saveAll(supervisorDefenseAssignments);
+
+        projectDefenseService.deleteProjectDefenses(projectDefenseIdsToBeRemoved);
+    }
+
+    private static void resetSupervisorDefenseAssignmentData(SupervisorDefenseAssignment supervisorDefenseAssignment) {
+        supervisorDefenseAssignment.setChairperson(Boolean.FALSE);
+        supervisorDefenseAssignment.setCommitteeIdentifier(null);
+        supervisorDefenseAssignment.setProjectDefense(null);
+        supervisorDefenseAssignment.setClassroom(null);
+    }
+
+    private static List<Long> extractProjectDefenseIdsForDeletion(List<SupervisorDefenseAssignment> supervisorDefenseAssignments) {
+        return supervisorDefenseAssignments.stream()
+                .filter(sda -> Objects.equals(Boolean.TRUE, sda.isChairperson()))
+                .map(sda -> sda.getProjectDefense().getId())
+                .toList();
     }
 
     private Map<String, Map<CommitteeIdentifier, ChairpersonAssignmentDTO>> createChairpersonPerCommitteeIdentifierPerDayMap(List<ChairpersonAssignmentDTO> chairpersonAssignmentDTOs) {

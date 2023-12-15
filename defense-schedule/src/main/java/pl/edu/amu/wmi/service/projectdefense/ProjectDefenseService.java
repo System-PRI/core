@@ -1,9 +1,6 @@
 package pl.edu.amu.wmi.service.projectdefense;
 
-import pl.edu.amu.wmi.entity.DefenseScheduleConfig;
-import pl.edu.amu.wmi.entity.ProjectDefense;
 import pl.edu.amu.wmi.entity.SupervisorDefenseAssignment;
-import pl.edu.amu.wmi.enumerations.CommitteeIdentifier;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseDTO;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefensePatchDTO;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseSummaryDTO;
@@ -13,16 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface ProjectDefenseService {
-
-    /**
-     * Creates {@link ProjectDefense} objects for all time slots, where Supervisor Defense Assignment has assigned the
-     * {@link CommitteeIdentifier} (for each different identifier different committee is created)
-     * Additionally, the validation if committee contains exactly one chairperson is performed.
-     *
-     * @param defenseScheduleConfigId - id of {@link DefenseScheduleConfig}
-     * @param studyYear               - study year that project defense object are created for
-     */
-    void createProjectDefenses(Long defenseScheduleConfigId, String studyYear);
 
     void createProjectDefense(String studyYear, List<SupervisorDefenseAssignment> committeeMembers);
 
