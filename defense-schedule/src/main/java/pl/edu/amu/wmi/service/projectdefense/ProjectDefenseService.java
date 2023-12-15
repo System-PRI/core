@@ -57,4 +57,6 @@ public interface ProjectDefenseService {
      * @return list of project names
      */
     List<ProjectNameDTO> getProjectNames(String studyYear);
+
+    ProjectDefense getProjectDefenseByProjectId(Long projectId);
 }

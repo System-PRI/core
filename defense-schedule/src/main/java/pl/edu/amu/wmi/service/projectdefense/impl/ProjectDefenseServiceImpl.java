@@ -319,4 +319,8 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
             return true;
         }
     }
+
+    public ProjectDefense getProjectDefenseByProjectId(Long projectId) {
+        return projectDefenseDAO.findByProjectId(projectId);
+    }
 }

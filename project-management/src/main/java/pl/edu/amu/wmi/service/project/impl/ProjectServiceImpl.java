@@ -22,6 +22,7 @@ import pl.edu.amu.wmi.service.ProjectMemberService;
 import pl.edu.amu.wmi.service.externallink.ExternalLinkService;
 import pl.edu.amu.wmi.service.grade.EvaluationCardService;
 import pl.edu.amu.wmi.service.project.ProjectService;
+import pl.edu.amu.wmi.service.projectdefense.ProjectDefenseService;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -60,6 +61,8 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMemberService projectMemberService;
     private final PermissionService permissionService;
 
+    private final ProjectDefenseService projectDefenseService;
+
     @Autowired
     public ProjectServiceImpl(ProjectDAO projectDAO,
                               StudentDAO studentDAO,
@@ -72,7 +75,8 @@ public class ProjectServiceImpl implements ProjectService {
                               EvaluationCardService evaluationCardService,
                               ExternalLinkService externalLinkService,
                               ProjectMemberService projectMemberService,
-                              PermissionService permissionService) {
+                              PermissionService permissionService,
+                              ProjectDefenseService projectDefenseService) {
         this.projectDAO = projectDAO;
         this.studentDAO = studentDAO;
         this.supervisorDAO = supervisorDAO;
@@ -85,6 +89,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.evaluationCardService = evaluationCardService;
         this.projectMemberService = projectMemberService;
         this.permissionService = permissionService;
+        this.projectDefenseService = projectDefenseService;
     }
 
     @Override
@@ -132,16 +137,15 @@ public class ProjectServiceImpl implements ProjectService {
             Comparator<Project> byStudentAssignedAndConfirmedProjects =
                     createComparatorByStudentAssignedAndConfirmedProjects(studentProjectsIds, student);
 
-            return prepareSortedProjectListWithRestrictions(projectEntityList, studentProjectsIds, byStudentAssignedAndConfirmedProjects, false);
+            return prepareSortedProjectListWithRestrictions(projectEntityList, studentProjectsIds, byStudentAssignedAndConfirmedProjects, false, false);
         } else {
             List<Long> supervisorProjectIds = getSupervisorProjectIds(supervisor);
             Comparator<Project> bySupervisorAssignedAndAcceptedProjects = createComparatorBySupervisorAssignedAndAcceptedProjects(supervisor);
 
             if (projectMemberService.isUserRoleCoordinator(userIndexNumber)) {
-                projectEntityList.sort(bySupervisorAssignedAndAcceptedProjects);
-                return projectMapper.mapToDTOs(projectEntityList);
+                return prepareSortedProjectListWithRestrictions(projectEntityList, supervisorProjectIds, bySupervisorAssignedAndAcceptedProjects, false, true);
             }
-            return prepareSortedProjectListWithRestrictions(projectEntityList, supervisorProjectIds, bySupervisorAssignedAndAcceptedProjects, true);
+            return prepareSortedProjectListWithRestrictions(projectEntityList, supervisorProjectIds, bySupervisorAssignedAndAcceptedProjects, true, false);
         }
     }
 
@@ -173,11 +177,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private List<ProjectDTO> prepareSortedProjectListWithRestrictions(List<Project> projects, List<Long> userProjectIds,
-                                                                      Comparator<Project> comparator, boolean isSupervisor) {
+                                                                      Comparator<Project> comparator, boolean isSupervisor,
+                                                                      boolean isCoordinator) {
         projects.sort(comparator);
         List<ProjectDTO> projectDTOs = new ArrayList<>();
         projects.forEach(project -> {
-            if (userProjectIds.contains(project.getId())) {
+            if (userProjectIds.contains(project.getId()) || isCoordinator) {
                 projectDTOs.add(mapToProjectDTO(project, MappingMode.FULL));
             } else if (isSupervisor && isProjectInDefenseOrRetakePhase(project)) {
                 projectDTOs.add(mapToProjectDTO(project, MappingMode.WITH_PARTIAL_RESTRICTIONS));
@@ -192,23 +197,59 @@ public class ProjectServiceImpl implements ProjectService {
         switch (mode) {
             case FULL -> {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDto(entity);
-                projectDTO.setPointsFirstSemester(evaluationCardService.getPointsForSemester(entity, Semester.FIRST));
-                projectDTO.setPointsSecondSemester(evaluationCardService.getPointsForSemester(entity, Semester.SECOND));
-                projectDTO.setCriteriaMet(getCriteriaMet(entity));
-                return projectDTO;
+                return fillProjectDtoWithNecessaryData(projectDTO, entity);
             }
             case WITH_PARTIAL_RESTRICTIONS -> {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDtoWithRestrictionsInPhaseDefense(entity);
-                projectDTO.setPointsFirstSemester(evaluationCardService.getPointsForSemester(entity, Semester.FIRST));
-                projectDTO.setPointsSecondSemester(evaluationCardService.getPointsForSemester(entity, Semester.SECOND));
-                projectDTO.setCriteriaMet(getCriteriaMet(entity));
-                return projectDTO;
+                return fillProjectDtoWithNecessaryData(projectDTO, entity);
             }
             case WITH_FULL_RESTRICTIONS -> {
-                return projectMapper.mapToProjectDtoWithRestrictions(entity);
+                ProjectDTO projectDTO = projectMapper.mapToProjectDtoWithRestrictions(entity);
+                projectDTO.setStudents(entity.getStudentsBasicData());
+                return projectDTO;
             }
             default -> throw new IllegalArgumentException("Unknown mapping mode: " + mode);
         }
+    }
+
+    private ProjectDTO fillProjectDtoWithNecessaryData(ProjectDTO projectDTO, Project entity) {
+        projectDTO.setPointsFirstSemester(evaluationCardService.getPointsForSemester(entity, Semester.FIRST));
+        projectDTO.setPointsSecondSemester(evaluationCardService.getPointsForSemester(entity, Semester.SECOND));
+        projectDTO.setCriteriaMet(getCriteriaMet(entity));
+
+        ProjectDefense projectDefense = projectDefenseService.getProjectDefenseByProjectId(entity.getId());
+
+        if (Objects.nonNull(projectDefense)) {
+            projectDTO.setDefenseDay(projectDefense.getDefenseTimeslot().getDate());
+            projectDTO.setDefenseHour(projectDefense.getDefenseTimeslot().getStartTime());
+            projectDTO.setClassroom(projectDefense.getClassroom());
+            projectDTO.setCommittee(projectDefense.getCommitteeInitials());
+        }
+
+        projectDTO.setEvaluationShown(isEvaluationShown(entity));
+        projectDTO.setStudents(entity.getStudentsBasicData());
+
+        return projectDTO;
+    }
+
+    private boolean isEvaluationShown(Project project) {
+        EvaluationCard theMostRecentEvaluationCard = evaluationCardService.findTheMostRecentEvaluationCardFromBothSemesters(project.getEvaluationCards());
+
+        if (Objects.isNull(theMostRecentEvaluationCard))
+            return false;
+
+        EvaluationPhase evaluationPhase = theMostRecentEvaluationCard.getEvaluationPhase();
+        EvaluationStatus evaluationStatus = theMostRecentEvaluationCard.getEvaluationStatus();
+
+        return isEvaluationPhaseSemesterOrRetake(evaluationPhase) || isEvaluationPhaseDefenseAndEvaluationStatusPublished(evaluationPhase, evaluationStatus);
+    }
+
+    private boolean isEvaluationPhaseSemesterOrRetake(EvaluationPhase evaluationPhase) {
+        return Objects.equals(evaluationPhase, EvaluationPhase.SEMESTER_PHASE) || Objects.equals(evaluationPhase, EvaluationPhase.RETAKE_PHASE);
+    }
+
+    private boolean isEvaluationPhaseDefenseAndEvaluationStatusPublished(EvaluationPhase evaluationPhase, EvaluationStatus evaluationStatus) {
+        return Objects.equals(evaluationPhase, EvaluationPhase.DEFENSE_PHASE) && Objects.equals(evaluationStatus, EvaluationStatus.PUBLISHED);
     }
 
     private boolean getCriteriaMet(Project entity) {
