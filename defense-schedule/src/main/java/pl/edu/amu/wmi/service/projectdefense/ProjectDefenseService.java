@@ -50,5 +50,4 @@ public interface ProjectDefenseService {
 
     void deleteProjectDefenses(List<Long> projectDefenseIdsToBeRemoved);
 
-    ProjectDefense getProjectDefenseByProjectId(Long projectId);
 }

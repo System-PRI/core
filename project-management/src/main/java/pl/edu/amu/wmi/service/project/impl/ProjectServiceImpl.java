@@ -22,7 +22,6 @@ import pl.edu.amu.wmi.service.ProjectMemberService;
 import pl.edu.amu.wmi.service.externallink.ExternalLinkService;
 import pl.edu.amu.wmi.service.grade.EvaluationCardService;
 import pl.edu.amu.wmi.service.project.ProjectService;
-import pl.edu.amu.wmi.service.projectdefense.ProjectDefenseService;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -51,6 +50,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final RoleDAO roleDAO;
 
+    private final ProjectDefenseDAO projectDefenseDAO;
+
     private final ProjectMapper projectMapper;
 
     private final StudentProjectMapper studentMapper;
@@ -61,8 +62,6 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMemberService projectMemberService;
     private final PermissionService permissionService;
 
-    private final ProjectDefenseService projectDefenseService;
-
     @Autowired
     public ProjectServiceImpl(ProjectDAO projectDAO,
                               StudentDAO studentDAO,
@@ -70,26 +69,26 @@ public class ProjectServiceImpl implements ProjectService {
                               StudyYearDAO studyYearDAO,
                               StudentProjectDAO studentProjectDAO,
                               RoleDAO roleDAO,
+                              ProjectDefenseDAO projectDefenseDAO,
                               ProjectMapper projectMapper,
                               StudentProjectMapper studentMapper,
                               EvaluationCardService evaluationCardService,
                               ExternalLinkService externalLinkService,
                               ProjectMemberService projectMemberService,
-                              PermissionService permissionService,
-                              ProjectDefenseService projectDefenseService) {
+                              PermissionService permissionService) {
         this.projectDAO = projectDAO;
         this.studentDAO = studentDAO;
         this.supervisorDAO = supervisorDAO;
         this.studyYearDAO = studyYearDAO;
         this.studentProjectDAO = studentProjectDAO;
         this.roleDAO = roleDAO;
+        this.projectDefenseDAO = projectDefenseDAO;
         this.externalLinkService = externalLinkService;
         this.projectMapper = projectMapper;
         this.studentMapper = studentMapper;
         this.evaluationCardService = evaluationCardService;
         this.projectMemberService = projectMemberService;
         this.permissionService = permissionService;
-        this.projectDefenseService = projectDefenseService;
     }
 
     @Override
@@ -217,7 +216,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectDTO.setPointsSecondSemester(evaluationCardService.getPointsForSemester(entity, Semester.SECOND));
         projectDTO.setCriteriaMet(getCriteriaMet(entity));
 
-        ProjectDefense projectDefense = projectDefenseService.getProjectDefenseByProjectId(entity.getId());
+        ProjectDefense projectDefense = projectDefenseDAO.findByProjectId(entity.getId());
 
         if (Objects.nonNull(projectDefense)) {
             projectDTO.setDefenseDay(projectDefense.getDefenseTimeslot().getDate());
