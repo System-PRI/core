@@ -7,10 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.edu.amu.wmi.dao.DefenseScheduleConfigDAO;
 import pl.edu.amu.wmi.dao.ProjectDAO;
 import pl.edu.amu.wmi.dao.ProjectDefenseDAO;
-import pl.edu.amu.wmi.entity.DefenseScheduleConfig;
-import pl.edu.amu.wmi.entity.Project;
-import pl.edu.amu.wmi.entity.ProjectDefense;
-import pl.edu.amu.wmi.entity.SupervisorDefenseAssignment;
+import pl.edu.amu.wmi.entity.*;
 import pl.edu.amu.wmi.enumerations.DefensePhase;
 import pl.edu.amu.wmi.enumerations.UserRole;
 import pl.edu.amu.wmi.exception.BusinessException;
@@ -123,11 +120,17 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
 
     @Override
     @Transactional
-    public void assignProjectsToProjectDefenses(List<ProjectDefenseDTO> projectDefenseDTOs) {
-        projectDefenseDTOs.forEach(this::changeSingleAssignmentWhenNecessary);
+    public Set<ProjectDefense> assignProjectsToProjectDefenses(List<ProjectDefenseDTO> projectDefenseDTOs) {
+        Set<ProjectDefense> updatedProjectDefenses = new HashSet<>();
+        projectDefenseDTOs.forEach(defense -> {
+            ProjectDefense updatedProjectDefense = changeSingleAssignmentWhenNecessary(defense);
+            if (Objects.nonNull(updatedProjectDefense))
+                updatedProjectDefenses.add(updatedProjectDefense);
+        });
+        return updatedProjectDefenses;
     }
 
-    private void changeSingleAssignmentWhenNecessary(ProjectDefenseDTO projectDefenseDTO) {
+    private ProjectDefense changeSingleAssignmentWhenNecessary(ProjectDefenseDTO projectDefenseDTO) {
         Long projectDefenseId = projectDefenseDTO.getProjectDefenseId();
         ProjectDefense projectDefenseEntity = projectDefenseDAO.findById(projectDefenseId)
                 .orElseThrow(() -> new BusinessException(MessageFormat.format("Project defense with id: {0} not found", projectDefenseId)));
@@ -136,25 +139,26 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
         Long projectDefenseCurrentProjectId = Objects.nonNull(projectDefenseProject) ? projectDefenseProject.getId() : null;
         Long projectDefenseNewProjectId = projectDefenseDTO.getProjectId();
 
-        boolean isProjectChange = !Objects.equals(projectDefenseCurrentProjectId, projectDefenseNewProjectId);
+        boolean isDefenseChange = !Objects.equals(projectDefenseCurrentProjectId, projectDefenseNewProjectId);
 
-        if (isProjectChange) {
-            updateSingleProjectDefense(projectDefenseNewProjectId, projectDefenseEntity);
-        }
+        if (isDefenseChange)
+            return updateSingleProjectDefense(projectDefenseNewProjectId, projectDefenseEntity);
+        else
+            return null;
     }
 
-    private void updateSingleProjectDefense(Long projectDefenseNewProjectId, ProjectDefense projectDefenseEntity) {
-        Project project;
+    private Project updateSingleProjectDefense(Long projectDefenseNewProjectId, ProjectDefense projectDefenseEntity) {
+        Project updatedProject;
         if (projectDefenseNewProjectId != null) {
-            project = projectDAO.findById(projectDefenseNewProjectId).orElseThrow(() ->
+            updatedProject = projectDAO.findById(projectDefenseNewProjectId).orElseThrow(() ->
                     new BusinessException(MessageFormat.format("Project with id: {0} not found", projectDefenseNewProjectId)));
-            projectDefenseEntity.setProject(project);
+            projectDefenseEntity.setProject(updatedProject);
         } else {
-            project = projectDefenseEntity.getProject();
+            updatedProject = projectDefenseEntity.getProject();
             projectDefenseEntity.setProject(null);
         }
-        defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(project.getStudents()));
         projectDefenseDAO.save(projectDefenseEntity);
+        return updatedProject;
     }
 
     @Override
@@ -332,6 +336,13 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
         projectDefense.addSupervisorDefenseAssignments(supervisorDefenseAssignments);
         projectDefense.setStudyYear(studyYear);
         projectDefenseDAO.save(projectDefense);
+    }
+
+    @Override
+    public List<Student> getStudentsFromProjectDefenses(Set<ProjectDefense> projectDefenses) {
+        List<Student> students = new ArrayList<>();
+        projectDefenses.forEach(defense -> students.addAll(defense.getProject().getStudents()));
+        return students;
     }
 
 }
