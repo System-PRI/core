@@ -115,6 +115,42 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
     }
 
     @Override
+    @Transactional
+    public void assignProjectsToProjectDefenses(List<ProjectDefenseDTO> projectDefenseDTOs) {
+        projectDefenseDTOs.forEach(this::changeSingleAssignmentWhenNecessary);
+    }
+
+    private void changeSingleAssignmentWhenNecessary(ProjectDefenseDTO projectDefenseDTO) {
+        Long projectDefenseId = projectDefenseDTO.getProjectDefenseId();
+        ProjectDefense projectDefenseEntity = projectDefenseDAO.findById(projectDefenseId)
+                .orElseThrow(() -> new BusinessException(MessageFormat.format("Project defense with id: {0} not found", projectDefenseId)));
+
+        Project projectDefenseProject = projectDefenseEntity.getProject();
+        Long projectDefenseCurrentProjectId = Objects.nonNull(projectDefenseProject) ? projectDefenseProject.getId() : null;
+        Long projectDefenseNewProjectId = projectDefenseDTO.getProjectId();
+
+        boolean isProjectChange = !Objects.equals(projectDefenseCurrentProjectId, projectDefenseNewProjectId);
+
+        if (isProjectChange) {
+            updateSingleProjectDefense(projectDefenseNewProjectId, projectDefenseEntity);
+        }
+    }
+
+    private void updateSingleProjectDefense(Long projectDefenseNewProjectId, ProjectDefense projectDefenseEntity) {
+        Project project;
+        if (projectDefenseNewProjectId != null) {
+            project = projectDAO.findById(projectDefenseNewProjectId).orElseThrow(() ->
+                    new BusinessException(MessageFormat.format("Project with id: {0} not found", projectDefenseNewProjectId)));
+            projectDefenseEntity.setProject(project);
+        } else {
+            project = projectDefenseEntity.getProject();
+            projectDefenseEntity.setProject(null);
+        }
+        defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(new ArrayList<>(project.getStudents()));
+        projectDefenseDAO.save(projectDefenseEntity);
+    }
+
+    @Override
     public List<ProjectNameDTO> getProjectNames(String studyYear) {
         List<Tuple> projectsWithDefenseInfoForStudyYear = projectDAO.findAcceptedProjectsWithDefenseInfoForStudyYear(studyYear);
         return projectsWithDefenseInfoForStudyYear.stream()

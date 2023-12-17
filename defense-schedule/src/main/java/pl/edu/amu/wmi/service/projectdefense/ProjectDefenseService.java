@@ -40,6 +40,8 @@ public interface ProjectDefenseService {
      */
     void assignProjectToProjectDefense(String studyYear, String indexNumber, Long projectDefenseId, ProjectDefensePatchDTO projectDefensePatchDTO);
 
+    void assignProjectsToProjectDefenses(List<ProjectDefenseDTO> projectDefenseDTOs);
+
     /**
      * Returns a list with project ids, names and related project defenses
      *

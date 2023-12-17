@@ -35,7 +35,7 @@ public class ProjectDefenseController {
                 .body(projectDefenseService.getProjectDefenses(studyYear, userDetails.getUsername()));
     }
 
-    @Secured({"PROJECT_ADMIN", "COORDINATOR"})
+    @Secured({"PROJECT_ADMIN"})
     @PatchMapping("/{projectDefenseId}")
     public ResponseEntity<Void> assignProjectToProjectDefense(
             @RequestHeader("study-year") String studyYear,
@@ -43,6 +43,15 @@ public class ProjectDefenseController {
             @RequestBody ProjectDefensePatchDTO projectDefensePatchDTO) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         projectDefenseService.assignProjectToProjectDefense(studyYear, userDetails.getUsername(), projectDefenseId, projectDefensePatchDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @Secured({"COORDINATOR"})
+    @PatchMapping("")
+    public ResponseEntity<Void> updateProjectDefenses(
+            @RequestHeader("study-year") String studyYear,
+            @RequestBody List<ProjectDefenseDTO> projectDefenseDTOs) {
+        projectDefenseService.assignProjectsToProjectDefenses(projectDefenseDTOs);
         return ResponseEntity.ok().build();
     }
 
