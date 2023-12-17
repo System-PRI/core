@@ -10,7 +10,7 @@
             <column name="version" value="0"/>
             <column name="first_semester_code" value="2023/SL"/>
             <column name="is_active" value="true"/>
-            <column name="second_semester_code" value="2024/SZ"/>
+            <column name="second_semester_code" value="2023/SZ"/>
             <column name="study_type" value="FULL_TIME"/>
             <column name="study_year" value="FULL_TIME#2023"/>
             <column name="subject_code" value="06-DPRILI0"/>
