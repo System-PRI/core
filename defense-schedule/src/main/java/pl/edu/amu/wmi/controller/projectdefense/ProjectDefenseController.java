@@ -7,7 +7,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.amu.wmi.entity.ProjectDefense;
+import pl.edu.amu.wmi.entity.Project;
 import pl.edu.amu.wmi.entity.Student;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseDTO;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefensePatchDTO;
@@ -59,7 +59,7 @@ public class ProjectDefenseController {
     public ResponseEntity<Void> updateProjectDefenses(
             @RequestHeader("study-year") String studyYear,
             @RequestBody List<ProjectDefenseDTO> projectDefenseDTOs) {
-        Set<ProjectDefense> updatedProjectDefenses = projectDefenseService.assignProjectsToProjectDefenses(projectDefenseDTOs);
+        Set<Project> updatedProjectDefenses = projectDefenseService.assignProjectsToProjectDefenses(projectDefenseDTOs);
         List<Student> studentsToNotify = projectDefenseService.getStudentsFromProjectDefenses(updatedProjectDefenses);
         defenseNotificationService.notifyStudentsAboutProjectDefenseAssignment(studentsToNotify);
         return ResponseEntity.ok().build();

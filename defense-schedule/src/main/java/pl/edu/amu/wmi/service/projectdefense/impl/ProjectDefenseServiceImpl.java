@@ -120,17 +120,16 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
 
     @Override
     @Transactional
-    public Set<ProjectDefense> assignProjectsToProjectDefenses(List<ProjectDefenseDTO> projectDefenseDTOs) {
-        Set<ProjectDefense> updatedProjectDefenses = new HashSet<>();
+    public Set<Project> assignProjectsToProjectDefenses(List<ProjectDefenseDTO> projectDefenseDTOs) {
+        Set<Project> updatedProjects = new HashSet<>();
         projectDefenseDTOs.forEach(defense -> {
-            ProjectDefense updatedProjectDefense = changeSingleAssignmentWhenNecessary(defense);
-            if (Objects.nonNull(updatedProjectDefense))
-                updatedProjectDefenses.add(updatedProjectDefense);
+            Optional<Project> updatedProject = changeSingleAssignmentWhenNecessary(defense);
+            updatedProject.ifPresent(updatedProjects::add);
         });
-        return updatedProjectDefenses;
+        return updatedProjects;
     }
 
-    private ProjectDefense changeSingleAssignmentWhenNecessary(ProjectDefenseDTO projectDefenseDTO) {
+    private Optional<Project> changeSingleAssignmentWhenNecessary(ProjectDefenseDTO projectDefenseDTO) {
         Long projectDefenseId = projectDefenseDTO.getProjectDefenseId();
         ProjectDefense projectDefenseEntity = projectDefenseDAO.findById(projectDefenseId)
                 .orElseThrow(() -> new BusinessException(MessageFormat.format("Project defense with id: {0} not found", projectDefenseId)));
@@ -141,10 +140,12 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
 
         boolean isDefenseChange = !Objects.equals(projectDefenseCurrentProjectId, projectDefenseNewProjectId);
 
+        Project updatedProject = null;
+
         if (isDefenseChange)
-            return updateSingleProjectDefense(projectDefenseNewProjectId, projectDefenseEntity);
-        else
-            return null;
+            updatedProject = updateSingleProjectDefense(projectDefenseNewProjectId, projectDefenseEntity);
+
+        return Optional.ofNullable(updatedProject);
     }
 
     private Project updateSingleProjectDefense(Long projectDefenseNewProjectId, ProjectDefense projectDefenseEntity) {
@@ -339,9 +340,9 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
     }
 
     @Override
-    public List<Student> getStudentsFromProjectDefenses(Set<ProjectDefense> projectDefenses) {
+    public List<Student> getStudentsFromProjectDefenses(Set<Project> projects) {
         List<Student> students = new ArrayList<>();
-        projectDefenses.forEach(defense -> students.addAll(defense.getProject().getStudents()));
+        projects.forEach(project -> students.addAll(project.getStudents()));
         return students;
     }
 
