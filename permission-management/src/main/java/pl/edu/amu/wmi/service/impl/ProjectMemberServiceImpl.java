@@ -35,7 +35,7 @@ public class ProjectMemberServiceImpl implements ProjectMemberService {
                 -> new BusinessException(MessageFormat.format("User with index: {0} not found.", index)));
         if (Objects.equals(UserRoleType.BASE, userRoleType)) {
             Role userRole = userData.getRoles().stream()
-                    .filter(role -> role.getName().equals(STUDENT) || role.getName().equals(SUPERVISOR))
+                    .filter(role -> role.getName().equals(STUDENT) || role.getName().equals(SUPERVISOR) || role.getName().equals(COORDINATOR))
                     .findFirst().orElseThrow(()
                             -> new BusinessException(MessageFormat.format("User with index: {0} does not have required role.", index)));
             return userRole.getName();
