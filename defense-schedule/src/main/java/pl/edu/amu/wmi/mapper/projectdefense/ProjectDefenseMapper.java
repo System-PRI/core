@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import pl.edu.amu.wmi.entity.*;
+import pl.edu.amu.wmi.enumerations.CommitteeIdentifier;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseDTO;
 import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseSummaryDTO;
 
@@ -22,6 +23,7 @@ public interface ProjectDefenseMapper {
     @Mapping(target = "time", source = "entity.defenseTimeslot", qualifiedByName = "DefenseTimeSlotStartTimeToString")
     @Mapping(target = "projectName", source = "entity.project.name")
     @Mapping(target = "committee", source = "entity.supervisorDefenseAssignments", qualifiedByName = "SupervisorDefenseAssignmentsToSupervisorsInitials")
+    @Mapping(target = "committeeIdentifier", source = "entity.supervisorDefenseAssignments", qualifiedByName = "MapToCommitteeIdentifier")
     @Mapping(target = "students", source = "entity.project", qualifiedByName = "StudentsToStudentsNames")
     @Mapping(target = "chairperson", source = "entity.chairpersonDefenseAssignment", qualifiedByName = "ChairpersonToChairpersonInitials")
     @Mapping(target = "classroom", source = "entity.classroom")
@@ -49,6 +51,18 @@ public interface ProjectDefenseMapper {
     @Named("DefenseTimeSlotDateToString")
     default String defenseTimeSlotDateToString (DefenseTimeSlot defenseTimeSlot) {
         return defenseTimeSlot.getDate().format(commonDateFormatter());
+    }
+
+    @Named("MapToCommitteeIdentifier")
+    default CommitteeIdentifier mapToCommitteeIdentifier (List<SupervisorDefenseAssignment> supervisorDefenseAssignments) {
+        // TODO: 12/18/2023 temporary fix for NPE, when project does not have supervisorDefenseAssignments
+        if (supervisorDefenseAssignments.isEmpty()) {
+            return null;
+        }
+        return supervisorDefenseAssignments.stream()
+                .filter(SupervisorDefenseAssignment::isChairperson)
+                .map(SupervisorDefenseAssignment::getCommitteeIdentifier)
+                .findFirst().orElse(null);
     }
 
     @Named("SupervisorDefenseAssignmentsToSupervisorsInitials")
