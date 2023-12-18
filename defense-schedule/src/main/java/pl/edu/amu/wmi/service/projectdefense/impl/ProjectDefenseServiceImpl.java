@@ -75,13 +75,13 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
             return null;
         }
         DefensePhase defensePhase = defenseScheduleConfig.getDefensePhase();
-        List<ProjectDefense> projectDefenses = projectDefenseDAO.findAllByStudyYear(studyYear);
+        List<ProjectDefense> projectDefenses = projectDefenseDAO.findAllByStudyYearAndSupervisorDefenseAssignmentsNotEmpty(studyYear);
         return createProjectDefenseDTOs(studyYear, indexNumber, projectDefenses, defensePhase);
     }
 
     @Override
     public Map<String, List<ProjectDefenseSummaryDTO>> getProjectDefensesSummary(String studyYear) {
-        List<ProjectDefense> projectDefenses = projectDefenseDAO.findAllByStudyYear(studyYear);
+        List<ProjectDefense> projectDefenses = projectDefenseDAO.findAllByStudyYearAndSupervisorDefenseAssignmentsNotEmpty(studyYear);
         Map<LocalDate, List<ProjectDefense>> projectDefenseMap = projectDefenses.stream().collect(Collectors.groupingBy(projectDefense -> projectDefense.getDefenseTimeslot().getDate()));
         Map<String, List<ProjectDefenseSummaryDTO>> projectDefenseDTOMap = new TreeMap<>();
         projectDefenseMap.forEach((date, defenses) -> {
