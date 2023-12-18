@@ -300,11 +300,20 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
                     yield projectDefenseDTOs.stream()
                             .sorted(projectDefenseByTimeComparator())
                             .toList();
+                } else if (Objects.equals(DefensePhase.SCHEDULE_PLANNING, defensePhase)) {
+                    yield Collections.emptyList();
                 } else {
                     yield mapProjectDefensesToDTOsWithSorting(defenses);
                 }
             }
-            case STUDENT, SUPERVISOR -> mapProjectDefensesToDTOsWithSorting(defenses);
+            case STUDENT -> {
+                if (Objects.equals(DefensePhase.SCHEDULE_PLANNING, defensePhase)) {
+                    yield Collections.emptyList();
+                } else {
+                    yield mapProjectDefensesToDTOsWithSorting(defenses);
+                }
+            }
+            case SUPERVISOR -> mapProjectDefensesToDTOsWithSorting(defenses);
         };
     }
 
