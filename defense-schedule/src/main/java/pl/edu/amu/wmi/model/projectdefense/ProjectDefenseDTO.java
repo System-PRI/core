@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.edu.amu.wmi.enumerations.CommitteeIdentifier;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 public class ProjectDefenseDTO {
@@ -30,7 +28,7 @@ public class ProjectDefenseDTO {
     /**
      * names initials of committee members
      */
-    private List<String> committee;
+    private String committee;
 
     private CommitteeIdentifier committeeIdentifier;
 

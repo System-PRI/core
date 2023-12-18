@@ -11,6 +11,7 @@ import pl.edu.amu.wmi.model.projectdefense.ProjectDefenseSummaryDTO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static pl.edu.amu.wmi.util.CommonDateUtils.commonDateFormatter;
 
@@ -66,10 +67,10 @@ public interface ProjectDefenseMapper {
     }
 
     @Named("SupervisorDefenseAssignmentsToSupervisorsInitials")
-    default List<String> supervisorDefenseAssignmentsToSupervisorsInitials(List<SupervisorDefenseAssignment> supervisorDefenseAssignments) {
+    default String supervisorDefenseAssignmentsToSupervisorsInitials(List<SupervisorDefenseAssignment> supervisorDefenseAssignments) {
         return supervisorDefenseAssignments.stream()
                 .map(supervisorDefenseAssignment -> supervisorDefenseAssignment.getSupervisor().getInitials())
-                .toList();
+                .collect(Collectors.joining(", "));
     }
 
     @Named("StudentsToStudentsNames")
