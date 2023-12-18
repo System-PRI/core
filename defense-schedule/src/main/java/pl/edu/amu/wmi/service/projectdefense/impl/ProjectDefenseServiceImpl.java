@@ -172,6 +172,7 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
         List<Tuple> projectsWithDefenseInfoForStudyYear = projectDAO.findAcceptedProjectsWithDefenseInfoForStudyYear(studyYear);
         return projectsWithDefenseInfoForStudyYear.stream()
                 .map(this::mapTupleToProjectNameDto)
+                .sorted(Comparator.comparing(ProjectNameDTO::getName))
                 .toList();
     }
 
@@ -190,7 +191,13 @@ public class ProjectDefenseServiceImpl implements ProjectDefenseService {
     private ProjectNameDTO mapTupleToProjectNameDto(Tuple tuple) {
         Project project = (Project) tuple.get("project");
         Long defenseId = (Long) tuple.get("projectDefenseId");
-        return new ProjectNameDTO(String.valueOf(project.getId()), project.getName(), defenseId);
+        String extendedProjectName = createExtendedProjectName(project);
+        return new ProjectNameDTO(String.valueOf(project.getId()), extendedProjectName, defenseId);
+    }
+
+    private String createExtendedProjectName(Project project) {
+        String supervisorInitials = project.getSupervisor().getInitials();
+        return supervisorInitials + ": " + project.getName();
     }
 
     private boolean isUserAProjectAdminAndDefensePhaseAllowTheModifications(String indexNumber, DefensePhase defensePhase) {
