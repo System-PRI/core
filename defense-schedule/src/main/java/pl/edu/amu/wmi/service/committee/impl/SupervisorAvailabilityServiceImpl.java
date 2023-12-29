@@ -134,7 +134,7 @@ public class SupervisorAvailabilityServiceImpl implements SupervisorAvailability
     }
 
     /**
-     * Creates aggregate4d Supervisor availability for days for which defense is scheduled.
+     * Creates aggregated Supervisor availability for days for which defense is scheduled.
      */
     private Map<String, Map<String, Map<String, SupervisorDefenseAssignmentDTO>>> createAggregatedSupervisorAvailability(List<Supervisor> supervisorsByStudyYear, List<LocalDate> defenseDays, String studyYear) {
         Map<String, Map<String, Map<String, SupervisorDefenseAssignmentDTO>>> aggregatedSupervisorsAvailability = new TreeMap<>();
