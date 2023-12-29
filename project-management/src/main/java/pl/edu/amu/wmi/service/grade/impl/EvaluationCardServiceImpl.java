@@ -64,7 +64,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
             return;
         }
         EvaluationCardTemplate template = evaluationCardTemplate.get();
-        List<Grade> grades = createEmptyGrades(template);
+        List<Grade> grades = createEmptyGrades(template, semester);
 
         EvaluationCard evaluationCard = new EvaluationCard();
         evaluationCard.setEvaluationCardTemplate(template);
@@ -80,10 +80,12 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         evaluationCardDAO.save(evaluationCard);
     }
 
-    private List<Grade> createEmptyGrades(EvaluationCardTemplate template) {
+    private List<Grade> createEmptyGrades(EvaluationCardTemplate template, Semester semester) {
         List<Grade> grades = new ArrayList<>();
-        grades.addAll(createEmptyGradesForSemester(template.getCriteriaSectionsFirstSemester()));
-        grades.addAll(createEmptyGradesForSemester(template.getCriteriaSectionsSecondSemester()));
+        switch (semester) {
+            case FIRST -> grades.addAll(createEmptyGradesForSemester(template.getCriteriaSectionsFirstSemester()));
+            case SECOND ->  grades.addAll(createEmptyGradesForSemester(template.getCriteriaSectionsSecondSemester()));
+        }
         return grades;
     }
 
