@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static pl.edu.amu.wmi.util.CommonDateUtils.commonDateFormatter;
+import static pl.edu.amu.wmi.util.CommonDateUtils.getDateStringWithTheDayOfWeek;
 import static pl.edu.amu.wmi.util.CommonDateUtils.getDefenseDays;
 
 @Service
@@ -58,7 +58,7 @@ public class SupervisorStatisticsServiceImpl implements SupervisorStatisticsServ
     private Map<String, Integer> createStatisticsTemplateMap(DefenseScheduleConfig defenseScheduleConfig) {
         Map<String, Integer> statisticsTemplateMap = new TreeMap<>();
         List<LocalDate> defenseDays = getDefenseDays(defenseScheduleConfig.getStartDate(), defenseScheduleConfig.getEndDate());
-        defenseDays.forEach(defenseDay -> statisticsTemplateMap.put(defenseDay.format(commonDateFormatter()), 0));
+        defenseDays.forEach(defenseDay -> statisticsTemplateMap.put(getDateStringWithTheDayOfWeek(defenseDay), 0));
         return statisticsTemplateMap;
     }
 
@@ -93,7 +93,7 @@ public class SupervisorStatisticsServiceImpl implements SupervisorStatisticsServ
         Map<String, Integer> committeessPerDayMap = new TreeMap<>(statisticsTemplateMap);
         projectDefenseByDateMap.forEach((date, defenses) -> {
             int numberOfCommittees = countTheNumberOfDefensesAssignedToSupervisor(supervisor, defenses);
-            committeessPerDayMap.put(date.format(commonDateFormatter()), numberOfCommittees);
+            committeessPerDayMap.put(getDateStringWithTheDayOfWeek(date), numberOfCommittees);
         });
         return committeessPerDayMap;
     }
