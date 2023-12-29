@@ -18,7 +18,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class UserControllerTest {
+class UserControllerIT {
 
     @LocalServerPort
     private int port;
@@ -32,7 +32,7 @@ class UserControllerTest {
     }
 
     @Nested
-    class SupervisorUserTest {
+    class SupervisorUserIT {
 
         @Test
         void createSupervisorReturn200() {
@@ -67,7 +67,7 @@ class UserControllerTest {
     }
 
     @Nested
-    class StudentUserTest {
+    class StudentUserIT {
 
         @Test
         void createStudentReturn200() {
