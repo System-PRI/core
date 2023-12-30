@@ -32,4 +32,20 @@ public interface EvaluationCardService {
 
     void publishEvaluationCards(String studyYear);
 
+    /**
+     * Changes the status of evaluation card in semester phase to FROZEN and creates new card in defense phase, based on
+     * a previous card in phase semester
+     *
+     * @param projectId        project id that the evaluation card is connected with
+     * @param evaluationCardId id of evaluation card in semester phase
+     */
+    void freezeEvaluationCard(Long projectId, Long evaluationCardId);
+
+    /**
+     * Creates an evaluation card in phase retake
+     *
+     * @param projectId        project id that the evaluation card is connected with
+     * @param evaluationCardId id of evaluation card in defense phase - base on this card, the retake card will be created
+     */
+    void retakeEvaluationCard(Long projectId, Long evaluationCardId);
 }

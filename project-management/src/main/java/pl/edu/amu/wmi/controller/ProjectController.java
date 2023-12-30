@@ -215,4 +215,26 @@ public class ProjectController {
         evaluationCardService.createEvaluationCard(project, studyYear, semester, evaluationPhase, evaluationStatus);
         return ResponseEntity.ok().build();
     }
+
+    @Secured({"COORDINATOR"})
+    @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/freeze")
+    public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> freezeEvaluationCard(@RequestHeader("study-year") String studyYear,
+                                                                                                              @PathVariable Long projectId,
+                                                                                                              @PathVariable Long evaluationCardId) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        evaluationCardService.freezeEvaluationCard(projectId, evaluationCardId);
+        return ResponseEntity.ok()
+                .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
+    }
+
+    @Secured({"COORDINATOR"})
+    @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/retake")
+    public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> retakeEvaluationCard(@RequestHeader("study-year") String studyYear,
+                                                                                                              @PathVariable Long projectId,
+                                                                                                              @PathVariable Long evaluationCardId) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        evaluationCardService.retakeEvaluationCard(projectId, evaluationCardId);
+        return ResponseEntity.ok()
+                .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
+    }
 }
