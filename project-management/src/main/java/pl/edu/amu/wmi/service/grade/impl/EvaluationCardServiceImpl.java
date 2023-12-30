@@ -439,7 +439,6 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         modifiedCopy.setGrades(defenseCopiedGrades);
         modifiedCopy.setSemester(originalEvaluationCard.getSemester());
         modifiedCopy.setEvaluationPhase(phase);
-        // TODO: 12/30/2023 active or frozen???
         modifiedCopy.setEvaluationStatus(status);
         modifiedCopy.setTotalPoints(originalEvaluationCard.getTotalPoints());
         return modifiedCopy;
