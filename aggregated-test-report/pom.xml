@@ -55,11 +55,6 @@
             <artifactId>permission-management</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>pl.edu.amu.wmi</groupId>
-            <artifactId>pri-application</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
