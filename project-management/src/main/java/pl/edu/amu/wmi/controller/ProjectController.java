@@ -226,4 +226,15 @@ public class ProjectController {
         return ResponseEntity.ok()
                 .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
     }
+
+    @Secured({"COORDINATOR"})
+    @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/retake")
+    public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> retakeEvaluationCard(@RequestHeader("study-year") String studyYear,
+                                                                                                              @PathVariable Long projectId,
+                                                                                                              @PathVariable Long evaluationCardId) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        evaluationCardService.retakeEvaluationCard(projectId, evaluationCardId);
+        return ResponseEntity.ok()
+                .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
+    }
 }
