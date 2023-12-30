@@ -11,6 +11,7 @@ import pl.edu.amu.wmi.enumerations.CriterionCategory;
 import pl.edu.amu.wmi.enumerations.EvaluationPhase;
 import pl.edu.amu.wmi.enumerations.EvaluationStatus;
 import pl.edu.amu.wmi.enumerations.Semester;
+import pl.edu.amu.wmi.exception.BusinessException;
 import pl.edu.amu.wmi.exception.grade.EvaluationCardException;
 import pl.edu.amu.wmi.exception.project.ProjectManagementException;
 import pl.edu.amu.wmi.mapper.grade.ProjectCriteriaSectionMapper;
@@ -397,6 +398,62 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
             });
             evaluationCardDAO.saveAll(evaluationCards);
         }
+    }
+
+    @Override
+    @Transactional
+    public Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>> freezeEvaluationCard(Long projectId, Long evaluationCardId, String studyYear, String indexNumber) {
+        EvaluationCard semesterEvaluationCard = evaluationCardDAO.findById(evaluationCardId)
+                .orElseThrow(() -> new EvaluationCardException(MessageFormat.format("Evaluation card with id: {0} not found", evaluationCardId)));
+
+        if (isEvaluationCardInDifferentPhaseThanSemester(semesterEvaluationCard)
+            || isEvaluationCardInSemesterPhaseInStatusDifferentThanActive(semesterEvaluationCard)) {
+            log.error("Only active card in phase: SEMESTER_PHASE can be frozen. Current phase and status of evaluation card with id: {}: {} {}",
+                    evaluationCardId, semesterEvaluationCard.getEvaluationPhase(), semesterEvaluationCard.getEvaluationStatus());
+            throw new BusinessException(MessageFormat.format("Evaluation card with id: {0} cannot be frozen", evaluationCardId));
+        }
+
+        Project project = projectDAO.findById(projectId)
+                .orElseThrow(() -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
+
+        EvaluationCard defenseEvaluationCard = createModifiedEvaluationCardCopy(semesterEvaluationCard, EvaluationPhase.DEFENSE_PHASE, EvaluationStatus.ACTIVE);
+
+        project.addEvaluationCard(defenseEvaluationCard);
+        evaluationCardDAO.save(defenseEvaluationCard);
+
+        semesterEvaluationCard.setEvaluationStatus(EvaluationStatus.FROZEN);
+        evaluationCardDAO.save(semesterEvaluationCard);
+
+        return findEvaluationCards(projectId, studyYear, indexNumber);
+    }
+
+    private EvaluationCard createModifiedEvaluationCardCopy(EvaluationCard originalEvaluationCard, EvaluationPhase phase, EvaluationStatus status) {
+        EvaluationCard modifiedCopy = new EvaluationCard();
+        modifiedCopy.setEvaluationCardTemplate(originalEvaluationCard.getEvaluationCardTemplate());
+        List<Grade> semesterGrades = originalEvaluationCard.getGrades();
+        List<Grade> defenseCopiedGrades = new ArrayList<>();
+
+        semesterGrades.forEach(semesterGrade -> {
+            Grade clonedGrade = semesterGrade.createACopy();
+            defenseCopiedGrades.add(clonedGrade);
+        });
+
+        modifiedCopy.setGrades(defenseCopiedGrades);
+        modifiedCopy.setSemester(originalEvaluationCard.getSemester());
+        modifiedCopy.setEvaluationPhase(phase);
+        // TODO: 12/30/2023 active or frozen???
+        modifiedCopy.setEvaluationStatus(status);
+        modifiedCopy.setTotalPoints(originalEvaluationCard.getTotalPoints());
+        return modifiedCopy;
+    }
+
+    private boolean isEvaluationCardInSemesterPhaseInStatusDifferentThanActive(EvaluationCard evaluationCard) {
+        return Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCard.getEvaluationPhase())
+                && !Objects.equals(EvaluationStatus.ACTIVE, evaluationCard.getEvaluationStatus());
+    }
+
+    private boolean isEvaluationCardInDifferentPhaseThanSemester(EvaluationCard evaluationCard) {
+        return !Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCard.getEvaluationPhase());
     }
 
 }

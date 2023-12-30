@@ -32,4 +32,6 @@ public interface EvaluationCardService {
 
     void publishEvaluationCards(String studyYear);
 
+    Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>> freezeEvaluationCard(Long projectId, Long evaluationCardId, String studyYear, String indexNumber);
+
 }
