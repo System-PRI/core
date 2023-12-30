@@ -219,10 +219,11 @@ public class ProjectController {
     @Secured({"COORDINATOR"})
     @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/freeze")
     public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> freezeEvaluationCard(@RequestHeader("study-year") String studyYear,
-                                                     @PathVariable Long projectId,
-                                                     @PathVariable Long evaluationCardId) {
+                                                                                                              @PathVariable Long projectId,
+                                                                                                              @PathVariable Long evaluationCardId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        evaluationCardService.freezeEvaluationCard(projectId, evaluationCardId);
         return ResponseEntity.ok()
-        .body(evaluationCardService.freezeEvaluationCard(projectId, evaluationCardId, studyYear, userDetails.getUsername()));
+                .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
     }
 }

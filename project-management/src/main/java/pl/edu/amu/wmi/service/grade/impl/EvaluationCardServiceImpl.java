@@ -402,7 +402,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     @Override
     @Transactional
-    public Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>> freezeEvaluationCard(Long projectId, Long evaluationCardId, String studyYear, String indexNumber) {
+    public void freezeEvaluationCard(Long projectId, Long evaluationCardId) {
         EvaluationCard semesterEvaluationCard = evaluationCardDAO.findById(evaluationCardId)
                 .orElseThrow(() -> new EvaluationCardException(MessageFormat.format("Evaluation card with id: {0} not found", evaluationCardId)));
 
@@ -423,8 +423,6 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
         semesterEvaluationCard.setEvaluationStatus(EvaluationStatus.FROZEN);
         evaluationCardDAO.save(semesterEvaluationCard);
-
-        return findEvaluationCards(projectId, studyYear, indexNumber);
     }
 
     private EvaluationCard createModifiedEvaluationCardCopy(EvaluationCard originalEvaluationCard, EvaluationPhase phase, EvaluationStatus status) {
