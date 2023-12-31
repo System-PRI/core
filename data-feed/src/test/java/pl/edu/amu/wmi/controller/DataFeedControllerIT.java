@@ -9,6 +9,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DataFeedControllerIT {
 
@@ -17,7 +22,7 @@ class DataFeedControllerIT {
 
     private String uri;
 
-    private static final Header STUDY_YEAR_HEADER = new Header("study-year", "2023#FullTime");
+    private static final Header STUDY_YEAR_HEADER = new Header("study-year", "PART_TIME#2023");
     private static final Header USER_INDEX_HEADER = new Header("index-number", "666");
 
     @PostConstruct
@@ -26,12 +31,13 @@ class DataFeedControllerIT {
     }
 
     @Test
-    void shouldCreateStudentsReturn200() {
+    void shouldCreateStudentsReturn200() throws IOException {
         //given
+        String csvPath = "src/test/resources/students.csv";
         //when
         RestAssured
                 .given()
-                .multiPart(getMultiPart())
+                .multiPart(getMultiPart(csvPath))
                 .header(STUDY_YEAR_HEADER)
                 .header(USER_INDEX_HEADER)
                 .when()
@@ -42,12 +48,13 @@ class DataFeedControllerIT {
     }
 
     @Test
-    void shouldCreateSupervisorsReturn200() {
+    void shouldCreateSupervisorsReturn200() throws IOException {
         //given
+        String csvPath = "src/test/resources/supervisors.csv";
         //when
         RestAssured
                 .given()
-                .multiPart(getMultiPart())
+                .multiPart(getMultiPart(csvPath))
                 .header(STUDY_YEAR_HEADER)
                 .header(USER_INDEX_HEADER)
                 .when()
@@ -63,7 +70,6 @@ class DataFeedControllerIT {
         //when
         RestAssured
                 .given()
-                .multiPart(getMultiPart())
                 .header(STUDY_YEAR_HEADER)
                 .header(USER_INDEX_HEADER)
                 .when()
@@ -73,12 +79,55 @@ class DataFeedControllerIT {
         //then
     }
 
-    private MultiPartSpecification getMultiPart() {
-        return new MultiPartSpecBuilder("content".getBytes()).
-                fileName("data.csv").
-                controlName("data").
-                mimeType("text/plain").
-                build();
+    @Test
+    void shouldExportCriteriaReturn200() {
+        //given
+        //when
+        RestAssured
+                .given()
+                .header(STUDY_YEAR_HEADER)
+                .header(USER_INDEX_HEADER)
+                .when()
+                .get(uri + "/data/export/criteria")
+                .then()
+                .statusCode(200);
+        //then
+    }
+
+    @Test
+    void shouldImportCriteriaReturn200() throws IOException {
+        //given
+        //when
+        RestAssured
+                .given()
+                .multiPart(getCriteriaJson())
+                .header(STUDY_YEAR_HEADER)
+                .header(USER_INDEX_HEADER)
+                .when()
+                .post(uri + "/data/import/criteria")
+                .then()
+                .statusCode(200);
+        //then
+    }
+
+    private MultiPartSpecification getCriteriaJson() throws IOException {
+        Path criteriaJsonPath = Paths.get("src/test/resources/criteria.json");
+        byte[] jsonContent = Files.readAllBytes(criteriaJsonPath);
+        return new MultiPartSpecBuilder(jsonContent)
+                .fileName("data.json")
+                .controlName("data")
+                .mimeType("json")
+                .build();
+    }
+
+    private MultiPartSpecification getMultiPart(String path) throws IOException {
+        Path studentsCsvPath = Paths.get(path);
+        byte[] csvContent = Files.readAllBytes(studentsCsvPath);
+        return new MultiPartSpecBuilder(csvContent)
+                .fileName("data.csv")
+                .controlName("data")
+                .mimeType("text/plain")
+                .build();
     }
 
 }
