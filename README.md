@@ -133,6 +133,9 @@ Modules excluded from code coverage:
 * aggregated-test-report
 * domain
 * persistence
+* pri-application
+
+`model` and `exception` packages are not counted into the code coverage.
 
 To run the unit tests, run the command:
 ```
