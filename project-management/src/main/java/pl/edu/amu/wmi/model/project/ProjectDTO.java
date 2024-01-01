@@ -40,7 +40,7 @@ public class ProjectDTO {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
     private LocalTime defenseHour;
 
-    private boolean evaluationShown;
+    private String evaluationPhase;
 
     private String classroom;
 
