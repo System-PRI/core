@@ -10,6 +10,7 @@ import pl.edu.amu.wmi.enumerations.AcceptanceStatus;
 import pl.edu.amu.wmi.enumerations.EvaluationPhase;
 import pl.edu.amu.wmi.enumerations.EvaluationStatus;
 import pl.edu.amu.wmi.enumerations.Semester;
+import pl.edu.amu.wmi.exception.BusinessException;
 import pl.edu.amu.wmi.exception.project.ProjectManagementException;
 import pl.edu.amu.wmi.mapper.project.ProjectMapper;
 import pl.edu.amu.wmi.mapper.project.StudentProjectMapper;
@@ -29,6 +30,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static pl.edu.amu.wmi.enumerations.AcceptanceStatus.*;
+import static pl.edu.amu.wmi.enumerations.EvaluationPhase.DEFENSE_PHASE;
+import static pl.edu.amu.wmi.enumerations.EvaluationPhase.SEMESTER_PHASE;
+import static pl.edu.amu.wmi.enumerations.EvaluationStatus.*;
 import static pl.edu.amu.wmi.enumerations.UserRole.*;
 
 
@@ -225,30 +229,29 @@ public class ProjectServiceImpl implements ProjectService {
             projectDTO.setCommittee(projectDefense.getCommitteeInitials());
         }
 
-        projectDTO.setEvaluationShown(isEvaluationShown(entity));
+        projectDTO.setEvaluationPhase(getDetailedEvaluationPhase(entity));
         projectDTO.setStudents(entity.getStudentsBasicData());
 
         return projectDTO;
     }
 
-    private boolean isEvaluationShown(Project project) {
+    private String getDetailedEvaluationPhase(Project project) {
         EvaluationCard theMostRecentEvaluationCard = evaluationCardService.findTheMostRecentEvaluationCardFromBothSemesters(project.getEvaluationCards());
 
         if (Objects.isNull(theMostRecentEvaluationCard))
-            return false;
+            throw new BusinessException(MessageFormat.format("The most recent evaluation card was not found for project with id: {0}", project.getId()));
 
         EvaluationPhase evaluationPhase = theMostRecentEvaluationCard.getEvaluationPhase();
         EvaluationStatus evaluationStatus = theMostRecentEvaluationCard.getEvaluationStatus();
 
-        return isEvaluationPhaseSemesterOrRetake(evaluationPhase) || isEvaluationPhaseDefenseAndEvaluationStatusPublished(evaluationPhase, evaluationStatus);
-    }
-
-    private boolean isEvaluationPhaseSemesterOrRetake(EvaluationPhase evaluationPhase) {
-        return Objects.equals(evaluationPhase, EvaluationPhase.SEMESTER_PHASE) || Objects.equals(evaluationPhase, EvaluationPhase.RETAKE_PHASE);
-    }
-
-    private boolean isEvaluationPhaseDefenseAndEvaluationStatusPublished(EvaluationPhase evaluationPhase, EvaluationStatus evaluationStatus) {
-        return Objects.equals(evaluationPhase, EvaluationPhase.DEFENSE_PHASE) && Objects.equals(evaluationStatus, EvaluationStatus.PUBLISHED);
+        if (Objects.equals(evaluationPhase, SEMESTER_PHASE))
+            return ACTIVE.label;
+        else if (Objects.equals(evaluationPhase, DEFENSE_PHASE) && !Objects.equals(evaluationStatus, PUBLISHED))
+            return FROZEN.label;
+        else if (Objects.equals(evaluationPhase, DEFENSE_PHASE) && Objects.equals(evaluationStatus, PUBLISHED))
+            return PUBLISHED.label;
+        else
+            return RETAKE.label;
     }
 
     private boolean getCriteriaMet(Project entity) {
