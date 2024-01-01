@@ -28,6 +28,12 @@ INSERT INTO public.supervisor(id, creation_date, modification_date, version, gro
 INSERT INTO public.project(id, creation_date, modification_date, version, acceptance_status, description, name, technologies, study_year, supervisor_id)
 VALUES (1, '2023-12-17 20:22:31.687', '2023-12-17 20:22:31.687', 0, 'ACCEPTED', 'test', 'test', '{java}', 'FULL_TIME#2023', 1);
 
+INSERT INTO public.evaluation_card_template (id, creation_date,modification_date,version,min_points_threshold_first_semester,min_points_threshold_second_semester,study_year) VALUES
+(1001, '2023-12-30 21:19:19.73432','2023-12-30 21:19:19.73432',0,0.8,0.7,'FULL_TIME#2023');
+
+INSERT INTO public.evaluation_card (id, creation_date,is_approved_for_defense,is_disqualified,modification_date,version,evaluation_card_template_id,project_id,evaluation_phase,evaluation_status,final_grade,semester,total_points) VALUES
+(1001,'2023-12-30 21:20:17.864204',false,true,'2023-12-30 21:20:17.896515',0,1001,1,'SEMESTER_PHASE','ACTIVE',NULL,'FIRST',0.0);
+
 
 INSERT INTO public.student(id, creation_date, modification_date, version, is_project_admin, is_project_confirmed, pesel, project_role, project_id, user_data_id, study_year) VALUES (1, '2023-12-17 20:22:31.687', '2023-12-17 20:22:31.687', 0, true, true, NULL, 'BACKEND', 1, 4, 'FULL_TIME#2023');
 INSERT INTO public.student(id, creation_date, modification_date, version, is_project_admin, is_project_confirmed, pesel, project_role, project_id, user_data_id, study_year) VALUES (2, '2023-12-17 20:22:31.687', '2023-12-17 20:22:31.687', 0, false, false, NULL, NULL, NULL, 5, 'FULL_TIME#2023');
