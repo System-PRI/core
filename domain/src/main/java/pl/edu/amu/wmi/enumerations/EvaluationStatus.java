@@ -2,7 +2,7 @@ package pl.edu.amu.wmi.enumerations;
 
 public enum EvaluationStatus {
 
-    ACTIVE("Active"), FROZEN("Frozen"), PUBLISHED("Published"), RETAKE("Retake");
+    ACTIVE("Active"), FROZEN("Hidden"), PUBLISHED("Published"), RETAKE("Retake");
 
     public final String label;
 
