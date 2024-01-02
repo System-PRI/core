@@ -35,15 +35,7 @@ build:
     paths:
       - "**/target"
 
-code-analysis:
-  extends:
-    - .common-rule
-  stage: test
-  script:
-    - echo "Running SonarQube..."
-    - echo "To be done..."
-
-unit-test:
+test:
   extends:
     - .common-rule
   stage: test
@@ -52,15 +44,15 @@ unit-test:
     paths:
       - .m2/repository
   script:
-    - echo "Running unit tests..."
-    - mvn $MAVEN_CLI_OPTS test
+    - echo "Running unit and integration tests..."
+    - mvn $MAVEN_CLI_OPTS verify
 
 swagger:
   extends:
     - .after-merge-rule
   stage: deploy
   script:
-    - sudo docker stop swagger || true && sudo docker rm swagger || true 
+    - sudo docker stop swagger || true && sudo docker rm swagger || true
     - sudo docker rmi swaggerapi/swagger-ui || true
     - sudo docker run -d --name swagger -e BASE_URL=/swagger --network=pri-network -p 81:8080 -e SWAGGER_JSON=/swagger-api/pri-api.yaml -v /${CI_PROJECT_DIR}/pri-application/:/swagger-api swaggerapi/swagger-ui
 
