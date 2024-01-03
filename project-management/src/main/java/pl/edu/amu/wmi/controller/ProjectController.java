@@ -212,28 +212,26 @@ public class ProjectController {
                                                      @RequestParam EvaluationPhase evaluationPhase,
                                                      @RequestParam EvaluationStatus evaluationStatus) {
         Project project = projectDAO.findById(projectId).orElse(null);
-        evaluationCardService.createEvaluationCard(project, studyYear, semester, evaluationPhase, evaluationStatus);
+        evaluationCardService.createEvaluationCard(project, studyYear, semester, evaluationPhase, evaluationStatus, Boolean.TRUE);
         return ResponseEntity.ok().build();
     }
 
     @Secured({"COORDINATOR"})
-    @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/freeze")
+    @PutMapping("/{projectId}/evaluation-card/freeze")
     public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> freezeEvaluationCard(@RequestHeader("study-year") String studyYear,
-                                                                                                              @PathVariable Long projectId,
-                                                                                                              @PathVariable Long evaluationCardId) {
+                                                                                                              @PathVariable Long projectId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        evaluationCardService.freezeEvaluationCard(projectId, evaluationCardId);
+        evaluationCardService.freezeEvaluationCard(projectId);
         return ResponseEntity.ok()
                 .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
     }
 
     @Secured({"COORDINATOR"})
-    @PutMapping("/{projectId}/evaluation-card/{evaluationCardId}/retake")
+    @PutMapping("/{projectId}/evaluation-card/retake")
     public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> retakeEvaluationCard(@RequestHeader("study-year") String studyYear,
-                                                                                                              @PathVariable Long projectId,
-                                                                                                              @PathVariable Long evaluationCardId) {
+                                                                                                              @PathVariable Long projectId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        evaluationCardService.retakeEvaluationCard(projectId, evaluationCardId);
+        evaluationCardService.retakeEvaluationCard(projectId);
         return ResponseEntity.ok()
                 .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
     }
