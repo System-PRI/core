@@ -324,7 +324,7 @@ public class ProjectServiceImpl implements ProjectService {
         evaluationCard.setProject(project);
 
         evaluationCardService.createEvaluationCard(project, studyYear,
-                Semester.FIRST, EvaluationPhase.SEMESTER_PHASE, EvaluationStatus.ACTIVE);
+                Semester.FIRST, EvaluationPhase.SEMESTER_PHASE, EvaluationStatus.ACTIVE, Boolean.TRUE);
     }
 
     @Override
