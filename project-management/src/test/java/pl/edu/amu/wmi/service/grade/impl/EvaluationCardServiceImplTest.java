@@ -56,7 +56,7 @@ class EvaluationCardServiceImplTest {
         Mockito.when(evaluationCardTemplateDAO.findByStudyYear(STUDY_YEAR_FULL_TIME_2023)).thenReturn(Optional.of(evaluationCardTemplate));
         Project project = createProject();
         //when
-        evaluationCardService.createEvaluationCard(project, STUDY_YEAR_FULL_TIME_2023, Semester.FIRST, EvaluationPhase.SEMESTER_PHASE, EvaluationStatus.ACTIVE);
+        evaluationCardService.createEvaluationCard(project, STUDY_YEAR_FULL_TIME_2023, Semester.FIRST, EvaluationPhase.SEMESTER_PHASE, EvaluationStatus.ACTIVE, Boolean.TRUE);
         //then
         ArgumentCaptor<EvaluationCard> captor = ArgumentCaptor.forClass(EvaluationCard.class);
         Mockito.verify(evaluationCardTemplateDAO, Mockito.times(1)).findByStudyYear(STUDY_YEAR_FULL_TIME_2023);
