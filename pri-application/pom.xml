@@ -99,7 +99,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <apiDocsUrl>http://localhost:8080/pri/v3/api-docs.yaml</apiDocsUrl>
+                    <apiDocsUrl>http://localhost:8081/pri/v3/api-docs.yaml</apiDocsUrl>
                     <outputFileName>pri-api.yaml</outputFileName>
                     <outputDir>${project.basedir}</outputDir>
                 </configuration>
