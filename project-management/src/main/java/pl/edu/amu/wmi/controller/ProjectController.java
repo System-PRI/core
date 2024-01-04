@@ -124,12 +124,12 @@ public class ProjectController {
                 return ResponseEntity.status(409).build();
             }
             ProjectDetailsDTO projectDetailsDTO = projectService.saveProject(project, studyYear, userDetails.getUsername());
-            projectService.acceptProjectByAllStudents(projectDetailsDTO.getId());
-            projectService.acceptProjectBySingleUser(supervisorIndexNumber, projectDetailsDTO.getId());
+            projectService.acceptProjectByAllStudents(Long.valueOf(projectDetailsDTO.getId()));
+            projectService.acceptProjectBySingleUser(supervisorIndexNumber, Long.valueOf(projectDetailsDTO.getId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(projectDetailsDTO);
         } else {
             ProjectDetailsDTO projectDetailsDTO = projectService.saveProject(project, studyYear, userDetails.getUsername());
-            projectService.acceptProjectBySingleUser(project.getAdmin(), projectDetailsDTO.getId());
+            projectService.acceptProjectBySingleUser(project.getAdmin(), Long.valueOf(projectDetailsDTO.getId()));
             return ResponseEntity.status(HttpStatus.CREATED).body(projectDetailsDTO);
         }
     }
@@ -192,27 +192,29 @@ public class ProjectController {
     }
 
     @Secured({"COORDINATOR"})
-    @PatchMapping("/{projectId}/evaluation-card/{evaluationCardId}/publish")
-    public ResponseEntity<Void> publishEvaluationCard(@PathVariable Long evaluationCardId) {
-        evaluationCardService.publishEvaluationCard(evaluationCardId);
+    @PutMapping("/{projectId}/evaluation-card/publish")
+    public ResponseEntity<Void> publishEvaluationCard(@PathVariable Long projectId) {
+        evaluationCardService.publishEvaluationCard(projectId);
         return ResponseEntity.ok().build();
     }
 
     @Secured({"COORDINATOR"})
-    @PatchMapping("/{projectId}/evaluation-card/publish")
+    @PutMapping("/evaluation-card/publish")
     public ResponseEntity<Void> publishEvaluationCards(@RequestHeader("study-year") String studyYear) {
         evaluationCardService.publishEvaluationCards(studyYear);
         return ResponseEntity.ok().build();
     }
 
     // TODO: 11/22/2023 remove this endpoint (only for tests)
+    @Secured({"COORDINATOR"})
     @GetMapping("/{projectId}/evaluationCard/create")
     public ResponseEntity<Void> createEvaluationCard(@RequestHeader("study-year") String studyYear, @PathVariable Long projectId,
                                                      @RequestParam Semester semester,
                                                      @RequestParam EvaluationPhase evaluationPhase,
-                                                     @RequestParam EvaluationStatus evaluationStatus) {
+                                                     @RequestParam EvaluationStatus evaluationStatus,
+                                                     @RequestParam boolean isActive) {
         Project project = projectDAO.findById(projectId).orElse(null);
-        evaluationCardService.createEvaluationCard(project, studyYear, semester, evaluationPhase, evaluationStatus, Boolean.TRUE);
+        evaluationCardService.createEvaluationCard(project, studyYear, semester, evaluationPhase, evaluationStatus, isActive);
         return ResponseEntity.ok().build();
     }
 
@@ -234,5 +236,13 @@ public class ProjectController {
         evaluationCardService.retakeEvaluationCard(projectId);
         return ResponseEntity.ok()
                 .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
+    }
+
+    @Secured({"COORDINATOR"})
+    @PutMapping("/evaluation-card/activate-second-semester")
+    public ResponseEntity<Void> activateEvaluationCardsForSecondSemester
+            (@RequestHeader("study-year") String studyYear) {
+        evaluationCardService.activateEvaluationCardsForSecondSemester(studyYear);
+        return ResponseEntity.ok().build();
     }
 }

@@ -24,6 +24,18 @@ paths:
               $ref: '#/components/schemas/ActualStudyYearDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -38,18 +50,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -72,6 +72,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -86,18 +98,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -133,6 +133,18 @@ paths:
                 $ref: '#/components/schemas/SupervisorDefenseAssignmentDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -147,18 +159,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -181,6 +181,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -195,18 +207,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -238,6 +238,18 @@ paths:
               $ref: '#/components/schemas/ChairpersonAssignmentDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -252,18 +264,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -286,6 +286,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -300,18 +312,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -345,6 +345,18 @@ paths:
                 $ref: '#/components/schemas/SupervisorDefenseAssignmentDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -359,18 +371,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -396,6 +396,18 @@ paths:
               $ref: '#/components/schemas/SingleGroupGradeUpdateDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -414,6 +426,36 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ErrorInfo'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UpdatedGradeDTO'
+  /project/{projectId}/evaluation-card/{evaluationCardId}/retake:
+    put:
+      tags:
+      - project-controller
+      operationId: retakeEvaluationCard
+      parameters:
+      - name: study-year
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: projectId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: evaluationCardId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
         "500":
           description: Internal Server Error
           content:
@@ -426,12 +468,98 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/ErrorInfo'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/UpdatedGradeDTO'
+                type: object
+                additionalProperties:
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/EvaluationCardDetailsDTO'
+  /project/{projectId}/evaluation-card/{evaluationCardId}/freeze:
+    put:
+      tags:
+      - project-controller
+      operationId: freezeEvaluationCard
+      parameters:
+      - name: study-year
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: projectId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: evaluationCardId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "409":
+          description: Conflict
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/EvaluationCardDetailsDTO'
   /project/{id}:
     get:
       tags:
@@ -450,6 +578,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -464,18 +604,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -509,6 +637,18 @@ paths:
               $ref: '#/components/schemas/ProjectDetailsDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -523,18 +663,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -557,6 +685,18 @@ paths:
           type: integer
           format: int64
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -571,18 +711,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -601,6 +729,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -615,18 +755,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -658,6 +786,18 @@ paths:
                 $ref: '#/components/schemas/SupervisorAvailabilityDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -672,18 +812,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -708,6 +836,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -722,18 +862,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -763,6 +891,18 @@ paths:
               $ref: '#/components/schemas/SupervisorCreationRequestDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -777,18 +917,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -811,6 +939,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -825,18 +965,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -866,6 +994,18 @@ paths:
               $ref: '#/components/schemas/StudentCreationRequestDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -880,18 +1020,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -920,6 +1048,18 @@ paths:
               $ref: '#/components/schemas/DefenseScheduleConfigDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -934,18 +1074,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -964,6 +1092,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -978,18 +1118,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1019,6 +1147,18 @@ paths:
               $ref: '#/components/schemas/ProjectDetailsDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1033,18 +1173,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1083,6 +1211,18 @@ paths:
                   type: string
                   format: binary
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1097,18 +1237,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1143,6 +1271,18 @@ paths:
                   type: string
                   format: binary
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1157,18 +1297,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1198,6 +1326,18 @@ paths:
                   type: string
                   format: binary
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1212,18 +1352,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1236,6 +1364,18 @@ paths:
       - auth-controller
       operationId: refresh
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1250,18 +1390,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1284,6 +1412,18 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1298,18 +1438,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1332,6 +1460,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1346,18 +1486,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1389,6 +1517,18 @@ paths:
                 $ref: '#/components/schemas/ProjectDefenseDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1403,18 +1543,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1451,6 +1579,18 @@ paths:
               $ref: '#/components/schemas/ProjectDefensePatchDTO'
         required: true
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1465,18 +1605,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1501,6 +1629,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1515,18 +1655,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1549,6 +1677,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1563,18 +1703,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1608,6 +1736,18 @@ paths:
           type: integer
           format: int64
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1622,18 +1762,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1657,6 +1785,18 @@ paths:
           type: integer
           format: int64
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1671,18 +1811,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1701,6 +1829,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1715,18 +1855,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1751,6 +1879,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1765,18 +1905,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1810,6 +1938,18 @@ paths:
           type: integer
           format: int64
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1824,18 +1964,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1858,6 +1986,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1872,18 +2012,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1906,6 +2034,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1920,18 +2060,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -1950,6 +2078,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -1964,18 +2104,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2000,6 +2128,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2014,18 +2154,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2048,6 +2176,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2062,18 +2202,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2129,7 +2257,20 @@ paths:
           - ACTIVE
           - FROZEN
           - PUBLISHED
+          - RETAKE
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2144,18 +2285,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2180,6 +2309,18 @@ paths:
           type: integer
           format: int64
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2194,18 +2335,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2232,6 +2361,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2246,18 +2387,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2283,6 +2412,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2297,18 +2438,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2327,6 +2456,18 @@ paths:
         schema:
           type: string
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2341,18 +2482,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2365,6 +2494,18 @@ paths:
       - auth-controller
       operationId: logoutUser
       responses:
+        "500":
+          description: Internal Server Error
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        "404":
+          description: Not Found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
         "403":
           description: Forbidden
           content:
@@ -2379,18 +2520,6 @@ paths:
                 $ref: '#/components/schemas/ErrorInfo'
         "400":
           description: Bad Request
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "500":
-          description: Internal Server Error
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ErrorInfo'
-        "404":
-          description: Not Found
           content:
             '*/*':
               schema:
@@ -2573,6 +2702,69 @@ components:
           type: string
         criteriaMet:
           type: boolean
+    CriteriaGroupDTO:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        selectedCriterion:
+          type: string
+          enum:
+          - CRITERION_NOT_MET
+          - UNSUCCESSFUL_ATTEMPT_TO_MEET_THE_CRITERION
+          - CRITERION_MET_WITH_RESERVATIONS
+          - CRITERION_MET
+        gradeWeight:
+          type: string
+        modificationDate:
+          type: string
+          format: date
+        criteria:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CriterionDTO'
+    CriteriaSectionDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        gradeWeight:
+          type: string
+        criteriaGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriteriaGroupDTO'
+    CriterionDTO:
+      type: object
+      properties:
+        description:
+          type: string
+        isDisqualifying:
+          type: boolean
+    EvaluationCardDetailsDTO:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        grade:
+          type: string
+        editable:
+          type: boolean
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriteriaSectionDTO'
     ExternalLinkDTO:
       required:
       - id
@@ -2791,8 +2983,8 @@ components:
           format: date
         defenseHour:
           $ref: '#/components/schemas/LocalTime'
-        evaluationShown:
-          type: boolean
+        evaluationPhase:
+          type: string
         classroom:
           type: string
         committee:
@@ -2805,66 +2997,3 @@ components:
           type: string
         secondSemesterGrade:
           type: string
-    CriteriaGroupDTO:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        selectedCriterion:
-          type: string
-          enum:
-          - CRITERION_NOT_MET
-          - UNSUCCESSFUL_ATTEMPT_TO_MEET_THE_CRITERION
-          - CRITERION_MET_WITH_RESERVATIONS
-          - CRITERION_MET
-        gradeWeight:
-          type: string
-        modificationDate:
-          type: string
-          format: date
-        criteria:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/CriterionDTO'
-    CriteriaSectionDTO:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        gradeWeight:
-          type: string
-        criteriaGroups:
-          type: array
-          items:
-            $ref: '#/components/schemas/CriteriaGroupDTO'
-    CriterionDTO:
-      type: object
-      properties:
-        description:
-          type: string
-        isDisqualifying:
-          type: boolean
-    EvaluationCardDetailsDTO:
-      required:
-      - id
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        grade:
-          type: string
-        editable:
-          type: boolean
-        sections:
-          type: array
-          items:
-            $ref: '#/components/schemas/CriteriaSectionDTO'

@@ -57,7 +57,7 @@ class ProjectControllerIT {
     @WithUserDetails(value = "Coordinator 1", userDetailsServiceBeanName = "testUserDetailsService")
     void getProjectByIdShouldReturnResultAndStatus200() throws Exception {
         //given
-        int projectId = 1;
+        Long projectId = 1L;
         //when
         final ResultActions resultActions = mockMvc.perform(get("/project/{id}", projectId).header(STUDY_YEAR_HEADER, STUDY_YEAR_FULL_TIME_2023));
         //then
@@ -65,7 +65,7 @@ class ProjectControllerIT {
         ProjectDetailsDTO project = extractProjectDetailsDtoFromResponse(resultActions);
 
         assertThat(project).isNotNull();
-        assertThat(project.getId()).isEqualTo(projectId);
+        assertThat(project.getId()).isEqualTo(projectId.toString());
     }
 
     @Test
