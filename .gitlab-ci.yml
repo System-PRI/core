@@ -9,7 +9,8 @@ stages:
 
 clean:
   extends:
-    - .common-rule
+    # - .common-rule
+    - .after-merge-rule
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -21,7 +22,8 @@ clean:
 
 build:
   extends:
-    - .common-rule
+    # - .common-rule
+    - .after-merge-rule
   stage: build
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
@@ -37,7 +39,8 @@ build:
 
 test:
   extends:
-    - .common-rule
+    # - .common-rule
+    - .after-merge-rule
   stage: test
   cache:
     key: "maven-$CI_COMMIT_REF_SLUG"
