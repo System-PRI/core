@@ -8,6 +8,8 @@ stages:
   - deploy
 
 clean:
+  tags:
+    - test
   extends:
     # - .common-rule
     - .after-merge-rule
@@ -21,6 +23,8 @@ clean:
     - mvn $MAVEN_CLI_OPTS clean -B
 
 build:
+  tags:
+    - test
   extends:
     # - .common-rule
     - .after-merge-rule
@@ -38,6 +42,8 @@ build:
       - "**/target"
 
 test:
+  tags:
+    - test
   extends:
     # - .common-rule
     - .after-merge-rule
@@ -51,6 +57,8 @@ test:
     - mvn $MAVEN_CLI_OPTS verify
 
 swagger:
+  tags:
+    - test
   extends:
     - .after-merge-rule
   stage: deploy
