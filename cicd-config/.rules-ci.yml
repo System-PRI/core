@@ -4,9 +4,9 @@
 
 .after-merge-rule-prod:
   rules:
-    - if: $CI_COMMIT_BRANCH == 'SYSPRI-356-Test-env-setup'
+    - if: $CI_COMMIT_BRANCH == 'main'
       when: manual
 
 .after-merge-rule:
   rules:
-    - if: $CI_COMMIT_BRANCH == 'SYSPRI-356-Test-env-setup'
+    - if: $CI_COMMIT_BRANCH == 'main'
