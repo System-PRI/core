@@ -56,7 +56,9 @@ swagger:
     - sudo docker rmi swaggerapi/swagger-ui || true
     - sudo docker run -d --name swagger -e BASE_URL=/swagger --network=pri-network -p 81:8080 -e SWAGGER_JSON=/swagger-api/pri-api.yaml -v /${CI_PROJECT_DIR}/pri-application/:/swagger-api swaggerapi/swagger-ui
 
-deploy_test_env:test:
+deploy_test_env:
+  tags:
+    - test
   extends:
     - .after-merge-rule
   stage: deploy
@@ -90,7 +92,9 @@ deploy_test_env:test:
 #    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-test.yml --env-file ${CI_PROJECT_DIR}/config.env build
 #    - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-test.yml --env-file ${CI_PROJECT_DIR}/config.env up -d
 
-deploy_prod_env:prod:
+deploy_prod_env:
+  tags:
+    - prod
   extends:
     - .after-merge-rule-prod
   stage: deploy
