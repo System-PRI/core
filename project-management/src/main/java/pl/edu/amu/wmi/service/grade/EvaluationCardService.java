@@ -28,7 +28,7 @@ public interface EvaluationCardService {
 
     String getPointsForSemester(Project entity, Semester semester);
 
-    void publishEvaluationCard(Long evaluationCardId);
+    void publishEvaluationCard(Long projectId);
 
     void publishEvaluationCards(String studyYear);
 
@@ -46,4 +46,6 @@ public interface EvaluationCardService {
      * @param projectId        project id that the evaluation card is connected with
      */
     void retakeEvaluationCard(Long projectId);
+
+    void activateEvaluationCardsForSecondSemester(String studyYear);
 }

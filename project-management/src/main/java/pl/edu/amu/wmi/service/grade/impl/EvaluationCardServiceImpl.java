@@ -26,7 +26,6 @@ import pl.edu.amu.wmi.service.grade.GradeService;
 
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.function.Predicate;
 
 @Slf4j
 @Service
@@ -158,13 +157,14 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         if (!permissionService.isEvaluationCardVisibleForUser(evaluationCardEntity, project, indexNumber)) {
             return null;
         }
-        if (projectMemberService.isStudentAMemberOfProject(indexNumber, project) && !isEvaluationCardTheMostRecentOne(project, evaluationCardEntity)) {
-            // defense phase in status active should not be displayed for student - add implementation after adding freeze logic (SYSPRI-226)
+        // TODO: 1/4/2024 validate if this logic is correct
+        if (projectMemberService.isStudentAMemberOfProject(indexNumber, project) && isAnyEvaluationCardInFrozenStatus(project.getEvaluationCards())) {
             return null;
         }
 
         EvaluationCardDetailsDTO evaluationCardDetailsDTO = new EvaluationCardDetailsDTO();
-        evaluationCardDetailsDTO.setId(evaluationCardEntity.getId());
+        evaluationCardDetailsDTO.setId(evaluationCardEntity.getId().toString());
+        evaluationCardDetailsDTO.setActive(evaluationCardEntity.isActive());
         evaluationCardDetailsDTO.setGrade(pointsToOverallPercent(evaluationCardEntity.getTotalPoints()));
 
         boolean isEditable = permissionService.isEvaluationCardEditableForUser(evaluationCardEntity, project, indexNumber);
@@ -188,14 +188,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         return evaluationCardDetailsDTO;
     }
 
-    /**
-     * check if an evaluation card is the most recent one in semester
-     */
-    private boolean isEvaluationCardTheMostRecentOne(Project project, EvaluationCard evaluationCard) {
-        Optional<EvaluationCard> theMostRecentEvaluationCard = findTheMostRecentEvaluationCard(project.getEvaluationCards(), evaluationCard.getSemester());
-
-        return theMostRecentEvaluationCard.map(card -> Objects.equals(evaluationCard.getId(), card.getId())).orElse(Boolean.FALSE);
-
+    private boolean isAnyEvaluationCardInFrozenStatus(List<EvaluationCard> evaluationCards) {
+        return evaluationCards.stream()
+                .anyMatch(evaluationCard -> Objects.equals(EvaluationStatus.FROZEN, evaluationCard.getEvaluationStatus()));
     }
 
     /**
@@ -340,21 +335,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     @Override
     public Optional<EvaluationCard> findTheMostRecentEvaluationCard(List<EvaluationCard> evaluationCards, Semester semester) {
-        Predicate<EvaluationCard> isSearchedSemester = evaluationCard -> Objects.equals(semester, evaluationCard.getSemester());
-        Predicate<EvaluationCard> isDefensePhase = evaluationCard -> Objects.equals(EvaluationPhase.DEFENSE_PHASE, evaluationCard.getEvaluationPhase());
-        Predicate<EvaluationCard> isRetakePhase = evaluationCard -> Objects.equals(EvaluationPhase.RETAKE_PHASE, evaluationCard.getEvaluationPhase());
-        Predicate<EvaluationCard> isActiveStatus = evaluationCard -> Objects.equals(EvaluationStatus.ACTIVE, evaluationCard.getEvaluationStatus());
-        Predicate<EvaluationCard> isPublishedStatus = evaluationCard -> Objects.equals(EvaluationStatus.PUBLISHED, evaluationCard.getEvaluationStatus());
-
         return evaluationCards.stream()
-                .filter(isSearchedSemester.and(isActiveStatus))
-                .findFirst()
-                .or(() -> evaluationCards.stream()
-                        .filter(isSearchedSemester.and(isRetakePhase).and(isPublishedStatus))
-                        .findFirst()
-                        .or(() -> evaluationCards.stream()
-                                .filter(isSearchedSemester.and(isDefensePhase).and(isPublishedStatus))
-                                .findFirst()));
+                .filter(evaluationCard -> Objects.equals(Boolean.TRUE, evaluationCard.isActive()))
+                .findFirst();
     }
 
     @Override
@@ -373,34 +356,37 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     @Override
     @Transactional
-    public void publishEvaluationCard(Long evaluationCardId) {
-        // TODO: 12/30/2023 all evaluation cards for semester have to be set to published
-        EvaluationCard evaluationCard = evaluationCardDAO.findById(evaluationCardId)
-                .orElseThrow(() -> new EvaluationCardException(MessageFormat.format("Evaluation card with id: {0} not found", evaluationCardId)));
+    public void publishEvaluationCard(Long projectId) {
+        publishEvaluationCardsForProject(projectId);
+    }
 
-        evaluationCard.setEvaluationStatus(EvaluationStatus.PUBLISHED);
-        log.info("Status was set to published for evaluation card with id: {}", evaluationCard.getId());
-        evaluationCardDAO.save(evaluationCard);
+    private void publishEvaluationCardsForProject(Long projectId) {
+        List<EvaluationCard> evaluationCards = evaluationCardDAO.findAllByProject_Id(projectId);
+
+        evaluationCards.stream()
+                .filter(evaluationCard -> isEvaluationCardFrozen(evaluationCard) || isEvaluationCardInActiveDefensePhase(evaluationCard))
+                .forEach(evaluationCard -> {
+                    evaluationCard.setEvaluationStatus(EvaluationStatus.PUBLISHED);
+                    log.info("Status was set to published for evaluation card with id: {}", evaluationCard.getId());
+                    evaluationCardDAO.save(evaluationCard);
+                });
+    }
+
+    private static boolean isEvaluationCardInActiveDefensePhase(EvaluationCard evaluationCard) {
+        return Objects.equals(EvaluationPhase.DEFENSE_PHASE, evaluationCard.getEvaluationPhase())
+                && Objects.equals(EvaluationStatus.ACTIVE, evaluationCard.getEvaluationStatus());
+    }
+
+    private static boolean isEvaluationCardFrozen(EvaluationCard evaluationCard) {
+        return Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCard.getEvaluationPhase())
+                && Objects.equals(EvaluationStatus.FROZEN, evaluationCard.getEvaluationStatus());
     }
 
     @Override
     @Transactional
     public void publishEvaluationCards(String studyYear) {
-        // TODO: 12/30/2023 all evaluation cards for semester have to be set to published
-        List<EvaluationCard> evaluationCards =
-                evaluationCardDAO.findAllByEvaluationPhaseAndEvaluationStatusAndEvaluationCardTemplate_StudyYear(
-                        EvaluationPhase.DEFENSE_PHASE,
-                        EvaluationStatus.FROZEN,
-                        studyYear
-                );
-
-        if (!evaluationCards.isEmpty()) {
-            evaluationCards.forEach(e -> {
-                e.setEvaluationStatus(EvaluationStatus.PUBLISHED);
-                log.info("Status was set to published for evaluation card with id: {}", e.getId());
-            });
-            evaluationCardDAO.saveAll(evaluationCards);
-        }
+        List<Long> projectIds = projectDAO.findProjectIdsByStudyYear(studyYear);
+        projectIds.forEach(this::publishEvaluationCardsForProject);
     }
 
     @Override
@@ -446,6 +432,33 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
         defenseEvaluationCard.setActive(Boolean.FALSE);
         evaluationCardDAO.save(defenseEvaluationCard);
+    }
+
+    @Override
+    @Transactional
+    public void activateEvaluationCardsForSecondSemester(String studyYear) {
+        List<Long> projectIds = projectDAO.findProjectIdsByStudyYear(studyYear);
+        projectIds.forEach(this::activateEvaluationCardForSecondSemesterForProject);
+    }
+
+    private void activateEvaluationCardForSecondSemesterForProject(Long projectId) {
+        List<EvaluationCard> evaluationCards = evaluationCardDAO.findAllByProject_Id(projectId);
+        evaluationCards.forEach(evaluationCard -> {
+            if (isACardForSecondSemesterToBeAcivated(evaluationCard)) {
+                evaluationCard.setEvaluationStatus(EvaluationStatus.ACTIVE);
+                evaluationCard.setActive(Boolean.TRUE);
+                evaluationCardDAO.save(evaluationCard);
+            } else if (Objects.equals(Boolean.TRUE, evaluationCard.isActive())) {
+                evaluationCard.setActive(Boolean.FALSE);
+                evaluationCardDAO.save(evaluationCard);
+            }
+        });
+    }
+
+    private static boolean isACardForSecondSemesterToBeAcivated(EvaluationCard evaluationCard) {
+        return Objects.equals(EvaluationPhase.SEMESTER_PHASE, evaluationCard.getEvaluationPhase())
+                && Objects.equals(EvaluationStatus.INACTIVE, evaluationCard.getEvaluationStatus())
+                && Objects.equals(Semester.SECOND, evaluationCard.getSemester());
     }
 
     private EvaluationCard createModifiedEvaluationCardCopy(EvaluationCard originalEvaluationCard, EvaluationPhase phase, EvaluationStatus status) {

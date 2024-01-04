@@ -102,15 +102,42 @@ public class ProjectServiceImpl implements ProjectService {
 
         List<StudentDTO> studentDTOs = prepareStudentDTOs(project);
         ProjectDetailsDTO projectDetailsDTO;
-        if (permissionService.isUserAllowedToSeeProjectDetails(studyYear, userIndexNumber, project.getId()))
+        if (permissionService.isUserAllowedToSeeProjectDetails(studyYear, userIndexNumber, project.getId())) {
             // TODO: 11/25/2023 what with external links in defense / retake phase ??
             projectDetailsDTO = projectMapper.mapToProjectDetailsDto(project);
-        else
+            EvaluationCard activeEvaluationCard = project.getEvaluationCards().stream()
+                    .filter(evaluationCard -> Objects.equals(Boolean.TRUE, evaluationCard.isActive()))
+                    .findFirst().orElseThrow(()
+                            -> new BusinessException(MessageFormat.format("There is none active evaluation card for project with id: {0}", id)));
+            if (shouldfreezeButtonBeShown(activeEvaluationCard)) {
+                projectDetailsDTO.setFreezeButtonShown(true);
+            } else if (shouldPublishButtonBeShown(activeEvaluationCard)) {
+                projectDetailsDTO.setPublishButtonShown(true);
+            } else if (shouldRetakeButtonBeShown(activeEvaluationCard)) {
+                projectDetailsDTO.setRetakeButtonShown(true);
+            }
+        } else {
             projectDetailsDTO = projectMapper.mapToProjectDetailsWithRestrictionsDto(project);
+        }
 
         projectDetailsDTO.setStudents(studentDTOs);
         projectDetailsDTO.setAdmin(getIndexNumberOfProjectAdmin(project));
         return projectDetailsDTO;
+    }
+
+    private boolean shouldRetakeButtonBeShown(EvaluationCard activeEvaluationCard) {
+        return Objects.equals(DEFENSE_PHASE, activeEvaluationCard.getEvaluationPhase())
+                && Objects.equals(PUBLISHED, activeEvaluationCard.getEvaluationStatus());
+    }
+
+    private boolean shouldPublishButtonBeShown(EvaluationCard activeEvaluationCard) {
+        return Objects.equals(DEFENSE_PHASE, activeEvaluationCard.getEvaluationPhase())
+                && Objects.equals(ACTIVE, activeEvaluationCard.getEvaluationStatus());
+    }
+
+    private boolean shouldfreezeButtonBeShown(EvaluationCard activeEvaluationCard) {
+        return Objects.equals(SEMESTER_PHASE, activeEvaluationCard.getEvaluationPhase())
+                && Objects.equals(ACTIVE, activeEvaluationCard.getEvaluationStatus());
     }
 
     private List<StudentDTO> prepareStudentDTOs(Project project) {
@@ -296,8 +323,10 @@ public class ProjectServiceImpl implements ProjectService {
         projectEntity.setAcceptanceStatus(acceptanceStatusByStudentsAmount(projectDTO));
         projectEntity.setExternalLinks(externalLinkService.createEmptyExternalLinks(studyYear));
 
-        addFirstEvaluationCardToProject(projectEntity, studyYear);
+        addEvaluationCardToProject(projectEntity, studyYear, Semester.FIRST);
+        projectEntity = projectDAO.save(projectEntity);
 
+        addEvaluationCardToProject(projectEntity, studyYear, Semester.SECOND);
         projectEntity = projectDAO.save(projectEntity);
 
         return projectMapper.mapToProjectDetailsDto(projectEntity);
@@ -318,13 +347,18 @@ public class ProjectServiceImpl implements ProjectService {
         student.getUserData().getRoles().add(roleDAO.findByName(PROJECT_ADMIN));
     }
 
-    private void addFirstEvaluationCardToProject(Project project, String studyYear) {
+    private void addEvaluationCardToProject(Project project, String studyYear, Semester semester) {
         EvaluationCard evaluationCard = new EvaluationCard();
         project.addEvaluationCard(evaluationCard);
         evaluationCard.setProject(project);
 
-        evaluationCardService.createEvaluationCard(project, studyYear,
-                Semester.FIRST, EvaluationPhase.SEMESTER_PHASE, EvaluationStatus.ACTIVE, Boolean.TRUE);
+        switch (semester) {
+            case FIRST -> evaluationCardService.createEvaluationCard(project, studyYear,
+                    Semester.FIRST, EvaluationPhase.SEMESTER_PHASE, EvaluationStatus.ACTIVE, Boolean.TRUE);
+            case SECOND -> evaluationCardService.createEvaluationCard(project, studyYear,
+                    Semester.SECOND, EvaluationPhase.SEMESTER_PHASE, INACTIVE, Boolean.FALSE);
+        }
+
     }
 
     @Override
@@ -606,7 +640,7 @@ public class ProjectServiceImpl implements ProjectService {
         Set<StudentProject> studentProjectsForUpdate = new HashSet<>();
         projectDetailsDTO.getStudents().forEach(studentDTO -> {
             Student student = studentDAO.findByUserData_IndexNumber(studentDTO.getIndexNumber());
-            StudentProject studentProject = studentProjectDAO.findByStudent_IdAndProject_Id(student.getId(), projectDetailsDTO.getId());
+            StudentProject studentProject = studentProjectDAO.findByStudent_IdAndProject_Id(student.getId(), Long.valueOf(projectDetailsDTO.getId()));
             studentProjectsForUpdate.add(studentProject);
         });
         return studentProjectsForUpdate;
