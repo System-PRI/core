@@ -127,6 +127,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         Project project = projectDAO.findById(projectId)
                 .orElseThrow(() -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
 
+        if (projectMemberService.isStudentAMemberOfProject(indexNumber, project) && isAnyEvaluationCardInFrozenStatus(project.getEvaluationCards())) {
+            return Collections.emptyMap();
+        }
 
         EvaluationCardTemplate evaluationCardTemplate = evaluationCardTemplateDAO.findByStudyYear(studyYear)
                 .orElseThrow(() -> new ProjectManagementException(MessageFormat.format("Evaluation card template for project with id: {0} not found", projectId)));
@@ -146,7 +149,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
             }
         });
 
-        Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>> evaluationCardMap = new HashMap<>();
+        Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>> evaluationCardMap = new TreeMap<>();
         evaluationCardMap.put(Semester.FIRST, evaluationCardsFirstSemester);
         if (!evaluationCardsSecondSemester.isEmpty()) {
             evaluationCardMap.put(Semester.SECOND, evaluationCardsSecondSemester);
