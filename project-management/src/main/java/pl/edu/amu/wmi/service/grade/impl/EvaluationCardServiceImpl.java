@@ -27,6 +27,8 @@ import pl.edu.amu.wmi.service.grade.GradeService;
 import java.text.MessageFormat;
 import java.util.*;
 
+import static pl.edu.amu.wmi.model.grade.GradeConstants.*;
+
 @Slf4j
 @Service
 public class EvaluationCardServiceImpl implements EvaluationCardService {
@@ -125,6 +127,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         Project project = projectDAO.findById(projectId)
                 .orElseThrow(() -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
 
+        if (projectMemberService.isStudentAMemberOfProject(indexNumber, project) && isAnyEvaluationCardInFrozenStatus(project.getEvaluationCards())) {
+            return Collections.emptyMap();
+        }
 
         EvaluationCardTemplate evaluationCardTemplate = evaluationCardTemplateDAO.findByStudyYear(studyYear)
                 .orElseThrow(() -> new ProjectManagementException(MessageFormat.format("Evaluation card template for project with id: {0} not found", projectId)));
@@ -144,7 +149,7 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
             }
         });
 
-        Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>> evaluationCardMap = new HashMap<>();
+        Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>> evaluationCardMap = new TreeMap<>();
         evaluationCardMap.put(Semester.FIRST, evaluationCardsFirstSemester);
         if (!evaluationCardsSecondSemester.isEmpty()) {
             evaluationCardMap.put(Semester.SECOND, evaluationCardsSecondSemester);
@@ -246,9 +251,31 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         boolean criteriaMet = !isDisqualified;
         evaluationCard.setDisqualified(isDisqualified);
         evaluationCard.setApprovedForDefense(criteriaMet);
+        Double finalGrade = calculateFinalGrade(criteriaMet, totalPointsSemester);
+        evaluationCard.setFinalGrade(finalGrade);
         evaluationCardDAO.save(evaluationCard);
 
         return new UpdatedGradeDTO(pointsToOverallPercent(totalPointsSemester), criteriaMet);
+    }
+
+    private Double calculateFinalGrade(boolean criteriaMet, Double totalPointsSemester) {
+        Double normalizedTotalPoints = totalPointsSemester / 4;
+        double epsilon = 0.000001d; //todo add precision to comparisons
+        if (Objects.equals(Boolean.FALSE, criteriaMet) || normalizedTotalPoints < GRADE_3_0_MIN_THRESHOLD) {
+            return GRADE_2_0;
+        } else if (normalizedTotalPoints >= GRADE_3_0_MIN_THRESHOLD && normalizedTotalPoints < GRADE_3_5_MIN_THRESHOLD) {
+            return GRADE_3_0;
+        } else if (normalizedTotalPoints >= GRADE_3_5_MIN_THRESHOLD && normalizedTotalPoints < GRADE_4_0_MIN_THRESHOLD) {
+            return GRADE_3_5;
+        } else if (normalizedTotalPoints >= GRADE_4_0_MIN_THRESHOLD && normalizedTotalPoints < GRADE_4_5_MIN_THRESHOLD) {
+            return GRADE_4_0;
+        } else if (normalizedTotalPoints >= GRADE_4_5_MIN_THRESHOLD && normalizedTotalPoints < GRADE_5_0_MIN_THRESHOLD) {
+            return GRADE_4_5;
+        } else if (normalizedTotalPoints >= GRADE_5_0_MIN_THRESHOLD) {
+            return GRADE_5_0;
+        } else {
+            return 0.0;
+        }
     }
 
     /**
@@ -443,16 +470,26 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     private void activateEvaluationCardForSecondSemesterForProject(Long projectId) {
         List<EvaluationCard> evaluationCards = evaluationCardDAO.findAllByProject_Id(projectId);
-        evaluationCards.forEach(evaluationCard -> {
-            if (isACardForSecondSemesterToBeAcivated(evaluationCard)) {
-                evaluationCard.setEvaluationStatus(EvaluationStatus.ACTIVE);
-                evaluationCard.setActive(Boolean.TRUE);
-                evaluationCardDAO.save(evaluationCard);
-            } else if (Objects.equals(Boolean.TRUE, evaluationCard.isActive())) {
-                evaluationCard.setActive(Boolean.FALSE);
-                evaluationCardDAO.save(evaluationCard);
-            }
-        });
+        if (isSecondSemesterCardActivationRequired(evaluationCards)) {
+            evaluationCards.forEach(evaluationCard -> {
+                if (isACardForSecondSemesterToBeAcivated(evaluationCard)) {
+                    evaluationCard.setEvaluationStatus(EvaluationStatus.ACTIVE);
+                    evaluationCard.setActive(Boolean.TRUE);
+                    evaluationCardDAO.save(evaluationCard);
+                } else if (Objects.equals(Boolean.TRUE, evaluationCard.isActive())) {
+                    evaluationCard.setActive(Boolean.FALSE);
+                    evaluationCardDAO.save(evaluationCard);
+                }
+            });
+            log.info("Evaluation card for second semester was activated for a project: {}", projectId);
+        } else {
+            log.info("Second semester evaluation card activation is not relevant for a project: {}", projectId);
+        }
+    }
+
+    private boolean isSecondSemesterCardActivationRequired(List<EvaluationCard> evaluationCards) {
+        return evaluationCards.stream()
+                .anyMatch(EvaluationCardServiceImpl::isACardForSecondSemesterToBeAcivated);
     }
 
     private static boolean isACardForSecondSemesterToBeAcivated(EvaluationCard evaluationCard) {

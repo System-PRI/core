@@ -212,8 +212,10 @@ public class ProjectServiceImpl implements ProjectService {
         projects.sort(comparator);
         List<ProjectDTO> projectDTOs = new ArrayList<>();
         projects.forEach(project -> {
-            if (userProjectIds.contains(project.getId()) || isCoordinator) {
+            if ((userProjectIds.contains(project.getId()) && !isEvaluationCardFreeze(project)) || isCoordinator) {
                 projectDTOs.add(mapToProjectDTO(project, MappingMode.FULL));
+            } else if (userProjectIds.contains(project.getId()) && isEvaluationCardFreeze(project)) {
+                projectDTOs.add(mapToProjectDTO(project, MappingMode.FULL_WITHOUT_GRADES));
             } else if (isSupervisor && isProjectInDefenseOrRetakePhase(project)) {
                 projectDTOs.add(mapToProjectDTO(project, MappingMode.WITH_PARTIAL_RESTRICTIONS));
             } else {
@@ -223,11 +225,23 @@ public class ProjectServiceImpl implements ProjectService {
         return projectDTOs;
     }
 
+    private boolean isEvaluationCardFreeze(Project project) {
+        return project.getEvaluationCards().stream()
+                .anyMatch(evaluationCard -> Objects.equals(FROZEN, evaluationCard.getEvaluationStatus()));
+    }
+
     private ProjectDTO mapToProjectDTO(Project entity, MappingMode mode) {
         switch (mode) {
             case FULL -> {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDto(entity);
                 return fillProjectDtoWithNecessaryData(projectDTO, entity);
+            }
+            case FULL_WITHOUT_GRADES -> {
+                ProjectDTO projectDTO = projectMapper.mapToProjectDto(entity);
+                ProjectDTO updatedProjectDTO = fillProjectDtoWithNecessaryData(projectDTO, entity);
+                updatedProjectDTO.setPointsSecondSemester(null);
+                updatedProjectDTO.setPointsFirstSemester(null);
+                return updatedProjectDTO;
             }
             case WITH_PARTIAL_RESTRICTIONS -> {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDtoWithRestrictionsInPhaseDefense(entity);
@@ -251,7 +265,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (Objects.nonNull(projectDefense)) {
             projectDTO.setDefenseDay(projectDefense.getDefenseTimeslot().getDate());
-            projectDTO.setDefenseHour(projectDefense.getDefenseTimeslot().getStartTime());
+            projectDTO.setDefenseTime(projectDefense.getDefenseTimeslot().getStartTime());
             projectDTO.setClassroom(projectDefense.getClassroom());
             projectDTO.setCommittee(projectDefense.getCommitteeInitials());
         }
@@ -654,6 +668,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private enum MappingMode {
         FULL,
+        FULL_WITHOUT_GRADES,
         WITH_PARTIAL_RESTRICTIONS,
         WITH_FULL_RESTRICTIONS
     }
