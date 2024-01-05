@@ -26,6 +26,7 @@ import pl.edu.amu.wmi.service.grade.GradeService;
 
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static pl.edu.amu.wmi.model.grade.GradeConstants.*;
 
@@ -362,17 +363,26 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     @Override
     public Optional<EvaluationCard> findTheMostRecentEvaluationCard(List<EvaluationCard> evaluationCards, Semester semester) {
-        return evaluationCards.stream()
-                .filter(evaluationCard -> Objects.equals(Boolean.TRUE, evaluationCard.isActive()))
-                .findFirst();
-    }
+        if (Objects.isNull(semester)) {
+            return evaluationCards.stream()
+                    .filter(evaluationCard -> Objects.equals(Boolean.TRUE, evaluationCard.isActive()))
+                    .findFirst();
+        } else {
+            Predicate<EvaluationCard> isSearchedSemester = evaluationCard -> Objects.equals(semester, evaluationCard.getSemester());
+            Predicate<EvaluationCard> isDefensePhase = evaluationCard -> Objects.equals(EvaluationPhase.DEFENSE_PHASE, evaluationCard.getEvaluationPhase());
+            Predicate<EvaluationCard> isRetakePhase = evaluationCard -> Objects.equals(EvaluationPhase.RETAKE_PHASE, evaluationCard.getEvaluationPhase());
+            Predicate<EvaluationCard> isActiveStatus = evaluationCard -> Objects.equals(EvaluationStatus.ACTIVE, evaluationCard.getEvaluationStatus());
 
-    @Override
-    public EvaluationCard findTheMostRecentEvaluationCardFromBothSemesters(List<EvaluationCard> evaluationCards) {
-        Optional<EvaluationCard> theMostRecentEvaluationCardFirstSemester = findTheMostRecentEvaluationCard(evaluationCards, Semester.FIRST);
-        Optional<EvaluationCard> theMostRecentEvaluationCardSecondSemester = findTheMostRecentEvaluationCard(evaluationCards, Semester.SECOND);
-
-        return theMostRecentEvaluationCardSecondSemester.orElseGet(() -> theMostRecentEvaluationCardFirstSemester.orElse(null));
+            return evaluationCards.stream()
+                    .filter(isSearchedSemester.and(isActiveStatus))
+                    .findFirst()
+                    .or(() -> evaluationCards.stream()
+                            .filter(isSearchedSemester.and(isRetakePhase))
+                            .findFirst()
+                            .or(() -> evaluationCards.stream()
+                                    .filter(isSearchedSemester.and(isDefensePhase))
+                                    .findFirst()));
+        }
     }
 
     @Override
