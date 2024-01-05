@@ -15,6 +15,7 @@ import pl.edu.amu.wmi.enumerations.EvaluationStatus;
 import pl.edu.amu.wmi.enumerations.Semester;
 import pl.edu.amu.wmi.exception.project.ProjectManagementException;
 import pl.edu.amu.wmi.model.grade.EvaluationCardDetailsDTO;
+import pl.edu.amu.wmi.model.grade.EvaluationCardsDTO;
 import pl.edu.amu.wmi.model.grade.SingleGroupGradeUpdateDTO;
 import pl.edu.amu.wmi.model.grade.UpdatedGradeDTO;
 import pl.edu.amu.wmi.model.project.ProjectDTO;
@@ -193,9 +194,10 @@ public class ProjectController {
 
     @Secured({"COORDINATOR"})
     @PutMapping("/{projectId}/evaluation-card/publish")
-    public ResponseEntity<Void> publishEvaluationCard(@PathVariable Long projectId) {
+    public ResponseEntity<EvaluationCardsDTO> publishEvaluationCard(@RequestHeader("study-year") String studyYear, @PathVariable Long projectId) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         evaluationCardService.publishEvaluationCard(projectId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(prepareEvaluationCardsDTO(projectId, studyYear, userDetails.getUsername(), EvaluationStatus.PUBLISHED));
     }
 
     @Secured({"COORDINATOR"})
@@ -220,22 +222,29 @@ public class ProjectController {
 
     @Secured({"COORDINATOR"})
     @PutMapping("/{projectId}/evaluation-card/freeze")
-    public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> freezeEvaluationCard(@RequestHeader("study-year") String studyYear,
+    public ResponseEntity<EvaluationCardsDTO> freezeEvaluationCard(@RequestHeader("study-year") String studyYear,
                                                                                                               @PathVariable Long projectId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         evaluationCardService.freezeEvaluationCard(projectId);
         return ResponseEntity.ok()
-                .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
+                .body(prepareEvaluationCardsDTO(projectId, studyYear, userDetails.getUsername(), EvaluationStatus.FROZEN));
+    }
+
+    private EvaluationCardsDTO prepareEvaluationCardsDTO(Long projectId, String studyYear, String indexNumber, EvaluationStatus status) {
+        return new EvaluationCardsDTO(
+                evaluationCardService.findEvaluationCards(projectId, studyYear, indexNumber),
+                status.label
+        );
     }
 
     @Secured({"COORDINATOR"})
     @PutMapping("/{projectId}/evaluation-card/retake")
-    public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> retakeEvaluationCard(@RequestHeader("study-year") String studyYear,
+    public ResponseEntity<EvaluationCardsDTO> retakeEvaluationCard(@RequestHeader("study-year") String studyYear,
                                                                                                               @PathVariable Long projectId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         evaluationCardService.retakeEvaluationCard(projectId);
         return ResponseEntity.ok()
-                .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));
+                .body(prepareEvaluationCardsDTO(projectId, studyYear, userDetails.getUsername(), EvaluationStatus.RETAKE));
     }
 
     @Secured({"COORDINATOR"})
