@@ -38,7 +38,7 @@ public class ProjectDTO {
     private LocalDate defenseDay;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="HH:mm")
-    private LocalTime defenseHour;
+    private LocalTime defenseTime;
 
     private String evaluationPhase;
 

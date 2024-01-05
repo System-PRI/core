@@ -61,5 +61,20 @@ public class DefenseScheduleConfigController {
         return ResponseEntity.ok(defensePhase);
     }
 
+    @Secured({"COORDINATOR"})
+    @PutMapping("/rebuild")
+    public ResponseEntity<Void> rebuildDefenseScheduleConfig(
+            @RequestHeader("study-year") String studyYear) {
+        defenseScheduleConfigService.deleteActiveScheduleConfig(studyYear);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Secured({"COORDINATOR"})
+    @PutMapping("/archive")
+    public ResponseEntity<Void> archiveDefenseScheduleConfig(
+            @RequestHeader("study-year") String studyYear) {
+        defenseScheduleConfigService.archiveDefenseScheduleConfig(studyYear);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
 }

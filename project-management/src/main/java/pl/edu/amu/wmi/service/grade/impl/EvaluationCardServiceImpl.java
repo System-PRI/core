@@ -443,16 +443,26 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
 
     private void activateEvaluationCardForSecondSemesterForProject(Long projectId) {
         List<EvaluationCard> evaluationCards = evaluationCardDAO.findAllByProject_Id(projectId);
-        evaluationCards.forEach(evaluationCard -> {
-            if (isACardForSecondSemesterToBeAcivated(evaluationCard)) {
-                evaluationCard.setEvaluationStatus(EvaluationStatus.ACTIVE);
-                evaluationCard.setActive(Boolean.TRUE);
-                evaluationCardDAO.save(evaluationCard);
-            } else if (Objects.equals(Boolean.TRUE, evaluationCard.isActive())) {
-                evaluationCard.setActive(Boolean.FALSE);
-                evaluationCardDAO.save(evaluationCard);
-            }
-        });
+        if (isSecondSemesterCardActivationRequired(evaluationCards)) {
+            evaluationCards.forEach(evaluationCard -> {
+                if (isACardForSecondSemesterToBeAcivated(evaluationCard)) {
+                    evaluationCard.setEvaluationStatus(EvaluationStatus.ACTIVE);
+                    evaluationCard.setActive(Boolean.TRUE);
+                    evaluationCardDAO.save(evaluationCard);
+                } else if (Objects.equals(Boolean.TRUE, evaluationCard.isActive())) {
+                    evaluationCard.setActive(Boolean.FALSE);
+                    evaluationCardDAO.save(evaluationCard);
+                }
+            });
+            log.info("Evaluation card for second semester was activated for a project: {}", projectId);
+        } else {
+            log.info("Second semester evaluation card activation is not relevant for a project: {}", projectId);
+        }
+    }
+
+    private boolean isSecondSemesterCardActivationRequired(List<EvaluationCard> evaluationCards) {
+        return evaluationCards.stream()
+                .anyMatch(EvaluationCardServiceImpl::isACardForSecondSemesterToBeAcivated);
     }
 
     private static boolean isACardForSecondSemesterToBeAcivated(EvaluationCard evaluationCard) {

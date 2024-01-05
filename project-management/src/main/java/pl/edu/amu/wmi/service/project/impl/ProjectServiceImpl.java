@@ -251,7 +251,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (Objects.nonNull(projectDefense)) {
             projectDTO.setDefenseDay(projectDefense.getDefenseTimeslot().getDate());
-            projectDTO.setDefenseHour(projectDefense.getDefenseTimeslot().getStartTime());
+            projectDTO.setDefenseTime(projectDefense.getDefenseTimeslot().getStartTime());
             projectDTO.setClassroom(projectDefense.getClassroom());
             projectDTO.setCommittee(projectDefense.getCommitteeInitials());
         }
