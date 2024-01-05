@@ -27,6 +27,8 @@ import pl.edu.amu.wmi.service.grade.GradeService;
 import java.text.MessageFormat;
 import java.util.*;
 
+import static pl.edu.amu.wmi.model.grade.GradeConstants.*;
+
 @Slf4j
 @Service
 public class EvaluationCardServiceImpl implements EvaluationCardService {
@@ -246,9 +248,31 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
         boolean criteriaMet = !isDisqualified;
         evaluationCard.setDisqualified(isDisqualified);
         evaluationCard.setApprovedForDefense(criteriaMet);
+        Double finalGrade = calculateFinalGrade(criteriaMet, totalPointsSemester);
+        evaluationCard.setFinalGrade(finalGrade);
         evaluationCardDAO.save(evaluationCard);
 
         return new UpdatedGradeDTO(pointsToOverallPercent(totalPointsSemester), criteriaMet);
+    }
+
+    private Double calculateFinalGrade(boolean criteriaMet, Double totalPointsSemester) {
+        Double normalizedTotalPoints = totalPointsSemester / 4;
+        double epsilon = 0.000001d; //todo add precision to comparisons
+        if (Objects.equals(Boolean.FALSE, criteriaMet) || normalizedTotalPoints < GRADE_3_0_MIN_THRESHOLD) {
+            return GRADE_2_0;
+        } else if (normalizedTotalPoints >= GRADE_3_0_MIN_THRESHOLD && normalizedTotalPoints < GRADE_3_5_MIN_THRESHOLD) {
+            return GRADE_3_0;
+        } else if (normalizedTotalPoints >= GRADE_3_5_MIN_THRESHOLD && normalizedTotalPoints < GRADE_4_0_MIN_THRESHOLD) {
+            return GRADE_3_5;
+        } else if (normalizedTotalPoints >= GRADE_4_0_MIN_THRESHOLD && normalizedTotalPoints < GRADE_4_5_MIN_THRESHOLD) {
+            return GRADE_4_0;
+        } else if (normalizedTotalPoints >= GRADE_4_5_MIN_THRESHOLD && normalizedTotalPoints < GRADE_5_0_MIN_THRESHOLD) {
+            return GRADE_4_5;
+        } else if (normalizedTotalPoints >= GRADE_5_0_MIN_THRESHOLD) {
+            return GRADE_5_0;
+        } else {
+            return 0.0;
+        }
     }
 
     /**
