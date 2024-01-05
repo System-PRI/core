@@ -92,7 +92,7 @@ deploy_test_env:
     - sudo echo "LDAP_BASE=${LDAP_BASE}" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "LDAP_DOMAIN=${LDAP_DOMAIN}" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "FF_EMAIL_TO_UNIVERSITY_DOMAIN_ENABLED=${FF_EMAIL_TO_UNIVERSITY_DOMAIN_ENABLED}" >> ${CI_PROJECT_DIR}/config.env
-    - sudo echo "FF_LDAP_AUTHENTICATION_ENABLED=${FF_LDAP_AUTHENTICATION_ENABLED}" >> ${CI_PROJECT_DIR}/config.env
+    - sudo echo "FF_LDAP_AUTHENTICATION_ENABLED=false" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "SCHEDULED_JOBS_ENABLED=${SCHEDULED_JOBS_ENABLED}" >> ${CI_PROJECT_DIR}/config.env
     - sudo cat ${CI_PROJECT_DIR}/config.env
     - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-test.yml --env-file ${CI_PROJECT_DIR}/config.env down
@@ -127,7 +127,7 @@ deploy_prod_env:
     - sudo echo "LDAP_BASE=${LDAP_BASE}" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "LDAP_DOMAIN=${LDAP_DOMAIN}" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "FF_EMAIL_TO_UNIVERSITY_DOMAIN_ENABLED=${FF_EMAIL_TO_UNIVERSITY_DOMAIN_ENABLED}" >> ${CI_PROJECT_DIR}/config.env
-    - sudo echo "FF_LDAP_AUTHENTICATION_ENABLED=${FF_LDAP_AUTHENTICATION_ENABLED}" >> ${CI_PROJECT_DIR}/config.env
+    - sudo echo "FF_LDAP_AUTHENTICATION_ENABLED=true" >> ${CI_PROJECT_DIR}/config.env
     - sudo echo "SCHEDULED_JOBS_ENABLED=${SCHEDULED_JOBS_ENABLED}" >> ${CI_PROJECT_DIR}/config.env
     - sudo cat ${CI_PROJECT_DIR}/config.env
     - sudo docker compose -f ${CI_PROJECT_DIR}/docker-compose-prod.yml --env-file ${CI_PROJECT_DIR}/config.env down
