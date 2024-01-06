@@ -28,7 +28,6 @@ import pl.edu.amu.wmi.service.grade.EvaluationCardService;
 import pl.edu.amu.wmi.service.project.ProjectService;
 import pl.edu.amu.wmi.service.project.SupervisorProjectService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -179,7 +178,7 @@ public class ProjectController {
     public ResponseEntity<Map<Semester, Map<EvaluationPhase, EvaluationCardDetailsDTO>>> getGradeDetailsByProjectId(@RequestHeader("study-year") String studyYear, @PathVariable Long projectId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!permissionService.isUserAllowedToSeeProjectDetails(studyYear, userDetails.getUsername(), projectId)) {
-            return ResponseEntity.ok().body(Collections.emptyMap());
+            return ResponseEntity.ok().body(null);
         }
         return ResponseEntity.ok()
                 .body(evaluationCardService.findEvaluationCards(projectId, studyYear, userDetails.getUsername()));

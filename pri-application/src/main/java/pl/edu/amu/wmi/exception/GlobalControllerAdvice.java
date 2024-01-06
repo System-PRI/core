@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import pl.edu.amu.wmi.exception.grade.UserNotAllowedToSeeGradesInDefensePhaseException;
 
 @ControllerAdvice
 @Slf4j
@@ -37,6 +38,14 @@ public class GlobalControllerAdvice {
     public ErrorInfo usernameNotFoundExceptionExceptionHandler(final Exception exception) {
         log.error("UsernameNotFoundException exception occurred", exception);
         return new ErrorInfo(exception.getMessage(), 404);
+    }
+
+    @ResponseBody
+    @ExceptionHandler(UserNotAllowedToSeeGradesInDefensePhaseException.class)
+    @ResponseStatus(HttpStatus.I_AM_A_TEAPOT)
+    public ErrorInfo userNotAllowedToSeeGradesInDefensePhaseExceptionExceptionHandler(final Exception exception) {
+        log.error("UserNotAllowedToSeeGradesInDefensePhaseException occurred", exception);
+        return new ErrorInfo(exception.getMessage(), 418);
     }
 
     @ResponseBody

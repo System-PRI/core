@@ -214,7 +214,7 @@ public class ProjectServiceImpl implements ProjectService {
         projects.forEach(project -> {
             if ((userProjectIds.contains(project.getId()) && !isEvaluationCardFreeze(project)) || isCoordinator) {
                 projectDTOs.add(mapToProjectDTO(project, MappingMode.FULL));
-            } else if (userProjectIds.contains(project.getId()) && isEvaluationCardFreeze(project)) {
+            } else if (userProjectIds.contains(project.getId()) && isEvaluationCardFreeze(project) && !isSupervisor) {
                 projectDTOs.add(mapToProjectDTO(project, MappingMode.FULL_WITHOUT_GRADES));
             } else if (isSupervisor && isProjectInDefenseOrRetakePhase(project)) {
                 projectDTOs.add(mapToProjectDTO(project, MappingMode.WITH_PARTIAL_RESTRICTIONS));
@@ -234,32 +234,42 @@ public class ProjectServiceImpl implements ProjectService {
         switch (mode) {
             case FULL -> {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDto(entity);
-                return fillProjectDtoWithNecessaryData(projectDTO, entity);
+                return fillProjectDtoWithNecessaryData(projectDTO, entity, true);
             }
             case FULL_WITHOUT_GRADES -> {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDto(entity);
-                ProjectDTO updatedProjectDTO = fillProjectDtoWithNecessaryData(projectDTO, entity);
-                updatedProjectDTO.setPointsSecondSemester(null);
-                updatedProjectDTO.setPointsFirstSemester(null);
-                return updatedProjectDTO;
+                return fillProjectDtoWithNecessaryData(projectDTO, entity, false);
             }
             case WITH_PARTIAL_RESTRICTIONS -> {
-                ProjectDTO projectDTO = projectMapper.mapToProjectDtoWithRestrictionsInPhaseDefense(entity);
-                return fillProjectDtoWithNecessaryData(projectDTO, entity);
+                ProjectDTO projectDTO = projectMapper.mapToProjectDtoWithRestrictions(entity);
+                projectDTO = fillProjectDtoWithNecessaryData(projectDTO, entity, true);
+                if (isSemesterPhaseForSecondSemester(entity.getEvaluationCards())) {
+                    projectDTO.setPointsSecondSemester(null);
+                }
+                return projectDTO;
             }
             case WITH_FULL_RESTRICTIONS -> {
                 ProjectDTO projectDTO = projectMapper.mapToProjectDtoWithRestrictions(entity);
-                projectDTO.setStudents(entity.getStudentsBasicData());
-                return projectDTO;
+                return fillProjectDtoWithNecessaryData(projectDTO, entity, false);
             }
             default -> throw new IllegalArgumentException("Unknown mapping mode: " + mode);
         }
     }
 
-    private ProjectDTO fillProjectDtoWithNecessaryData(ProjectDTO projectDTO, Project entity) {
-        projectDTO.setPointsFirstSemester(evaluationCardService.getPointsForSemester(entity, Semester.FIRST));
-        projectDTO.setPointsSecondSemester(evaluationCardService.getPointsForSemester(entity, Semester.SECOND));
-        projectDTO.setCriteriaMet(getCriteriaMet(entity));
+    private boolean isSemesterPhaseForSecondSemester(List<EvaluationCard> evaluationCards) {
+        Predicate<EvaluationCard> isSecondSemester = evaluationCard -> Objects.equals(Semester.SECOND, evaluationCard.getSemester());
+        Predicate<EvaluationCard> isSemesterPhase = evaluationCard -> Objects.equals(SEMESTER_PHASE, evaluationCard.getEvaluationPhase());
+        Predicate<EvaluationCard>isActiveStatus = evaluationCard -> Objects.equals(ACTIVE, evaluationCard.getEvaluationStatus());
+        return evaluationCards.stream()
+                .anyMatch(isSecondSemester.and(isSemesterPhase.and(isActiveStatus)));
+    }
+
+    private ProjectDTO fillProjectDtoWithNecessaryData(ProjectDTO projectDTO, Project entity, boolean isGradeMapping) {
+        if (isGradeMapping) {
+            projectDTO.setPointsFirstSemester(evaluationCardService.getPointsForSemester(entity, Semester.FIRST));
+            projectDTO.setPointsSecondSemester(evaluationCardService.getPointsForSemester(entity, Semester.SECOND));
+            projectDTO.setCriteriaMet(getCriteriaMet(entity));
+        }
 
         ProjectDefense projectDefense = projectDefenseDAO.findByProjectId(entity.getId());
 

@@ -129,7 +129,9 @@ public class EvaluationCardServiceImpl implements EvaluationCardService {
                 .orElseThrow(() -> new ProjectManagementException(MessageFormat.format("Project with id: {0} not found", projectId)));
 
         if (projectMemberService.isStudentAMemberOfProject(indexNumber, project) && isAnyEvaluationCardInFrozenStatus(project.getEvaluationCards())) {
-            return Collections.emptyMap();
+//            throw new UserNotAllowedToSeeGradesInDefensePhaseException(
+//                    MessageFormat.format("User with index number: {0} is not allowed to see grades in defense phase", indexNumber));
+            return null;
         }
 
         EvaluationCardTemplate evaluationCardTemplate = evaluationCardTemplateDAO.findByStudyYear(studyYear)
