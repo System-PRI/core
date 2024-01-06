@@ -25,6 +25,9 @@ import pl.edu.amu.wmi.service.grade.EvaluationCardService;
 import pl.edu.amu.wmi.service.project.ProjectService;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,7 +43,7 @@ import static pl.edu.amu.wmi.enumerations.UserRole.*;
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
-    public static final Integer NUMBER_OF_EVALUATION_CARDS_IN_SINGLE_SEMESTER = 3;
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     private final ProjectDAO projectDAO;
 
@@ -274,8 +277,7 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectDefense projectDefense = projectDefenseDAO.findByProjectId(entity.getId());
 
         if (Objects.nonNull(projectDefense)) {
-            projectDTO.setDefenseDay(projectDefense.getDefenseTimeslot().getDate());
-            projectDTO.setDefenseTime(projectDefense.getDefenseTimeslot().getStartTime());
+            projectDTO.setDefenseDay(extractDateAndTime(projectDefense));
             projectDTO.setClassroom(projectDefense.getClassroom());
             projectDTO.setCommittee(projectDefense.getCommitteeInitials());
         }
@@ -284,6 +286,16 @@ public class ProjectServiceImpl implements ProjectService {
         projectDTO.setStudents(entity.getStudentsBasicData());
 
         return projectDTO;
+    }
+
+    private static String extractDateAndTime(ProjectDefense projectDefense) {
+        LocalDate date = projectDefense.getDefenseTimeslot().getDate();
+        return date.format(dateTimeFormatter)
+                + " " + projectDefense.getDefenseTimeslot().getStartTime() + " | " + getDayOfWeek(date);
+    }
+
+    public static String getDayOfWeek(LocalDate date) {
+        return date.getDayOfWeek().getDisplayName(TextStyle.SHORT_STANDALONE, Locale.US);
     }
 
     private String getDetailedEvaluationPhase(Project project) {
