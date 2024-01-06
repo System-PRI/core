@@ -277,10 +277,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private String getDetailedEvaluationPhase(Project project) {
-        EvaluationCard theMostRecentEvaluationCard = evaluationCardService.findTheMostRecentEvaluationCardFromBothSemesters(project.getEvaluationCards());
-
-        if (Objects.isNull(theMostRecentEvaluationCard))
-            throw new BusinessException(MessageFormat.format("The most recent evaluation card was not found for project with id: {0}", project.getId()));
+        EvaluationCard theMostRecentEvaluationCard = evaluationCardService.findTheMostRecentEvaluationCard(project.getEvaluationCards(), null)
+                .orElseThrow(() ->  new BusinessException(MessageFormat.format("The most recent evaluation card was not found for project with id: {0}", project.getId())));
 
         EvaluationPhase evaluationPhase = theMostRecentEvaluationCard.getEvaluationPhase();
         EvaluationStatus evaluationStatus = theMostRecentEvaluationCard.getEvaluationStatus();
@@ -296,13 +294,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean getCriteriaMet(Project entity) {
-        Semester semester = determineTheMostRecentSemester(entity.getEvaluationCards());
-        Optional<EvaluationCard> theMostRecentEvaluationCard = evaluationCardService.findTheMostRecentEvaluationCard(entity.getEvaluationCards(), semester);
+        Optional<EvaluationCard> theMostRecentEvaluationCard = evaluationCardService.findTheMostRecentEvaluationCard(entity.getEvaluationCards(), null);
         return theMostRecentEvaluationCard.map(evaluationCard -> !evaluationCard.isDisqualified()).orElse(false);
-    }
-
-    private Semester determineTheMostRecentSemester(List<EvaluationCard> evaluationCards) {
-        return evaluationCards.size() <= NUMBER_OF_EVALUATION_CARDS_IN_SINGLE_SEMESTER ? Semester.FIRST : Semester.SECOND;
     }
 
     private boolean isProjectInDefenseOrRetakePhase(Project project) {
