@@ -1,0 +1,110 @@
+dn: dc=springframework,dc=org
+objectclass: top
+objectclass: domain
+objectclass: extensibleObject
+dc: springframework
+
+dn: ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: ou=subgroups,ou=groups,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: subgroups
+
+dn: ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+dn: uid=coordinator1,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Coordinator 1
+sn: Test Coordinator 1
+uid: coordinator1
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=supervisor1,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Supervisor 1
+sn: Test Supervisor 1
+uid: supervisor1
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=supervisor2,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Supervisor 2
+sn: Test Supervisor 2
+uid: supervisor2
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=student1,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Student 1
+sn: Test Student 1
+uid: student1
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=student2,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Student 2
+sn: Test Student 2
+uid: student2
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=student3,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Student 3
+sn: Test Student 3
+uid: student3
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=student4,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Student 4
+sn: Test Student 4
+uid: student4
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=student5,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Student 5
+sn: Test Student 5
+uid: student5
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
+
+dn: uid=student6,ou=people,dc=springframework,dc=org
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: Test Student 6
+sn: Test Student 6
+uid: student6
+userPassword: $2a$12$1r2SNO6lLJk5D9zYgNbpyO0nk9kQo61JMjDSWQkgXrBMiWdjLn01q
