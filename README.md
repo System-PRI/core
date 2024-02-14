@@ -67,7 +67,7 @@ List of scheduled jobs:
 
 * installation of: maven, java 17
 * creation of Postgres database
-* substitution of all environment variables (see `config.env.example` file)
+* substitution of all environment variables (see [config.env.example](https://github.com/System-PRI/deploy/blob/main/config.env.example) file)
 
 #### Secrets
 
@@ -113,6 +113,8 @@ java -jar -Dspring.profiles.active=local <environment variables> pri-application
 // before execution check the name of the jar file
 // as <environment variables> put all variables from config.env.example file (e.g. -DPOSTGRES_URL=${POSTGRES_URL} -DPOSTGRES_DB=${POSTGRES_DB})
 ```
+## How to run application using docker:
+Check out [deploy](https://github.com/System-PRI/deploy) repository.
 
 ## How to test the application:
 
